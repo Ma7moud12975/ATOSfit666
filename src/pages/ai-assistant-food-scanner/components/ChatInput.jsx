@@ -80,7 +80,7 @@ const ChatInput = ({ onSendMessage, disabled = false }) => {
             disabled={disabled}
             className="chat-input-mic-btn"
             style={{
-              color: isRecording ? '#FF8A00' : undefined
+              color: isRecording ? '#4353FF' : undefined
             }}
           >
             <Icon name="Mic" size={20} />
@@ -96,7 +96,7 @@ const ChatInput = ({ onSendMessage, disabled = false }) => {
             cursor: (!message.trim() || disabled) ? 'not-allowed' : 'pointer'
           }}
         >
-          <Icon name="Send" size={20} color="#181818" />
+          <Icon name="Send" size={20} color="#FFFFFF" />
         </button>
       </form>
     </div>

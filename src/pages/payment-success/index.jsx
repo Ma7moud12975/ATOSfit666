@@ -50,11 +50,11 @@ const PaymentSuccess = () => {
 
   if (isVerifying) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#FF8A00] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-white mb-2">Verifying Payment</h2>
-          <p className="text-gray-400">Please wait while we confirm your subscription...</p>
+      <div className="min-h-screen bg-[#F4F8FA] text-[#1A202C] flex items-center justify-center p-4">
+        <div className="text-center p-8 bg-white border border-[#E6EFF3] rounded-[32px] shadow-[0px_10px_35px_rgba(67, 83, 245,0.08)] max-w-md w-full">
+          <div className="w-16 h-16 border-4 border-[#4353FF] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h2 className="text-2xl font-bold text-[#1A202C] mb-2">Verifying Payment</h2>
+          <p className="text-[#64748B]">Please wait while we confirm your subscription...</p>
         </div>
       </div>
     );
@@ -62,27 +62,27 @@ const PaymentSuccess = () => {
 
   if (verificationStatus === 'error') {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="max-w-md mx-auto text-center p-8">
-          <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="min-h-screen bg-[#F4F8FA] text-[#1A202C] flex items-center justify-center p-4">
+        <div className="max-w-md w-full mx-auto text-center p-8 bg-white border border-[#E6EFF3] rounded-[32px] shadow-[0px_10px_35px_rgba(67, 83, 245,0.08)]">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-4">Payment Verification Failed</h1>
-          <p className="text-gray-400 mb-8">
+          <h1 className="text-3xl font-bold text-[#1A202C] mb-4">Payment Verification Failed</h1>
+          <p className="text-[#64748B] mb-8 leading-relaxed">
             We couldn't verify your payment. Please contact support if you believe this is an error.
           </p>
           <div className="space-y-4">
             <button
               onClick={() => navigate('/pricing')}
-              className="w-full py-3 bg-[#FF8A00] hover:bg-[#E67B00] text-black font-semibold rounded-xl transition-colors"
+              className="w-full py-3 bg-[#4353FF] hover:bg-[#5668FF] text-white font-bold rounded-xl transition-all duration-300 shadow-[0px_4px_18px_rgba(67, 83, 245,0.3)]"
             >
               Try Again
             </button>
             <button
               onClick={() => navigate('/dashboard')}
-              className="w-full py-3 bg-transparent border border-gray-600 text-white hover:bg-gray-800 font-semibold rounded-xl transition-colors"
+              className="w-full py-3 bg-transparent border border-[#9DA8FF] text-[#4353FF] hover:bg-[#4353FF] hover:text-white font-bold rounded-xl transition-all duration-300"
             >
               Go to Dashboard
             </button>
@@ -93,35 +93,35 @@ const PaymentSuccess = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="max-w-md mx-auto text-center p-8">
+    <div className="min-h-screen bg-[#F4F8FA] text-[#1A202C] flex items-center justify-center p-4">
+      <div className="max-w-md w-full mx-auto text-center p-8 bg-white border border-[#E6EFF3] rounded-[32px] shadow-[0px_10px_35px_rgba(67, 83, 245,0.08)]">
         {/* Success Icon */}
-        <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Icon name="CheckCircle" className="w-12 h-12 text-white" />
+        <div className="w-20 h-20 bg-[#E6EFF3] rounded-full flex items-center justify-center mx-auto mb-6">
+          <Icon name="CheckCircle" className="w-12 h-12 text-[#4353FF]" />
         </div>
 
         {/* Success Message */}
-        <h1 className="text-3xl font-bold text-white mb-4">Payment Successful!</h1>
-        <p className="text-gray-400 mb-8">
+        <h1 className="text-3xl font-bold text-[#1A202C] mb-4">Payment Successful!</h1>
+        <p className="text-[#64748B] mb-8 leading-relaxed">
           Welcome to ATOS fit {subscriptionDetails?.plan || 'Premium'}! Your subscription is now active.
         </p>
 
         {/* Subscription Details */}
         {subscriptionDetails && (
-          <div className="bg-gray-900 rounded-xl p-6 mb-8 text-left">
-            <h3 className="text-lg font-semibold text-white mb-4">Subscription Details</h3>
+          <div className="bg-[#F4F8FA] border border-[#E6EFF3] rounded-2xl p-6 mb-8 text-left">
+            <h3 className="text-lg font-semibold text-[#1A202C] mb-4">Subscription Details</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-400">Plan:</span>
-                <span className="text-white">{subscriptionDetails.plan}</span>
+                <span className="text-[#64748B]">Plan:</span>
+                <span className="text-[#1A202C] font-semibold">{subscriptionDetails.plan}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Status:</span>
-                <span className="text-green-400 capitalize">{subscriptionDetails.status}</span>
+                <span className="text-[#64748B]">Status:</span>
+                <span className="text-[#4353FF] font-semibold capitalize">{subscriptionDetails.status}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Started:</span>
-                <span className="text-white">
+                <span className="text-[#64748B]">Started:</span>
+                <span className="text-[#1A202C] font-semibold">
                   {new Date(Number(subscriptionDetails.createdAt) / 1000000).toLocaleDateString()}
                 </span>
               </div>
@@ -133,21 +133,21 @@ const PaymentSuccess = () => {
         <div className="space-y-4">
           <button
             onClick={handleContinue}
-            className="w-full py-4 bg-[#FF8A00] hover:bg-[#E67B00] text-black font-semibold rounded-xl transition-colors"
+            className="w-full py-4 bg-[#4353FF] hover:bg-[#5668FF] text-white font-bold rounded-xl transition-all duration-300 shadow-[0px_4px_18px_rgba(67, 83, 245,0.3)]"
           >
             Continue to Dashboard
           </button>
           <button
             onClick={() => navigate('/user-profile')}
-            className="w-full py-3 bg-transparent border border-gray-600 text-white hover:bg-gray-800 font-semibold rounded-xl transition-colors"
+            className="w-full py-3 bg-transparent border border-[#9DA8FF] text-[#4353FF] hover:bg-[#4353FF] hover:text-white font-bold rounded-xl transition-all duration-300"
           >
             View Profile
           </button>
         </div>
 
         {/* Additional Info */}
-        <div className="mt-8 p-4 bg-gray-900 rounded-xl">
-          <p className="text-sm text-gray-400">
+        <div className="mt-8 p-4 bg-[#E6EFF3] border border-[#9DA8FF]/40 rounded-xl">
+          <p className="text-sm text-[#4353FF] font-medium">
             🎉 You now have access to all premium features including unlimited tracking, 
             advanced analytics, and personalized workout plans!
           </p>

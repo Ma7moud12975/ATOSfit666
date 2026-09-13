@@ -17,6 +17,7 @@ body {
   filter: brightness(0) saturate(100%) invert(1) sepia(0) saturate(0) hue-rotate(0deg) brightness(1.5);
 }
 
-.filter-orange {
-  filter: brightness(0) saturate(100%) invert(65%) sepia(85%) saturate(2341%) hue-rotate(8deg) brightness(102%) contrast(101%);
+.filter-orange,
+.filter-blue {
+  filter: invert(41%) sepia(52%) saturate(1478%) hue-rotate(213deg) brightness(93%) contrast(88%);
 }

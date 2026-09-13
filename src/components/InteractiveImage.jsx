@@ -1,74 +1,138 @@
 import React, { useState, useRef, useEffect } from 'react';
+import Icon from './AppIcon';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const InteractiveImage = () => {
+  const { language } = useLanguage();
   const [imageStyle, setImageStyle] = useState({});
   const [isHovered, setIsHovered] = useState(false);
   const imageRef = useRef(null);
+  const containerRef = useRef(null);
 
-  // Enhanced global mouse tracking for more interactive effect
+  // Enhanced mouse tracking for 3D tilt
   useEffect(() => {
-    const handleGlobalMouseMove = (e) => {
-      if (!imageRef.current) return;
-      
-      // Get mouse position relative to viewport center
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
-      
-      const deltaX = (e.clientX - centerX) / window.innerWidth;
-      const deltaY = (e.clientY - centerY) / window.innerHeight;
-      
-      // More pronounced rotation for better interactivity
-      const rotateX = deltaY * -12;
-      const rotateY = deltaX * 12;
-      const translateZ = isHovered ? 30 : 0;
-      const scale = isHovered ? 1.05 : 1;
-      
+    const handleMouseMove = (e) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      const deltaX = (e.clientX - centerX) / (rect.width / 2);
+      const deltaY = (e.clientY - centerY) / (rect.height / 2);
+
+      // Controlled tilt angles
+      const rotateX = Math.max(-12, Math.min(12, deltaY * -10));
+      const rotateY = Math.max(-12, Math.min(12, deltaX * 10));
+      const translateZ = isHovered ? 25 : 0;
+      const scale = isHovered ? 1.03 : 1;
+
       setImageStyle({
-        transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
-        transition: isHovered ? 'transform 0.3s ease-out' : 'transform 0.15s ease-out'
+        transform: `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
+        transition: isHovered ? 'transform 0.25s ease-out' : 'transform 0.12s ease-out'
       });
     };
 
-    document.addEventListener('mousemove', handleGlobalMouseMove);
-    return () => document.removeEventListener('mousemove', handleGlobalMouseMove);
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [isHovered]);
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
+  const isAr = language === 'ar';
 
-  const handleMouseLeave = () => {
-    setIsHovered(false);
+  const copy = isAr ? {
+    angleTitle: 'تحليل الزوايا الحركية',
+    angleValue: 'زاوية الركبة: 94.2°',
+    angleStatus: 'عمق نزول مثالي',
+    accuracyTitle: 'دقة أداء الحركة',
+    accuracyValue: '98.5% ممتاز',
+    accuracySub: 'استقامة مثالية للظهر',
+    repTitle: 'العد التلقائي الذكي',
+    repValue: '12 / 12 تكرار',
+    repSub: 'الجولة 3 • سرعة 1.3 ث',
+    privacyTitle: 'خصوصية تامة 100%',
+    privacyValue: 'معالجة محلية بالكامل',
+    privacySub: '0 بايت تُرسل للسحابة',
+  } : {
+    angleTitle: 'LIVE POSE ESTIMATION',
+    angleValue: 'Knee Flexion: 94.2°',
+    angleStatus: 'Optimal Squat Depth',
+    accuracyTitle: 'FORM ACCURACY SCORE',
+    accuracyValue: '98.5% Perfect',
+    accuracySub: 'Zero spine curvature drift',
+    repTitle: 'REAL-TIME REP COUNTER',
+    repValue: '12 / 12 Reps',
+    repSub: 'Set 3 • Cadence: 1.3s',
+    privacyTitle: 'ZERO-CLOUD PRIVACY',
+    privacyValue: '100% On-Device AI',
+    privacySub: '0 KB transmitted to servers',
   };
 
   return (
-    <div className="relative w-full h-full max-w-lg mx-auto" style={{ perspective: '1000px' }}>
+    <div 
+      ref={containerRef}
+      className="relative w-full py-4 sm:py-6 lg:py-8 flex items-center justify-center select-none"
+    >
+      {/* Radiant Violet & Solar Amber Aura (from 3D Logo colors) directly behind mockup */}
+      <div 
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[440px] md:w-[500px] h-[340px] sm:h-[440px] md:h-[500px] rounded-full pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle, rgba(79, 70, 229, 0.38) 0%, rgba(255, 122, 0, 0.14) 42%, transparent 72%)',
+          filter: 'blur(55px)',
+        }}
+      />
+
+      {/* 3D Tilt Container */}
       <div 
         ref={imageRef}
         style={imageStyle}
-        className="relative w-full"
+        className="relative z-10 flex items-center justify-center"
       >
-        <img 
-          src="/assets/images/weekly_tasks.gif" 
-          alt="ATOS fit App Interface" 
-          className="w-1/2 h-auto object-cover cursor-pointer mx-auto block"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        />
-        
-        {/* Hover Overlay - Only shows on image hover
-        {isHovered && (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-center items-center p-8 pointer-events-none">
-            <div className="text-center transform transition-all duration-300 ease-out">
-              <h3 className="text-[#FF8A00] text-2xl font-bold mb-4">Privacy-First Fitness</h3>
-              <div className="space-y-3 text-white text-lg">
-                <p>• Experience AI with complete privacy</p>
-                <p>• AI form correction</p>
-                <p>• ICP blockchain security</p>
+        {/* Phone Mockup with exercise GIF */}
+        <div className="relative group cursor-pointer">
+          <div className="relative rounded-[42px] p-1.5 bg-gradient-to-b from-white/30 via-white/10 to-[#4F46E5]/30 shadow-[0_25px_60px_-15px_rgba(79,70,229,0.5)] overflow-hidden">
+            <img 
+              src="/assets/images/weekly_tasks.gif" 
+              alt="ATOS fit Exercise AI Motion Tracking" 
+              className="w-[260px] sm:w-[300px] md:w-[330px] xl:w-[360px] h-auto object-contain rounded-[34px] block"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            />
+            
+            {/* Athletic HUD: Top Live Biomechanics Pill */}
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-[10px] sm:text-xs font-semibold text-white pointer-events-none">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="tracking-wide">{isAr ? 'تتبع حركي مباشر' : 'LIVE POSE AI'}</span>
+              </div>
+              <span className="text-emerald-400 font-bold" dir="ltr">60 FPS</span>
+            </div>
+
+            {/* Athletic HUD: Bottom Real-Time Telemetry Bar */}
+            <div className="absolute bottom-4 left-3 right-3 p-2.5 rounded-2xl bg-black/75 backdrop-blur-md border border-white/15 shadow-lg pointer-events-none">
+              <div className="flex items-center justify-between text-[11px] sm:text-xs text-white">
+                <div className="flex items-center gap-1">
+                  <span className="text-orange-400 font-bold">🔥</span>
+                  <span className="font-bold" dir="ltr">420</span>
+                  <span className="text-[10px] text-gray-400">{isAr ? 'سعرة' : 'kcal'}</span>
+                </div>
+                <div className="h-3 w-[1px] bg-white/20"></div>
+                <div className="flex items-center gap-1">
+                  <span className="text-indigo-400 font-bold">⚡</span>
+                  <span className="font-bold text-indigo-300" dir="ltr">8/12</span>
+                  <span className="text-[10px] text-gray-400">{isAr ? 'تكرار' : 'reps'}</span>
+                </div>
+                <div className="h-3 w-[1px] bg-white/20"></div>
+                <div className="flex items-center gap-1">
+                  <span className="text-emerald-400 font-bold">🎯</span>
+                  <span className="font-bold text-emerald-300" dir="ltr">99%</span>
+                  <span className="text-[10px] text-gray-400">{isAr ? 'دقة' : 'form'}</span>
+                </div>
               </div>
             </div>
+
+            {/* Glossy Reflection overlay */}
+            <div className="absolute inset-0 rounded-[34px] bg-gradient-to-tr from-transparent via-white/5 to-white/15 pointer-events-none" />
           </div>
-        )} */}
+        </div>
       </div>
     </div>
   );

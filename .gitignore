@@ -108,3 +108,7 @@ jspm_packages/
 .kiro/steering/byterover-rules.md
 .qoder/rules/byterover-rules.md
 .augment/rules/byterover-rules.md
+
+# Large root assets
+/3.png
+/4.png

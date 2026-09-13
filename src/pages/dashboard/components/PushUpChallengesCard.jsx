@@ -61,8 +61,8 @@ const PushUpChallengesCard = () => {
     <div className="bg-card border border-border rounded-xl p-4 shadow-elevation-2">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
-          <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center mr-3">
-            <Icon name="Target" size={20} className="text-orange-500" />
+          <div className="w-10 h-10 rounded-lg bg-[#4353FF]/10 flex items-center justify-center mr-3">
+            <Icon name="Target" size={20} className="text-[#4353FF]" />
           </div>
           <div>
             <h3 className="font-semibold text-card-foreground">Push-Up Challenges</h3>

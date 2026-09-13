@@ -150,7 +150,7 @@ const buildDailyMissions = ({ user, language, todayKey, water, waterGoal }) => {
 };
 
 // ─── Ring Progress ────────────────────────────────────────────────────────────
-const Ring = ({ pct, r = 44, color = '#FF8A00', trackColor = 'rgba(167,162,137,.18)', sw = 7, size = 110, children }) => {
+const Ring = ({ pct, r = 44, color = '#4353FF', trackColor = 'rgba(255, 255, 255, 0.08)', sw = 7, size = 110, children }) => {
   const circ = 2 * Math.PI * r;
   const offset = circ - (pct / 100) * circ;
   return (
@@ -169,7 +169,7 @@ const Ring = ({ pct, r = 44, color = '#FF8A00', trackColor = 'rgba(167,162,137,.
 };
 
 // ─── Stat Pill ────────────────────────────────────────────────────────────────
-const StatPill = ({ label, value, unit, icon, pct, color = '#FF8A00' }) => (
+const StatPill = ({ label, value, unit, icon, pct, color = '#4353FF' }) => (
   <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8 }}>
     <Ring pct={pct} color={color} r={30} sw={5} size={74}>
       <Ic d={ICONS[icon]} size={16} stroke={color} sw={2} />
@@ -248,6 +248,7 @@ export default function Dashboard() {
   const displayedExercises = todayWorkout.planItems.length
     ? todayWorkout.planItems.map(item => item.name).filter(Boolean)
     : exercises;
+
   const dailyMission = dashboardData.missions;
   const coachPulse = buildDashboardCoachPulse({ mission: dailyMission, water, waterGoal });
   const dashboardAccountId = dashboardData.accountId || user.principal || user.id || user.email || user.name;
@@ -299,7 +300,7 @@ export default function Dashboard() {
               <div className="mission-card-inner">
                 <div className="mission-hero">
                   <div className="dash-eyebrow">
-                    <Ic d={ICONS.zap} size={13} stroke="#FF8A00" sw={2.2} />
+                    <Ic d={ICONS.zap} size={13} stroke="#4353FF" sw={2.2} />
                     {language === 'ar' ? 'رحلة اليوم' : "Today's Mission"}
                   </div>
                   <h1>{language === 'ar' ? 'ماذا يحتاج جسمك اليوم؟' : 'What does your body need today?'}</h1>
@@ -319,7 +320,7 @@ export default function Dashboard() {
                   {dailyMission.items.map(item => (
                     <div className={item.done ? 'mission-row mission-row-done' : 'mission-row'} key={item.id}>
                       <div className="mission-icon">
-                        <Ic d={ICONS[item.icon]} size={17} stroke={item.done ? '#80C342' : '#FF8A00'} sw={2.1} />
+                        <Ic d={ICONS[item.icon]} size={17} stroke={item.done ? '#10B981' : '#4353FF'} sw={2.1} />
                       </div>
                       <div className="mission-copy">
                         <span>{item.label}</span>
@@ -332,14 +333,14 @@ export default function Dashboard() {
                         onClick={() => handleMissionAction(item.action)}
                         disabled={item.done && item.action === 'hydrate'}
                       >
-                        {item.done && item.action === 'hydrate' ? <Ic d={ICONS.check} size={14} stroke="#80C342" sw={2.6} /> : item.cta}
+                        {item.done && item.action === 'hydrate' ? <Ic d={ICONS.check} size={14} stroke="#10B981" sw={2.6} /> : item.cta}
                       </button>
                     </div>
                   ))}
                 </div>
 
                 <div className="mission-streak">
-                  <Ic d={ICONS.trophy} size={15} stroke="#FAB406" sw={2} />
+                  <Ic d={ICONS.trophy} size={15} stroke="#828FFF" sw={2} />
                   <span>{dailyMission.streakText}</span>
                 </div>
               </div>
@@ -355,9 +356,9 @@ export default function Dashboard() {
               <div className="p-5 sm:p-7 relative z-10">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5">
                   <div className="flex-1">
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255, 138, 0,.12)', border: '1px solid rgba(255, 138, 0,.25)', borderRadius: 999, padding: '.3rem .85rem', marginBottom: '.75rem' }}>
-                      <Ic d={ICONS.flame} size={13} stroke="#FF8A00" sw={2} />
-                      <span style={{ fontSize: '.7rem', color: '#FF8A00', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>{t('dashboard.todaysWorkout')}</span>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(67, 83, 245, 0.12)', border: '1px solid rgba(67, 83, 245, 0.25)', borderRadius: 999, padding: '.3rem .85rem', marginBottom: '.75rem' }}>
+                      <Ic d={ICONS.flame} size={13} stroke="#4353FF" sw={2} />
+                      <span style={{ fontSize: '.7rem', color: '#4353FF', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>{t('dashboard.todaysWorkout')}</span>
                     </div>
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--bento-text)] m-0 leading-tight tracking-tight">{todayWorkout.plan?.name || (todayWorkout.isCompleted ? 'Workout completed today' : t('dashboard.fullBodyStrength'))}</h2>
                     <p style={{ color: 'var(--bento-muted)', marginTop: 6, fontSize: '.9rem', fontWeight: 500 }}>
@@ -369,7 +370,7 @@ export default function Dashboard() {
                     </p>
                   </div>
                   <button className="btn-coral w-full sm:w-auto justify-center" onClick={() => navigate('/exercise-workout-screen')}>
-                    <Ic d={ICONS.play} size={15} stroke="#181818" fill="#181818" sw={2} />
+                    <Ic d={ICONS.play} size={15} stroke="#FFFFFF" fill="#FFFFFF" sw={2} />
                     {todayWorkout.isCompleted ? 'Review workout' : t('dashboard.startWorkout')}
                   </button>
                 </div>
@@ -377,7 +378,7 @@ export default function Dashboard() {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {displayedExercises.map((ex, i) => (
                     <div key={i} style={{ background: 'var(--bento-chip)', border: '1px solid var(--bento-border)', borderRadius: 999, padding: '.35rem .85rem', fontSize: '.78rem', color: 'var(--bento-soft-text)', fontWeight: 500, cursor: 'pointer', transition: 'all .2s' }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255, 138, 0,.5)'; e.currentTarget.style.color = '#FF8A00'; }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(67, 83, 245, 0.5)'; e.currentTarget.style.color = '#4353FF'; }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bento-border)'; e.currentTarget.style.color = 'var(--bento-soft-text)'; }}>
                       {ex}
                     </div>
@@ -390,19 +391,19 @@ export default function Dashboard() {
             <div className="bento-card col-span-1 md:col-span-1 lg:col-span-1 lg:row-span-2 flex flex-col p-6 sm:p-7">
               <div className="flex justify-between items-center mb-5">
                 <span className="font-extrabold text-[var(--bento-text)] text-base">{t('dashboard.hydration')}</span>
-                <Ic d={ICONS.drop} size={18} stroke="#FF8A00" sw={2} fill="rgba(255, 138, 0,.15)" />
+                <Ic d={ICONS.drop} size={18} stroke="#828FFF" sw={2} fill="rgba(86, 104, 255, 0.15)" />
               </div>
               {/* Animated liquid ring effect */}
-              <div className="flex justify-center mx-auto relative w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-[rgba(167,162,137,0.18)]">
+              <div className="flex justify-center mx-auto relative w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-slate-200/40 dark:border-slate-800">
                 <div className="liquid-bg" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: `${waterPct}%`, transition: 'height 1s ease-in-out' }}></div>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-2xl sm:text-3xl font-black text-[var(--bento-text)] drop-shadow-lg">{waterPct}%</span>
-                  <span className="text-[0.6rem] sm:text-[0.65rem] color-[#f5f3e5] font-semibold tracking-wider drop-shadow-lg">{t('dashboard.hydrated')}</span>
+                  <span className="text-[0.6rem] sm:text-[0.65rem] text-white font-semibold tracking-wider drop-shadow-lg">{t('dashboard.hydrated')}</span>
                 </div>
               </div>
               <div className="text-center my-4 sm:my-5">
                 <span className="text-xl sm:text-2xl font-extrabold text-[var(--bento-text)]">{water}</span>
-                <span className="text-[#a7a289] text-sm font-semibold"> / {waterGoal} ml</span>
+                <span className="text-[var(--bento-muted)] text-sm font-semibold"> / {waterGoal} ml</span>
                 <div className="dash-hydration-note">
                   {waterRemaining > 0 ? t('dashboard.leftToday', { amount: waterRemaining }) : t('dashboard.goalComplete')}
                 </div>
@@ -440,7 +441,7 @@ export default function Dashboard() {
                   <span className="font-extrabold text-[var(--bento-text)] text-base">{t('dashboard.readiness')}</span>
                   <p className="text-[var(--bento-muted)] text-xs mt-1">{t('dashboard.readinessCopy')}</p>
                 </div>
-                <Ic d={ICONS.zap} size={18} stroke="#FAB406" fill="rgba(250,180,6,.12)" sw={2} />
+                <Ic d={ICONS.zap} size={18} stroke="#828FFF" fill="rgba(86, 104, 255, 0.12)" sw={2} />
               </div>
               <div className="dash-readiness-layout">
                 <div>
@@ -470,11 +471,11 @@ export default function Dashboard() {
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.5rem' }}>
                 <div>
                   <h3 style={{ fontWeight:800, color:'var(--bento-text)', fontSize:'1.05rem', margin:0 }}>{t('dashboard.progressHub')}</h3>
-                  <p style={{ color:'#a7a289', fontSize:'.78rem', marginTop:2 }}>{t('dashboard.weeklyOverview')}</p>
+                  <p style={{ color:'var(--bento-muted)', fontSize:'.78rem', marginTop:2 }}>{t('dashboard.weeklyOverview')}</p>
                 </div>
-                <div style={{ display:'flex', alignItems:'center', gap:6, background:'rgba(255, 138, 0,.1)', borderRadius:999, padding:'.3rem .8rem' }}>
-                  <Ic d={ICONS.trend} size={14} stroke="#FF8A00" sw={2} />
-                  <span style={{ fontSize:'.72rem', color:'#FF8A00', fontWeight:700 }}>{t('dashboard.weekTrend')}</span>
+                <div style={{ display:'flex', alignItems:'center', gap:6, background:'rgba(67, 83, 245, 0.1)', borderRadius:999, padding:'.3rem .8rem' }}>
+                  <Ic d={ICONS.trend} size={14} stroke="#4353FF" sw={2} />
+                  <span style={{ fontSize:'.72rem', color:'#4353FF', fontWeight:700 }}>{t('dashboard.weekTrend')}</span>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -491,11 +492,11 @@ export default function Dashboard() {
                 ].map(({ label, val, detail }) => (
                   <div key={label}>
                     <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
-                      <span style={{ fontSize:'.75rem', color:'#a7a289', fontWeight:500 }}>{label}</span>
-                      <span style={{ fontSize:'.75rem', color:'#FF8A00', fontWeight:700 }}>{detail}</span>
+                      <span style={{ fontSize:'.75rem', color:'var(--bento-muted)', fontWeight:500 }}>{label}</span>
+                      <span style={{ fontSize:'.75rem', color:'#4353FF', fontWeight:700 }}>{detail}</span>
                     </div>
-                    <div style={{ height:5, borderRadius:999, background:'rgba(167,162,137,.15)' }}>
-                      <div style={{ height:'100%', borderRadius:999, background:'linear-gradient(90deg,#FF8A00,#FAB406)', width:`${val}%`, transition:'width 1s ease' }} />
+                    <div style={{ height:5, borderRadius:999, background:'var(--bento-field)' }}>
+                      <div style={{ height:'100%', borderRadius:999, background:'linear-gradient(90deg, #4353FF, #828FFF)', width:`${val}%`, transition:'width 1s ease' }} />
                     </div>
                   </div>
                 ))}
@@ -506,7 +507,7 @@ export default function Dashboard() {
             <div className="bento-card col-span-1 md:col-span-2 lg:col-span-1 p-6 sm:p-7">
               <div className="flex justify-between items-center mb-5">
                 <span className="font-extrabold text-[var(--bento-text)] text-base">{t('dashboard.nutrition')}</span>
-                <Ic d={ICONS.fork} size={18} stroke="#FF8A00" sw={2} />
+                <Ic d={ICONS.fork} size={18} stroke="#4353FF" sw={2} />
               </div>
               <div className="dash-nutrition-hero">
                 <strong>{Math.round(nutrition.remainingCalories)}</strong>
@@ -530,7 +531,7 @@ export default function Dashboard() {
                 ))}
               </div>
               <button className="btn-olive w-full mt-5" onClick={() => navigate('/food-scanner')}>
-                <Ic d={ICONS.scan} size={15} stroke="#FF8A00" sw={2} />
+                <Ic d={ICONS.scan} size={15} stroke="#4353FF" sw={2} />
                 {t('dashboard.scanNextMeal')}
               </button>
             </div>
@@ -538,37 +539,37 @@ export default function Dashboard() {
             <div className="bento-card col-span-1 lg:col-span-2" style={{ padding:'1.75rem', cursor:'pointer' }}
               onClick={() => setQuoteIdx(i => (i + 1) % quotes.length)}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'1rem' }}>
-                <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(167,162,137,.1)', border:'1px solid rgba(167,162,137,.2)', borderRadius:999, padding:'.28rem .7rem' }}>
-                  <Ic d={ICONS.star} size={12} stroke="#a7a289" sw={2} />
-                  <span style={{ fontSize:'.68rem', color:'#a7a289', fontWeight:700, textTransform:'uppercase', letterSpacing:'.07em' }}>{t('dashboard.dailyDose')}</span>
+                <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'var(--bento-chip)', border:'1px solid var(--bento-border)', borderRadius:999, padding:'.28rem .7rem' }}>
+                  <Ic d={ICONS.star} size={12} stroke="var(--bento-muted)" sw={2} />
+                  <span style={{ fontSize:'.68rem', color:'var(--bento-muted)', fontWeight:700, textTransform:'uppercase', letterSpacing:'.07em' }}>{t('dashboard.dailyDose')}</span>
                 </div>
                 <div style={{ display:'flex', gap:5 }}>
                   {quotes.map((_, i) => (
-                    <div key={i} style={{ height:6, borderRadius:999, background: i===quoteIdx ? '#FF8A00' : 'rgba(167,162,137,.25)', width: i===quoteIdx ? 20 : 6, transition:'all .4s ease' }} />
+                    <div key={i} style={{ height:6, borderRadius:999, background: i===quoteIdx ? '#4353FF' : 'var(--bento-border)', width: i===quoteIdx ? 20 : 6, transition:'all .4s ease' }} />
                   ))}
                 </div>
               </div>
-              <h4 style={{ color:'#FF8A00', fontWeight:700, fontSize:'.85rem', marginBottom:8 }}>{quotes[quoteIdx].title}</h4>
+              <h4 style={{ color:'#4353FF', fontWeight:700, fontSize:'.85rem', marginBottom:8 }}>{quotes[quoteIdx].title}</h4>
               <p style={{ color:'var(--bento-soft-text)', fontSize:'1.05rem', fontWeight:500, lineHeight:1.6, margin:0 }}>"{quotes[quoteIdx].body}"</p>
-              <p style={{ color:'rgba(167,162,137,.5)', fontSize:'.72rem', marginTop:'1rem' }}>Tap to see next →</p>
+              <p style={{ color:'var(--bento-muted)', fontSize:'.72rem', marginTop:'1rem' }}>Tap to see next →</p>
             </div>
 
             {/* 5. SUBSCRIPTION CARD — spans 2 cols */}
-            <div className="bento-card sub-border col-span-1 lg:col-span-2" style={{ padding:'1.75rem', background:'linear-gradient(135deg,rgba(255, 138, 0,.12) 0%,var(--bento-card-strong) 100%)' }}>
+            <div className="bento-card sub-border col-span-1 lg:col-span-2" style={{ padding:'1.75rem', background:'linear-gradient(135deg, rgba(67, 83, 245, 0.12) 0%, var(--bento-card-strong) 100%)' }}>
               <div className="trail trail-coral" style={{ width:200, height:200, top:'-30%', right:'-10%', opacity:.18 }} />
               <div style={{ position:'relative', zIndex:1 }}>
-                <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(255, 138, 0,.15)', border:'1px solid rgba(255, 138, 0,.35)', borderRadius:999, padding:'.3rem .85rem', marginBottom:'1rem' }}>
-                  <Ic d={ICONS.crown} size={13} stroke="#FF8A00" sw={2.2} />
-                  <span style={{ fontSize:'.7rem', color:'#FF8A00', fontWeight:800, textTransform:'uppercase', letterSpacing:'.08em' }}>{subscription.isPro ? `${subscription.plan} plan` : t('dashboard.proPlan')}</span>
+                <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(67, 83, 245, 0.15)', border:'1px solid rgba(67, 83, 245, 0.35)', borderRadius:999, padding:'.3rem .85rem', marginBottom:'1rem' }}>
+                  <Ic d={ICONS.crown} size={13} stroke="#4353FF" sw={2.2} />
+                  <span style={{ fontSize:'.7rem', color:'#4353FF', fontWeight:800, textTransform:'uppercase', letterSpacing:'.08em' }}>{subscription.isPro ? `${subscription.plan} plan` : t('dashboard.proPlan')}</span>
                 </div>
                 <h3 style={{ fontSize:'1.6rem', fontWeight:900, color:'var(--bento-text)', margin:'0 0 .5rem', lineHeight:1.2 }}>{subscription.isPro ? 'Your plan is active' : t('dashboard.unlockElite')}</h3>
-                <p style={{ color:'#a7a289', fontSize:'.85rem', lineHeight:1.6, marginBottom:'1.25rem' }}>
+                <p style={{ color:'var(--bento-muted)', fontSize:'.85rem', lineHeight:1.6, marginBottom:'1.25rem' }}>
                   {subscription.isPro ? 'Premium features are enabled for this account.' : t('dashboard.upgradeCopy')}
                 </p>
                 <div style={{ display:'flex', flexDirection:'column', gap:6, marginBottom:'1.25rem' }}>
                   {['Personalized AI programs','Unlimited food scanning','Advanced performance analytics'].map(f => (
                     <div key={f} style={{ display:'flex', alignItems:'center', gap:8 }}>
-                      <Ic d={ICONS.check} size={14} stroke="#FF8A00" sw={2.5} />
+                      <Ic d={ICONS.check} size={14} stroke="#10B981" sw={2.5} />
                       <span style={{ color:'var(--bento-soft-text)', fontSize:'.8rem', fontWeight:500 }}>{f}</span>
                     </div>
                   ))}
@@ -576,7 +577,7 @@ export default function Dashboard() {
                 {!subscription.isPro && (
                   <button className="btn-coral" style={{ width:'100%', justifyContent:'center', padding:'.9rem' }}
                     onClick={() => navigate('/pricing')}>
-                    <Ic d={ICONS.zap} size={15} stroke="#181818" fill="#181818" />
+                    <Ic d={ICONS.zap} size={15} stroke="#FFFFFF" fill="#FFFFFF" />
                     {t('dashboard.upgradeNow')}
                   </button>
                 )}

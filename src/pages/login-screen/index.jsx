@@ -40,14 +40,6 @@ const LoginScreen = () => {
     }
   }, [isAuthenticated, loading, supabaseUser, navigate]);
 
-  // Enforce dark mode on the login screen only
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.add('dark');
-    return () => {
-      root.classList.remove('dark');
-    };
-  }, []);
 
   return (
     <AuthenticationLayout>

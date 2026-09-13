@@ -6,7 +6,7 @@ const MobileSplash = ({ statusText = "Preparing your AI coach..." }) => {
   return (
     <div className="fixed inset-0 bg-[#181818] z-[200] flex flex-col items-center justify-center overflow-hidden">
       {/* Ambient Glows */}
-      <div className="absolute top-[-10%] right-[-10%] w-[80vw] h-[80vw] bg-[#FF8A00] opacity-10 blur-[120px] rounded-full animate-pulse" />
+      <div className="absolute top-[-10%] right-[-10%] w-[80vw] h-[80vw] bg-[#4353FF] opacity-10 blur-[120px] rounded-full animate-pulse" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[80vw] h-[80vw] bg-[#00E5FF] opacity-10 blur-[120px] rounded-full animate-pulse delay-1000" />
 
       <motion.div
@@ -20,20 +20,20 @@ const MobileSplash = ({ statusText = "Preparing your AI coach..." }) => {
           <motion.div
             animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="absolute inset-[-10%] border-2 border-[#FF8A00] rounded-3xl blur-[2px]"
+            className="absolute inset-[-10%] border-2 border-[#4353FF] rounded-3xl blur-[2px]"
           />
           <img src={logoImage} alt="ATOS Fit Logo" className="w-full h-full object-contain rounded-2xl" />
         </div>
 
         <h1 className="text-3xl font-black text-[#fffef5] tracking-tight mb-2">
-          ATOS <span className="text-[#FF8A00]">Fit</span>
+          ATOS <span className="text-[#4353FF]">Fit</span>
         </h1>
 
         <div className="flex flex-col items-center gap-3">
           <motion.div
             animate={{ opacity: [0.4, 1, 0.4] }}
             transition={{ duration: 1.5, repeat: Infinity }}
-            className="text-xs sm:text-sm font-bold text-[#a7a289] uppercase tracking-[0.2em]"
+            className="text-xs sm:text-sm font-bold text-[var(--bento-muted)] uppercase tracking-[0.2em]"
           >
             {statusText}
           </motion.div>
@@ -44,14 +44,14 @@ const MobileSplash = ({ statusText = "Preparing your AI coach..." }) => {
               initial={{ x: "-100%" }}
               animate={{ x: "100%" }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              className="w-full h-full bg-gradient-to-r from-transparent via-[#FF8A00] to-transparent"
+              className="w-full h-full bg-gradient-to-r from-transparent via-[#4353FF] to-transparent"
             />
           </div>
         </div>
       </motion.div>
 
       {/* Subtle bottom text */}
-      <div className="absolute bottom-10 text-[10px] text-[#a7a289] font-medium tracking-widest opacity-50 uppercase">
+      <div className="absolute bottom-10 text-[10px] text-[var(--bento-muted)] font-medium tracking-widest opacity-50 uppercase">
         Powered by AI Coaching
       </div>
     </div>

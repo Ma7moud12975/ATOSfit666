@@ -204,7 +204,7 @@ const UserProfile = () => {
     if (isLoadingSubscription) {
       return (
         <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 border-4 border-[#FF8A00] border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-[#4353FF] border-t-transparent rounded-full animate-spin"></div>
           <span className="ml-3 text-gray-400">Loading subscription...</span>
         </div>
       );
@@ -242,7 +242,7 @@ const UserProfile = () => {
     return (
       <div className="space-y-6">
         {/* Current Plan */}
-        <div className="bg-[rgba(255,138,0,0.05)] dark:bg-[#181818] border-2 border-[#FF8A00] rounded-[32px] p-8">
+        <div className="bg-[rgba(67,83,255,0.05)] dark:bg-[#181818] border-2 border-[#4353FF] rounded-[32px] p-8">
           <h3 className="text-xl font-semibold text-[#232323] dark:text-white mb-4">Current Plan</h3>
           
           {subscription ? (
@@ -253,7 +253,7 @@ const UserProfile = () => {
                   <p className="text-gray-400 capitalize">Status: {subscription.status}</p>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-[#FF8A00]">
+                  <div className="text-2xl font-bold text-[#4353FF]">
                     ${paymentService.getSubscriptionPlanDetails(subscription.plan)?.price || 'N/A'}/month
                   </div>
                 </div>
@@ -303,14 +303,14 @@ const UserProfile = () => {
         </div>
 
         {/* Plan Features */}
-        <div className="bg-[rgba(255,138,0,0.05)] dark:bg-[#181818] border-2 border-[#FF8A00] rounded-[32px] p-8">
+        <div className="bg-[rgba(67,83,255,0.05)] dark:bg-[#181818] border-2 border-[#4353FF] rounded-[32px] p-8">
           <h3 className="text-xl font-semibold text-[#232323] dark:text-white mb-4">Plan Features</h3>
           
           {subscription ? (
             <div className="space-y-3">
               {paymentService.getSubscriptionPlanDetails(subscription.plan)?.features.map((feature, index) => (
                 <div key={index} className="flex items-center">
-                  <div className="w-2 h-2 bg-[#FF8A00] rounded-full mr-3"></div>
+                  <div className="w-2 h-2 bg-[#4353FF] rounded-full mr-3"></div>
                   <span className="text-gray-300">{feature}</span>
                 </div>
               ))}
@@ -318,19 +318,19 @@ const UserProfile = () => {
           ) : (
             <div className="space-y-3">
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-[#FF8A00] rounded-full mr-3"></div>
+                <div className="w-2 h-2 bg-[#4353FF] rounded-full mr-3"></div>
                 <span className="text-[#232323] dark:text-white">10 hours of workout tracking per month</span>
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-[#FF8A00] rounded-full mr-3"></div>
+                <div className="w-2 h-2 bg-[#4353FF] rounded-full mr-3"></div>
                 <span className="text-[#232323] dark:text-white">100 AI chatbot messages per month</span>
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-[#FF8A00] rounded-full mr-3"></div>
+                <div className="w-2 h-2 bg-[#4353FF] rounded-full mr-3"></div>
                 <span className="text-[#232323] dark:text-white">50 food scans per month</span>
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-[#FF8A00] rounded-full mr-3"></div>
+                <div className="w-2 h-2 bg-[#4353FF] rounded-full mr-3"></div>
                 <span className="text-[#232323] dark:text-white">Basic workout library access</span>
               </div>
             </div>
@@ -338,10 +338,10 @@ const UserProfile = () => {
         </div>
 
         {/* Plan Usage & Upgrade Section */}
-        <div className="bg-[rgba(255,138,0,0.05)] dark:bg-[#181818] border-2 border-[#FF8A00] rounded-[32px] p-8 mt-6">
+        <div className="bg-[rgba(67,83,255,0.05)] dark:bg-[#181818] border-2 border-[#4353FF] rounded-[32px] p-8 mt-6">
           <h3 className="text-xl font-semibold text-[#232323] dark:text-white mb-4 flex items-center">
             <span className="mr-2">Plan Usage</span>
-            <span className="w-3 h-3 bg-[#FF8A00] rounded-full animate-pulse"></span>
+            <span className="w-3 h-3 bg-[#4353FF] rounded-full animate-pulse"></span>
           </h3>
           {/* Replace with actual tracked usage if you have it, else fallback */}
           <div className="space-y-4">
@@ -350,30 +350,30 @@ const UserProfile = () => {
               <span className="min-w-[120px] font-medium text-[#232323] dark:text-white">Chatbot Messages</span>
               <div className="flex-1 flex items-center">
                 <div className="w-full bg-black/20 rounded h-3 mx-3">
-                  <div className="bg-gradient-to-r from-[#FFB340] to-[#FF8A00] h-3 rounded" style={{ width: '45%' }}></div>
+                  <div className="bg-gradient-to-r from-[#FFAE00] to-[#4353FF] h-3 rounded" style={{ width: '45%' }}></div>
                 </div>
                 <span className="text-xs text-gray-400 ml-2">45 / 100</span>
-                <span className="text-xs text-[#FF8A00] ml-2">45%</span>
+                <span className="text-xs text-[#4353FF] ml-2">45%</span>
               </div>
             </div>
             <div className="flex items-center mb-2">
               <span className="min-w-[120px] font-medium text-[#232323] dark:text-white">Workout Tracking</span>
               <div className="flex-1 flex items-center">
                 <div className="w-full bg-black/20 rounded h-3 mx-3">
-                  <div className="bg-gradient-to-r from-[#ffdea9] to-[#FF8A00] h-3 rounded" style={{ width: '70%' }}></div>
+                  <div className="bg-gradient-to-r from-[#FFE7A6] to-[#4353FF] h-3 rounded" style={{ width: '70%' }}></div>
                 </div>
                 <span className="text-xs text-gray-400 ml-2">7 / 10 hrs</span>
-                <span className="text-xs text-[#FF8A00] ml-2">70%</span>
+                <span className="text-xs text-[#4353FF] ml-2">70%</span>
               </div>
             </div>
             <div className="flex items-center mb-2">
               <span className="min-w-[120px] font-medium text-[#232323] dark:text-white">Food Scans</span>
               <div className="flex-1 flex items-center">
                 <div className="w-full bg-black/20 rounded h-3 mx-3">
-                  <div className="bg-gradient-to-r from-[#ffdea9] to-[#FF8A00] h-3 rounded" style={{ width: '60%' }}></div>
+                  <div className="bg-gradient-to-r from-[#FFE7A6] to-[#4353FF] h-3 rounded" style={{ width: '60%' }}></div>
                 </div>
                 <span className="text-xs text-gray-400 ml-2">30 / 50</span>
-                <span className="text-xs text-[#FF8A00] ml-2">60%</span>
+                <span className="text-xs text-[#4353FF] ml-2">60%</span>
               </div>
             </div>
           </div>
@@ -382,12 +382,12 @@ const UserProfile = () => {
 
         {/* Upgrade Options */}
         {!subscription && (
-          <div className="bg-gradient-to-r from-[#FF8A00]/10 to-[#E67B00]/10 border border-[#FF8A00]/20 rounded-xl p-6">
+          <div className="bg-gradient-to-r from-[#4353FF]/10 to-[#7082FF]/10 border border-[#7082FF]/30 rounded-xl p-6">
             <h3 className="text-xl font-semibold text-[#232323] dark:text-white mb-4">Available Upgrades</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-[#F3F3F6] dark:bg-[#232323] border-2 border-[#FF8A00] rounded-lg p-4">
+              <div className="bg-[#F3F3F6] dark:bg-[#232323] border-2 border-[#4353FF] rounded-lg p-4">
                 <h4 className="font-semibold text-[#232323] dark:text-white mb-2">Premium</h4>
-                <p className="text-2xl font-bold text-[#FF8A00] mb-2">$9.99/month</p>
+                <p className="text-2xl font-bold text-[#4353FF] mb-2">$9.99/month</p>
                 <p className="text-[#232323] dark:text-gray-200 text-sm mb-4">Enhanced features for serious fitness enthusiasts</p>
                 <button
                   disabled
@@ -396,9 +396,9 @@ const UserProfile = () => {
                   Choose Premium
                 </button>
               </div>
-              <div className="bg-[#F3F3F6] dark:bg-[#232323] border-2 border-[#FF8A00] rounded-lg p-4">
+              <div className="bg-[#F3F3F6] dark:bg-[#232323] border-2 border-[#4353FF] rounded-lg p-4">
                 <h4 className="font-semibold text-[#232323] dark:text-white mb-2">Premium Plus</h4>
-                <p className="text-2xl font-bold text-[#FF8A00] mb-2">$19.99/month</p>
+                <p className="text-2xl font-bold text-[#4353FF] mb-2">$19.99/month</p>
                 <p className="text-[#232323] dark:text-gray-200 text-sm mb-4">Unlimited access to all features</p>
                 <button
                   disabled

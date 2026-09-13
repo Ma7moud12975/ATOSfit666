@@ -78,7 +78,9 @@ const Routes = () => {
                 </MobileLayout>
               </MobileAppRouter>
             ) : (
-              <AppContent />
+              <MobileLayout>
+                <AppContent />
+              </MobileLayout>
             )}
           </ErrorBoundary>
         </AuthProvider>

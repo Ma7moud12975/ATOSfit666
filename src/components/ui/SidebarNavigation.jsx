@@ -58,9 +58,9 @@ const SidebarNavigation = ({ isOpen = false, onClose }) => {
         className={`atos-sidebar lg:translate-x-0 ${isOpen ? 'translate-x-0' : isRTL ? 'translate-x-[120%]' : '-translate-x-[120%]'}`}
       >
         {/* Logo Area */}
-        <div style={{ padding: '1.5rem 1.25rem 1.25rem', borderBottom: '1px solid rgba(167,162,137,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ padding: '1.5rem 1.25rem 1.25rem', borderBottom: '1px solid var(--bento-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src={logoImage} alt="ATOSfit Logo" style={{ width: 36, height: 36, borderRadius: 10, objectFit: 'cover' }} />
+            <img src={logoImage} alt="ATOSfit Logo" style={{ width: 36, height: 36, objectFit: 'contain' }} />
             <span style={{ fontWeight: 800, fontSize: '1.15rem', color: 'var(--bento-text)', letterSpacing: '0.02em' }}>ATOSfit</span>
           </div>
           <button 
@@ -85,18 +85,18 @@ const SidebarNavigation = ({ isOpen = false, onClose }) => {
                   onClick={() => handleNav(it.path)}
                   style={{
                     display: 'flex', alignItems: 'center', gap: '12px', padding: '0.85rem 1rem',
-                    borderRadius: '16px', border: 'none', cursor: 'pointer', textAlign: 'left',
-                    transition: 'all 0.25s ease',
-                    background: active ? 'rgba(255, 138, 0,0.15)' : 'transparent',
-                    color: active ? '#FF8A00' : 'var(--bento-muted)',
-                    borderInlineStart: active ? '3px solid #FF8A00' : '3px solid transparent',
-                    boxShadow: active ? 'inset 3px 0 12px rgba(255, 138, 0,0.12)' : 'none'
+                    borderRadius: '14px', border: 'none', cursor: 'pointer', textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                    background: active ? 'rgba(67, 83, 245, 0.15)' : 'transparent',
+                    color: active ? 'var(--bento-text)' : 'var(--bento-muted)',
+                    borderInlineStart: active ? '3px solid #4353FF' : '3px solid transparent',
+                    boxShadow: active ? '0 0 15px rgba(67, 83, 245, 0.2)' : 'none'
                   }}
                   onMouseOver={e => { if (!active) { e.currentTarget.style.backgroundColor = 'var(--bento-chip)'; e.currentTarget.style.color = 'var(--bento-text)'; } }}
                   onMouseOut={e => { if (!active) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--bento-muted)'; } }}
                 >
-                  <Icon name={it.icon} size={20} color={active ? '#FF8A00' : 'var(--bento-muted)'} />
-                  <span style={{ fontSize: '0.9rem', fontWeight: active ? 700 : 500 }}>{it.label}</span>
+                  <Icon name={it.icon} size={20} color={active ? '#4353FF' : 'var(--bento-muted)'} />
+                  <span style={{ fontSize: '0.9rem', fontWeight: active ? 600 : 500 }}>{it.label}</span>
                 </button>
               );
             })}
@@ -104,10 +104,10 @@ const SidebarNavigation = ({ isOpen = false, onClose }) => {
         </nav>
 
         {/* Footer Badge */}
-        <div style={{ padding: '1.25rem', borderTop: '1px solid rgba(167,162,137,0.1)' }}>
-          <div style={{ background: 'rgba(255, 138, 0,0.1)', border: '1px solid rgba(255, 138, 0,0.25)', borderRadius: '14px', padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Icon name="Crown" size={16} color="#FF8A00" />
-            <span style={{ fontSize: '0.78rem', color: '#FF8A00', fontWeight: 700 }}>{t('nav.freePlan')}</span>
+        <div style={{ padding: '1.25rem', borderTop: '1px solid var(--bento-border)' }}>
+          <div style={{ background: 'rgba(255, 174, 0, 0.10)', border: '1px solid rgba(255, 174, 0, 0.25)', borderRadius: '14px', padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Icon name="Crown" size={16} color="#FFAE00" />
+            <span style={{ fontSize: '0.78rem', color: '#FFAE00', fontWeight: 600 }}>{t('nav.freePlan')}</span>
           </div>
         </div>
       </aside>

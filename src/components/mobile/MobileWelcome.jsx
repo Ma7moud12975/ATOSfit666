@@ -9,7 +9,7 @@ const slides = [
     title: "AI Workout Analysis",
     description: "Use your camera to detect posture, count reps, and improve form in real-time.",
     icon: "Activity",
-    color: "#FF8A00",
+    color: "#4353FF",
     image: "https://media.craiyon.com/2025-04-08/ZNEwVZXCQWWnQsrUfh71tA.webp"
   },
   {
@@ -63,7 +63,7 @@ const MobileWelcome = ({ onComplete }) => {
         <div className="flex justify-end mb-8">
           <button
             onClick={handleSkip}
-            className="text-sm font-bold text-[#a7a289] uppercase tracking-widest hover:text-[#fffef5] transition-colors"
+            className="text-sm font-bold text-[var(--bento-muted)] uppercase tracking-widest hover:text-[#fffef5] transition-colors"
           >
             Skip
           </button>
@@ -97,7 +97,7 @@ const MobileWelcome = ({ onComplete }) => {
               <h2 className="text-3xl font-black text-[#fffef5] mb-4 leading-tight">
                 {slides[currentSlide].title}
               </h2>
-              <p className="text-base text-[#a7a289] font-medium leading-relaxed mb-8">
+              <p className="text-base text-[var(--bento-muted)] font-medium leading-relaxed mb-8">
                 {slides[currentSlide].description}
               </p>
             </motion.div>

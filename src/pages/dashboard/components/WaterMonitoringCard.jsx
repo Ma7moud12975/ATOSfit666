@@ -26,7 +26,7 @@ const WaterMonitoringCard = () => {
   }, [waterIntake, goal, lastDrink]);
 
   const goalLevels = {
-    minimum: { amount: 2000, label: 'Minimum', color: 'text-orange-500', bgColor: 'bg-orange-500/10', borderColor: 'border-orange-500/20' },
+    minimum: { amount: 2000, label: 'Minimum', color: 'text-[#828FFF]', bgColor: 'bg-[#828FFF]/10', borderColor: 'border-[#828FFF]/20' },
     recommended: { amount: 2500, label: 'Recommended', color: 'text-blue-500', bgColor: 'bg-blue-500/10', borderColor: 'border-blue-500/20' },
     advanced: { amount: 3000, label: 'Advanced', color: 'text-green-500', bgColor: 'bg-green-500/10', borderColor: 'border-green-500/20' }
   };

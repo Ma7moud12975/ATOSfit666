@@ -45,10 +45,10 @@ const ChatHistory = ({ isOpen, onClose, onConversationSelect, currentConversatio
           <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--bento-text)', margin: 0 }}>{t('chat.historyTitle')}</h2>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button onClick={loadConversations} style={{ background: 'var(--bento-chip)', border: 'none', color: 'var(--bento-muted)', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#FF8A00'} onMouseOut={e => e.currentTarget.style.color = 'var(--bento-muted)'} title={t('chat.refreshHistory')}>
+          <button onClick={loadConversations} style={{ background: 'var(--bento-chip)', border: 'none', color: 'var(--bento-muted)', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#4353FF'} onMouseOut={e => e.currentTarget.style.color = 'var(--bento-muted)'} title={t('chat.refreshHistory')}>
             <Icon name="RefreshCw" size={14} />
           </button>
-          <button onClick={onClose} className="lg:hidden" style={{ background: 'var(--bento-chip)', border: 'none', color: 'var(--bento-muted)', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#FF8A00'} onMouseOut={e => e.currentTarget.style.color = 'var(--bento-muted)'}>
+          <button onClick={onClose} className="lg:hidden" style={{ background: 'var(--bento-chip)', border: 'none', color: 'var(--bento-muted)', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#4353FF'} onMouseOut={e => e.currentTarget.style.color = 'var(--bento-muted)'}>
             <Icon name="X" size={16} />
           </button>
         </div>
@@ -61,7 +61,7 @@ const ChatHistory = ({ isOpen, onClose, onConversationSelect, currentConversatio
           className="btn-coral"
           style={{ width: '100%', justifyContent: 'center', padding: '0.8rem' }}
         >
-          <Icon name="Plus" size={18} color="#181818" /> {t('chat.newChat')}
+          <Icon name="Plus" size={18} color="#FFFFFF" /> {t('chat.newChat')}
         </button>
       </div>
 
@@ -85,15 +85,15 @@ const ChatHistory = ({ isOpen, onClose, onConversationSelect, currentConversatio
                   style={{
                     padding: '1rem',
                     borderRadius: '16px',
-                    background: active ? 'rgba(255, 138, 0,0.12)' : 'var(--bento-chip)',
-                    border: `1px solid ${active ? 'rgba(255, 138, 0,0.38)' : 'var(--bento-border)'}`,
+                    background: active ? 'rgba(67, 83, 255, 0.12)' : 'var(--bento-chip)',
+                    border: `1px solid ${active ? 'rgba(67, 83, 255, 0.38)' : 'var(--bento-border)'}`,
                     cursor: 'pointer',
                     transition: 'all 0.2s'
                   }}
-                  onMouseOver={e => { if(!active){ e.currentTarget.style.backgroundColor = 'var(--bento-chip-hover)'; e.currentTarget.style.borderColor = 'rgba(255, 138, 0,0.24)'; } }}
+                  onMouseOver={e => { if(!active){ e.currentTarget.style.backgroundColor = 'var(--bento-chip-hover)'; e.currentTarget.style.borderColor = 'rgba(67, 83, 255, 0.24)'; } }}
                   onMouseOut={e => { if(!active){ e.currentTarget.style.backgroundColor = 'var(--bento-chip)'; e.currentTarget.style.borderColor = 'var(--bento-border)'; } }}
                 >
-                  <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: active ? '#FF8A00' : 'var(--bento-text)', margin: '0 0 6px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: active ? '#4353FF' : 'var(--bento-text)', margin: '0 0 6px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {conv.title}
                   </h3>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--bento-muted)' }}>

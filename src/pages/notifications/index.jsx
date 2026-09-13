@@ -22,7 +22,7 @@ const NotificationsPage = () => {
 
   // Load theme preference
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const savedTheme = localStorage.getItem('theme') || 'light';
     setCurrentTheme(savedTheme);
     if (savedTheme === 'dark') {
       document.documentElement.classList.add('dark');

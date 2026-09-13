@@ -26,14 +26,6 @@ const RegisterScreen = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Enforce dark mode on the registration screen
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.add('dark');
-    return () => {
-      root.classList.remove('dark');
-    };
-  }, []);
 
   const handleRegistrationSuccess = () => {
     setShowWelcome(true);

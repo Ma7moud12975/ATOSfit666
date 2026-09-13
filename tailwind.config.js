@@ -64,9 +64,42 @@ export default {
           DEFAULT: "var(--color-error)", // red-600
           foreground: "var(--color-error-foreground)", // white
         },
-        surface: "var(--color-surface)", // gray-50
-        "text-primary": "var(--color-text-primary)", // gray-800
-        "text-secondary": "var(--color-text-secondary)", // gray-500
+        surface: "var(--color-surface)", // #0a0a0c
+        "text-primary": "var(--color-text-primary)", // #EDEDEF
+        "text-secondary": "var(--color-text-secondary)", // #8A8F98
+        brand: {
+          blue: "#4353FF",
+          "blue-hover": "#5668FF",
+          secondary: "#7082FF",
+          solar: "#FFAE00",
+          "solar-hover": "#FFBE26",
+          accent: "#8FA0FF",
+          frost: "rgba(255, 255, 255, 0.05)",
+          bg: "#05060D",
+          darkText: "#EDEDEF",
+          greyText: "#8A8F98",
+          surface: "#0A0D1B",
+          card: "rgba(10, 13, 27, 0.75)",
+          border: "rgba(255, 255, 255, 0.06)",
+        },
+        linear: {
+          deep: "#020307",
+          bg: "#05060D",
+          elevated: "#0a0d1b",
+          surface: "rgba(255, 255, 255, 0.05)",
+          surfaceHover: "rgba(255, 255, 255, 0.08)",
+          text: "#EDEDEF",
+          muted: "#8A8F98",
+          subtle: "rgba(255, 255, 255, 0.60)",
+          border: "rgba(255, 255, 255, 0.06)",
+          borderHover: "rgba(255, 255, 255, 0.12)",
+          accent: "#4353FF",
+          accentBright: "#5668FF",
+          accentGlow: "rgba(67, 83, 245, 0.35)",
+          accentDim: "rgba(67, 83, 245, 0.14)",
+          solar: "#FFAE00",
+          solarGlow: "rgba(255, 174, 0, 0.35)",
+        },
       },
       borderRadius: {
         lg: "12px",
@@ -75,7 +108,7 @@ export default {
         xl: "20px",
       },
       fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
+        sans: ['Inter', 'Poppins', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       fontWeight: {
@@ -85,9 +118,13 @@ export default {
         bold: '700',
       },
       boxShadow: {
-        'elevation-1': '0 2px 6px rgba(0, 0, 0, 0.06)',
-        'elevation-2': '0 6px 12px rgba(0, 0, 0, 0.08)',
-        'elevation-3': '0 12px 20px rgba(0, 0, 0, 0.12)',
+        'elevation-1': '0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+        'elevation-2': '0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06)',
+        'elevation-3': '0 12px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08)',
+        'linear-card': '0 0 0 1px rgba(255,255,255,0.06), 0 2px 20px rgba(0,0,0,0.4), 0 0 40px rgba(0,0,0,0.2)',
+        'linear-card-hover': '0 0 0 1px rgba(94,106,210,0.35), 0 8px 32px rgba(0,0,0,0.6), 0 0 30px rgba(94,106,210,0.15)',
+        'linear-btn': '0 0 0 1px rgba(94,106,210,0.5), 0 4px 14px rgba(94,106,210,0.35), inset 0 1px 0 0 rgba(255,255,255,0.25)',
+        'linear-btn-hover': '0 0 0 1px rgba(104,114,217,0.7), 0 6px 20px rgba(94,106,210,0.45), inset 0 1px 0 0 rgba(255,255,255,0.35)',
       },
       animation: {
         'spring': 'spring 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',

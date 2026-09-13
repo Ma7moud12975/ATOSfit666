@@ -1,7 +1,32 @@
 {
-  "error": {
-    "code": 403,
-    "message": "Your API key was reported as leaked. Please use another API key.",
-    "status": "PERMISSION_DENIED"
-  }
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Hello! How can I help you today?",
+            "thoughtSignature": "Er8FCrwFARFNMg8o/ioJr1Gp+T0zgfOPZ7dTzRhTdvHS+PL+c1/TPxiY9b0YoJrqNkjWQCPWQDqQrmuXtu82xKhDG9cmtS3HyP+q36BpygVqST2OmnoDalYNoEy1kU0HQrbkSQfnqkGbbbj7H+ywtHfK7R/FjBf2q7rKqNGj1chF/rJBt4M8bLd7LNIXOO89Sr7IIMRN7Hbjnnw/U8Vru47VGOCqBnObyrVvYT4ULsqKr18HqyC63ynMiNZ5ZfjU6UVfnL52u+AwfVIuGyOhEuyeEoWf2CmWKtLDOp3lO3i90GK3zgYxAg6Yniu/PkSlk8SRrPJ9t/t2r2eleBUDBAy4M1IK6NeDw/yew9PMY7Q3lOrlq1i0dWVdC+77W/yCOVshRrNkJYpXFND+c77I91EJpMMLv5aGZh9fvITN+Wncai7CsQQbB3z4678Kj4D534xBa1iIj+iNcRMMQxtj46yFF4Jtlg0mGBnTJhnsp6+QC2irGItGruIDHenImSAmHHM3oFOFgnog3mTvkrg0eSzk6IJW4qMvmWsb6jaGPzPkYLYDMhZSx7le2tlstPGUCm7KW/qJIirPw46Urw36kDEP2tI5YKr79qgrmI3yJU7teeAH2axLQGekJP5LG5gxKA30cIXd28GABgJudFNr58nF0oYzdXlr9gPdgRBKpUHaOutJXaFuFFU5xfuK39bALUBzHCY/crWzHYj4DDSCy6jPE92kLWmhwW1FvUo4crMnH8xZ5QYLWCYg6CrOTXIhaHMAEG02qNkLNfIm8jfwfHmS51VcU38i3Z1Xq+WKkHs7rWIyjWWImyT8IQ4RO+eIh5Z443VJ6VNpU7mLe+u+CfdjfrGjBLzLWfNEDHIG1W3bFdv+oXrQ4MHlJmNP+dBnU7j/PxKoTen0PTVF8iz8jhCEL4crIVzElD1xmraZ109fdA=="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1,
+    "candidatesTokenCount": 9,
+    "totalTokenCount": 164,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1
+      }
+    ],
+    "thoughtsTokenCount": 154,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.6-flash",
+  "responseId": "RzmmarDMNLepvdIP34K0yQU"
 }

@@ -4,74 +4,284 @@ import Icon from '../../components/AppIcon';
 import { useAuth } from '../../contexts/AuthContext';
 import InteractiveImage from '../../components/InteractiveImage';
 import { useLanguage } from '../../contexts/LanguageContext';
-
+import { applyTheme, getSavedTheme } from '../../utils/theme';
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const { login, loading: authLoading } = useAuth();
   const { language, toggleLanguage } = useLanguage();
+  const [theme, setTheme] = useState(getSavedTheme);
   const [isVisible, setIsVisible] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const landingCopy = language === 'ar' ? {
+
+  useEffect(() => {
+    setIsVisible(true);
+    const current = getSavedTheme();
+    applyTheme(current);
+    setTheme(current);
+    const syncTheme = (e) => {
+      setTheme(e.detail || getSavedTheme());
+    };
+    window.addEventListener('atos-theme-change', syncTheme);
+    return () => window.removeEventListener('atos-theme-change', syncTheme);
+  }, []);
+
+  const isAr = language === 'ar';
+
+  const landingCopy = isAr ? {
     home: 'الرئيسية',
+    howItWorksNav: 'كيف يعمل',
+    features: 'المميزات',
     pricing: 'الأسعار',
     privacy: 'الخصوصية',
     about: 'من نحن',
     signIn: 'تسجيل الدخول',
     signingIn: 'جار تسجيل الدخول...',
-    start: 'ابدأ رحلتك',
+    start: 'ابدأ تمرينك المجاني',
     starting: 'جار البدء...',
-    form: 'أداء صحيح',
-    results: 'نتائج أقوى',
-    intro: 'يصحح ATOS fit أداءك لحظيا مع تقنية تحافظ على الخصوصية وتبقي بياناتك تحت سيطرتك.',
+    badge: '⚡ الجيل القادم للياقة والرؤية الحاسوبية',
+    form: 'أداء حركي متقن.',
+    results: 'نتائج رياضية غير مسبوقة.',
+    intro: 'يحوّل كاميرا هاتفك إلى مدرب شخصي فائق الدقة. خوارزميات الرؤية الحاسوبية تحلل زوايا مفاصلك واستقامة عمودك الفقري لحظياً وتعد تكراراتك بدقة متناهية — بخصوصية كاملة 100% دون خروج أي فيديو من هاتفك.',
+    howItWorks: 'كيف يعمل التطبيق',
+    categories: [
+      { icon: '🏋️', label: 'تمارين الحديد والقوة' },
+      { icon: '🤸', label: 'كاليسثينكس ووزن الجسم' },
+      { icon: '🔥', label: 'حرق الدهون وHIIT' },
+      { icon: '🧘', label: 'المرونة وتصحيح القوام' },
+    ],
+    accuracyStat: 'دقة التحليل الحركي',
+    latencyStat: 'زمن التوجيه الصوتي',
+    privacyStat: 'معالجة محلية بالكامل',
+    stepsTag: '⚡ ٣ خطوات للبدء',
+    stepsTitle: 'كيف تبدأ تمرينك مع ATOS fit؟',
+    stepsSubtitle: 'بدون أي ساعات ذكية، حساسات معقدة، أو تكاليف تدريب باهظة. هاتفك فقط يكفي لبدء التمرين الذكي.',
+    steps: [
+      {
+        num: '01',
+        icon: 'Smartphone',
+        title: 'اسند هاتفك أمامك',
+        desc: 'ضع هاتفك على الأرض أو مسنوداً على زجاجة ماء أمام مساحة تمرينك، وتأكد من ظهور جسمك في الكاميرا.',
+      },
+      {
+        num: '02',
+        icon: 'Activity',
+        title: 'تدرّب بتوجيه ذكي لحظي',
+        desc: 'تتبع 33 نقطة مفصلية بسرعة 60 إطاراً بالثانية لمراقبة عمق السكوات، استقامة الظهر، وتفادي الإصابات الشائعة.',
+      },
+      {
+        num: '03',
+        icon: 'Trophy',
+        title: 'إرشادات صوتية وعدّ آلي',
+        desc: 'استمع لتوجيهات فورية ("ارفع صدرك"، "ادفع بكعبيك") مع تسجيل آلي كامل لعدد التكرارات، الجولات، والسعرات.',
+      }
+    ],
+    featuresTag: '⚡ ترسانة الرياضي المتكاملة',
+    featuresTitle: 'تكنولوجيا متطورة لأداء رياضي احترافي',
+    featuresSubtitle: 'صُممت خوارزمياتنا لمساعدتك على كسر أرقامك القياسية وبناء عضلاتك بأمان تام وحركة بيوميكانيكية صحيحة.',
+    supportedTag: '💪 تمارين مدعومة لحظياً',
+    supportedTitle: 'أكثر من 50 تمريناً تُتبع بدقة متناهية',
+    supportedSubtitle: 'يقوم الذكاء الاصطناعي بالتحقق من اكتمال المدى الحركي (Full ROM) لضمان تحقيق أقصى فائدة عضلية.',
+    exercises: [
+      { name: 'سكوات', target: 'الأرجل والجلوتس', badge: 'عمق كامل' },
+      { name: 'ضغط (Push-Ups)', target: 'الصدر والترايسبس', badge: 'استقامة الجذع' },
+      { name: 'عقلة (Pull-Ups)', target: 'الظهر والبايسبس', badge: 'مدى حركي كامل' },
+      { name: 'طعنات (Lunges)', target: 'الفخذين والتوازن', badge: 'زاوية 90°' },
+      { name: 'بلانك (Plank)', target: 'عضلات الكور', badge: 'استقامة الحوض' },
+      { name: 'ضغط أكتاف', target: 'الأكتاف والتراي', badge: 'قفل علوي' },
+      { name: 'ديدليفت', target: 'السلسلة الخلفية', badge: 'حماية الظهر' },
+      { name: 'تسلق الجبال', target: 'كارديو وحرق', badge: 'سرعة وإيقاع' },
+    ],
+    privacyTag: '🔒 بنية الخصوصية والأمان',
+    privacyTitle: 'جسمك وبياناتك ملكك وحدك دون أي تسريب',
+    privacySubtitle: 'تتم معالجة الفيديو بالكامل داخل معالج هاتفك العصبي. لا يتم تسجيل أو رفع أي لقطة تمرين للسيرفرات إطلاقاً.',
+    ctaTag: '🚀 ارتقِ بمستوى لياقتك',
+    ctaTitle: 'جاهز لتجاوز أرقامك القياسية؟',
+    ctaSubtitle: 'ابدأ تمرينك اليوم مجاناً بدون أي بطاقة بنكية. طوّر أداءك الحركي وتدرب بأحدث تقنيات الرياضة العالمية.',
+    ctaButton: 'ابدأ تمرينك المجاني الآن',
+    readPrivacy: 'اقرأ وثيقة الخصوصية بالكامل',
+    copyright: '© 2026 ATOS fit. جميع الحقوق محفوظة.',
   } : {
     home: 'Home',
+    howItWorksNav: 'How It Works',
+    features: 'Features',
     pricing: 'Pricing',
     privacy: 'Privacy',
     about: 'About Us',
     signIn: 'Sign In',
     signingIn: 'Signing in...',
-    start: 'Start Your Journey',
+    start: 'Start Free Workout',
     starting: 'Starting...',
-    form: 'PERFECT FORM',
-    results: 'MAX RESULTS',
-    intro: 'corrects your form in real-time. With privacy-first technology, your video never leaves your device and you have full control of your data.',
+    badge: '⚡ NEXT-GEN COMPUTER VISION FITNESS',
+    form: 'PERFECT FORM.',
+    results: 'MAX RESULTS.',
+    intro: 'transforms your smartphone into an elite biomechanics personal trainer. Neural vision tracks your joint angles at 60 FPS, prevents injuries before they happen, and counts reps automatically — with 100% on-device privacy.',
+    howItWorks: 'How It Works',
+    categories: [
+      { icon: '🏋️', label: 'Strength & Gym' },
+      { icon: '🤸', label: 'Calisthenics' },
+      { icon: '🔥', label: 'HIIT & Burn' },
+      { icon: '🧘', label: 'Mobility & Posture' },
+    ],
+    accuracyStat: 'Biomechanical Accuracy',
+    latencyStat: 'Real-Time Audio Guidance',
+    privacyStat: 'Zero Video Uploads',
+    stepsTag: '⚡ 3 SIMPLE STEPS',
+    stepsTitle: 'How ATOS fit Powers Your Workout',
+    stepsSubtitle: 'No wearables, no smart watches, no gym appointments. Just you and your smartphone.',
+    steps: [
+      {
+        num: '01',
+        icon: 'Smartphone',
+        title: 'Prop Your Phone',
+        desc: 'Place your phone against a water bottle or wall facing your workout space. Make sure your full body is visible.',
+      },
+      {
+        num: '02',
+        icon: 'Activity',
+        title: 'Move with Real-Time AI',
+        desc: 'Our neural vision tracks 33 3D skeletal landmarks at 60 FPS, checking joint flexion, lumbar neutral, and movement path.',
+      },
+      {
+        num: '03',
+        icon: 'Trophy',
+        title: 'Instant Audio Cues & Gains',
+        desc: 'Hear instant voice coaching ("Drive through heels", "Chest up") while reps, sets, tempo, and calories log automatically.',
+      }
+    ],
+    featuresTag: '⚡ THE ATHLETE\'S ARSENAL',
+    featuresTitle: 'Engineered for Serious Lifters & Athletes',
+    featuresSubtitle: 'From injury prevention to automated cadence analysis, experience the world\'s most advanced fitness computer vision.',
+    supportedTag: '💪 REAL-TIME MOVEMENTS',
+    supportedTitle: '50+ Supported Exercises Tracked Live',
+    supportedSubtitle: 'Our neural engine verifies full range of motion (ROM) and prevents shallow or cheated repetitions.',
+    exercises: [
+      { name: 'Squats', target: 'Quads & Glutes', badge: 'Full Depth' },
+      { name: 'Push-Ups', target: 'Chest & Triceps', badge: 'Plank Form' },
+      { name: 'Pull-Ups', target: 'Lats & Biceps', badge: 'Full ROM' },
+      { name: 'Lunges', target: 'Quads & Balance', badge: '90° Angle' },
+      { name: 'Planks', target: 'Core Stability', badge: 'Spine Neutral' },
+      { name: 'Shoulder Press', target: 'Deltoids', badge: 'Lockout' },
+      { name: 'Deadlifts', target: 'Posterior Chain', badge: 'Spine Safe' },
+      { name: 'Mountain Climbers', target: 'Cardio & Core', badge: 'Pace & Rhythm' },
+    ],
+    privacyTag: '🔒 PRIVACY-FIRST ARCHITECTURE',
+    privacyTitle: 'Your Body & Workout Data Stay Yours',
+    privacySubtitle: 'Your camera feed is processed strictly inside your device neural processor. Zero video frames are ever recorded or uploaded.',
+    ctaTag: '🚀 ELEVATE YOUR PERFORMANCE',
+    ctaTitle: 'Ready to Crush Your Personal Best?',
+    ctaSubtitle: 'Start training with real-time AI biomechanics today. Completely free, no credit card required.',
+    ctaButton: 'Start Your Free Workout Now',
+    readPrivacy: 'Read Our Privacy Policy',
+    copyright: '© 2026 ATOS fit. All rights reserved.',
   };
 
   const featureWidgets = [
     {
       id: "real_time_feedback",
-      heading: "Real-Time Feedback & Form Correction",
-      body: "Get immediate and actionable insights that will help you push past plateaus and smash your goals.",
+      tag: isAr ? 'رؤية بيوميكانيكية فائقة' : 'BIOMECHANICS VISION',
+      heading: isAr ? 'تصحيح لحظي للهيئة ومنع الإصابات' : 'Real-Time Form Correction & Injury Prevention',
+      body: isAr 
+        ? 'تحليل مباشر لـ 33 نقطة مفصلية وإرشادات صوتية ومرئية فورية تدفعك للأداء المثالي وتمنع إصابات المفاصل والعمود الفقري.'
+        : 'Live 33-point skeletal landmark tracking with millisecond audio cues that correct your posture before bad form causes injury.',
       video: "/schools-header-vp9-chrome-1.webm",
-      className: "lg:col-start-1 lg:col-span-4 lg:row-start-1 lg:row-span-2 md:col-start-1 md:col-span-8 md:row-start-1 col-start-1 col-span-4 row-start-1",
+      className: "lg:col-span-12 xl:col-span-6 row-span-2 min-h-[420px]",
+      badgeText: isAr ? 'تحليل 33 نقطة حركية • 60 إطار/ث' : '33 Skeletal Keypoints • 60 FPS',
     },
     {
       id: "ai_coach",
-      heading: "AI Coach",
-      body: "Ask about anything fitness-related, from workout plans to nutrition advice, and get instant, personalized answers.",
-      image: "artificial-intelligence.svg",
-      className: "lg:col-start-5 lg:col-span-4 lg:row-start-1 md:col-start-1 md:col-span-4 md:row-start-2 col-start-1 col-span-4 row-start-2 svg-white",
+      tag: isAr ? 'مدرب اللياقة الذكي' : 'CONVERSATIONAL COACH',
+      heading: isAr ? 'مدرب القوة والتغذية المخصص' : 'Personal AI Strength & Nutrition Coach',
+      body: isAr
+        ? 'اسأل مدربك الذكي عن خطط التمارين، التغذية، فترات الاستشفاء، وتطبيق الحمل الدوري (Progressive Overload).'
+        : 'Ask anything fitness-related: personalized training splits, progressive overload, recovery scores, and meal timing.',
+      iconName: "Bot",
+      accent: "indigo",
+      className: "lg:col-span-6 xl:col-span-6",
+      interactivePreview: isAr
+        ? '💡 "حافظ على استقامة العمود الفقري وادفع بكعبيك أثناء الصعود من السكوات"'
+        : '💡 "Maintain lumbar neutral and drive through heels on squat ascent"',
     },
     {
       id: "food_scanner",
-      heading: "Food Scanner",
-      body: "Instantly identify food items and get detailed nutritional information to stay on top of your diet.",
-      image: "scanner.svg",
-      className: "lg:col-start-5 lg:col-span-4 lg:row-start-2 md:col-start-5 md:col-span-4 md:row-start-2 col-start-1 col-span-4 row-start-3 svg-white",
+      tag: isAr ? 'تحليل ذكي للوجبات' : 'SMART NUTRITION VISION',
+      heading: isAr ? 'الماسح الضوئي الذكي للماكروز' : 'Smart Food & Macro Scanner',
+      body: isAr
+        ? 'وجّه كاميرا هاتفك للوجبة وتعرّف فوراً على السعرات والماكروز (بروتين، كارب، دهون) لضمان تحقيق هدفك البدني.'
+        : 'Snap your plate to instantly log calories, protein, carbs, and fats to hit your muscle-building or fat-loss targets.',
+      iconName: "Scan",
+      accent: "amber",
+      className: "lg:col-span-6 xl:col-span-6",
+      interactivePreview: isAr
+        ? '🥗 صدر دجاج مشوي مع أرز • 38g بروتين • 340 سعرة'
+        : '🥗 Grilled Chicken & Rice • 38g Protein • 340 kcal',
     },
     {
       id: "rep_counting",
-      heading: "Automatic Rep Counting",
-      body: "Focus on your form, not the count. Our AI automatically tracks your reps with precision.",
-      image: "Gemini_Generated_Image_5ysnl85ysnl85ysn.png",
-      className: "lg:col-start-9 lg:col-span-4 lg:row-start-1 lg:row-span-2 md:col-start-1 md:col-span-8 md:row-start-3 col-start-1 col-span-4 row-start-4",
+      tag: isAr ? 'خوارزمية العد الآلي' : 'PRECISION CADENCE',
+      heading: isAr ? 'العد الآلي الذكي للتكرارات والإيقاع' : 'Automated Rep Counting & Cadence Engine',
+      body: isAr
+        ? 'ركّز كامل طاقتك على الأداء العضلي؛ الذكاء الاصطناعي يحسب كل تكرار، سرعة النزول والصعود، ويضمن عمق الحركة الكامل.'
+        : 'Focus 100% on the mind-muscle burn. Our neural engine tracks every rep, tempo, and validates full range of motion.',
+      image: "/Gemini_Generated_Image_5ysnl85ysnl85ysn.png",
+      className: "lg:col-span-12 xl:col-span-12 row-span-1 min-h-[320px]",
+      badgeText: isAr ? 'تحليل المدى الحركي والإيقاع' : 'Full Range of Motion & Tempo',
     }
   ];
 
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
+  const privacyCards = [
+    {
+      icon: "Cpu",
+      tag: isAr ? 'أمان طرفي كامل' : 'EDGE COMPUTING',
+      title: isAr ? 'المعالجة المحلية بالذكاء الاصطناعي' : 'Local AI Processing',
+      desc: isAr
+        ? 'تُعالج فيديوهات تمارينك بالكامل داخل معالج هاتفك باستخدام MediaPipe دون إرسال أي صورة أو فيديو للسيرفرات.'
+        : 'Your workout camera feed is processed entirely on your device using MediaPipe neural models. No video ever leaves your phone.',
+      checks: isAr ? [
+        'تحليل الهيكل الحركي محلياً 100%',
+        'لا يتم نقل أي فيديو للسيرفرات إطلاقاً',
+        'يعمل بدون إنترنت وبشكل غير متصل'
+      ] : [
+        'Real-time pose analysis entirely on-device',
+        'Zero video transmission to external servers',
+        'Works completely offline without Wi-Fi'
+      ]
+    },
+    {
+      icon: "KeyRound",
+      tag: isAr ? 'هوية مشفرة' : 'CRYPTOGRAPHIC IDENTITY',
+      title: isAr ? 'تسجيل دخول مجهول وآمن' : 'Anonymous Authentication',
+      desc: isAr
+        ? 'سجّل دخولك دون إيميل أو أرقام هواتف عبر تقنية Internet Identity المشفرة للحفاظ على سرية هويتك التامة.'
+        : 'Internet Identity provides cryptographically secure, anonymous login without emails or personal phone numbers.',
+      checks: isAr ? [
+        'لا حاجة لبريد إلكتروني أو بيانات شخصية',
+        'مفاتيح تشفير متقدمة مقاومة للاختراق',
+        'أمان بيومتري Passkey فائق الحماية'
+      ] : [
+        'No email or personal info required to sign up',
+        'Cryptographically secure with Passkey hardware',
+        'Immune to phishing and credential leaks'
+      ]
+    },
+    {
+      icon: "Database",
+      tag: isAr ? 'لامركزية تامة' : 'DECENTRALIZED',
+      title: isAr ? 'تخزين مشفر لا مركزي' : 'Decentralized Storage',
+      desc: isAr
+        ? 'تُحفظ سجلاتك الرياضية على بلوكتشين Internet Computer، مما يجعلها مقاومة للتلاعب وتحت سيطرتك فقط.'
+        : 'Your progress history is stored on the Internet Computer blockchain, making it tamper-proof and accessible only by you.',
+      checks: isAr ? [
+        'موزع عبر عقد بلوكتشين مشفرة',
+        'سجلات غير قابلة للتعديل أو الحذف الخبيث',
+        'أنت وحدك المالك والمتحكم ببياناتك'
+      ] : [
+        'Distributed across decentralized cryptographic nodes',
+        'Tamper-proof workout history and metrics',
+        'You exclusively own and control your data'
+      ]
+    }
+  ];
 
   const handleGetStarted = async () => {
     try {
@@ -112,85 +322,192 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F0F0F] text-white font-['Halyard_Display',sans-serif]">
-      {/* Background accent glows */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[rgba(255,138,0,0.15)] rounded-full blur-3xl" />
-        <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-[rgba(255,138,0,0.1)] rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 w-[700px] h-[700px] bg-[rgba(255,138,0,0.08)] rounded-full blur-3xl" />
+    <div 
+      dir={isAr ? 'rtl' : 'ltr'}
+      className="min-h-screen bg-[#F6F8FD] dark:bg-[#05060D] text-[#0F1015] dark:text-[#EDEDEF] font-sans relative overflow-x-hidden selection:bg-[#4353FF]/30 selection:text-white transition-colors duration-300"
+    >
+      {/* ============================================================ */}
+      {/* Atmospheric Violet/Electric Indigo Background Glows System   */}
+      {/* ============================================================ */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        {/* Primary Top-Center Atmospheric Violet Light Pool (Dashboard Theme) */}
+        <div 
+          className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[1100px] sm:w-[1300px] h-[650px] dark:opacity-100 opacity-60 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse 75% 60% at 50% 0%, rgba(67, 83, 255, 0.32) 0%, rgba(94, 75, 255, 0.16) 45%, rgba(67, 83, 255, 0.04) 70%, transparent 90%)',
+            filter: 'blur(45px)',
+          }}
+        />
+
+        {/* Secondary Right Ambient Glow */}
+        <div 
+          className="absolute top-[20%] -right-[10%] w-[750px] h-[750px] dark:opacity-75 opacity-35 pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle at 50% 50%, rgba(67, 83, 255, 0.18) 0%, rgba(94, 75, 255, 0.07) 50%, transparent 75%)',
+            filter: 'blur(70px)',
+          }}
+        />
+
+        {/* Subtle Solar Amber Accent Glow from Dashboard palette */}
+        <div 
+          className="absolute top-[18%] right-[12%] w-[400px] h-[400px] dark:opacity-70 opacity-30 pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle at 50% 50%, rgba(255, 174, 0, 0.07) 0%, transparent 70%)',
+            filter: 'blur(70px)',
+          }}
+        />
+
+        {/* Mid-page Features Violet Glow */}
+        <div 
+          className="absolute top-[52%] -left-[10%] w-[750px] h-[750px] dark:opacity-70 opacity-35 pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle at 50% 50%, rgba(67, 83, 255, 0.16) 0%, transparent 70%)',
+            filter: 'blur(80px)',
+          }}
+        />
+
+        {/* Bottom CTA Glow */}
+        <div 
+          className="absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[1000px] h-[600px] dark:opacity-85 opacity-40 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse at 50% 100%, rgba(67, 83, 255, 0.24) 0%, rgba(94, 75, 255, 0.09) 60%, transparent 80%)',
+            filter: 'blur(60px)',
+          }}
+        />
+
+        {/* Subtle Tech Precision Grid Lines */}
+        <div 
+          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage: `linear-gradient(to right, #4353FF 1px, transparent 1px), linear-gradient(to bottom, #4353FF 1px, transparent 1px)`,
+            backgroundSize: '64px 64px',
+            maskImage: 'radial-gradient(ellipse 90% 70% at 50% 30%, black 30%, transparent 85%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 90% 70% at 50% 30%, black 30%, transparent 85%)',
+          }}
+        />
       </div>
 
-      {/* Navigation */}
-      <nav className="relative z-50 px-6 py-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <img src="/assets/images/atosfit.png" alt="ATOS fit Logo" className="w-10 h-10 object-contain" />
-            <span className="text-2xl font-bold text-white">ATOS fit</span>
+      {/* ============================================================ */}
+      {/* Navigation Header                                            */}
+      {/* ============================================================ */}
+      <nav className="relative z-50 px-6 sm:px-8 py-4 border-b border-black/[0.06] dark:border-white/[0.06] bg-white/80 dark:bg-[#05060D]/80 backdrop-blur-xl transition-colors">
+        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto flex items-center justify-between">
+          {/* Brand Logo & Name */}
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
+            <div className="relative flex items-center justify-center">
+              <img src="/assets/images/atosfit.png" alt="ATOS fit Logo" className="w-11 h-11 object-contain drop-shadow-[0_4px_16px_rgba(79,70,229,0.35)] group-hover:scale-105 transition-transform" />
+            </div>
+            <div className="flex items-baseline gap-1.5" dir="ltr">
+              <span className="text-2xl font-black text-[#0F1015] dark:text-white tracking-tight">ATOS</span>
+              <span className="text-2xl font-black bg-gradient-to-r from-[#4F46E5] to-[#FF7A00] bg-clip-text text-transparent tracking-tight">fit</span>
+            </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="#home" className="text-[#E0E0E0] hover:text-white transition-colors">{landingCopy.home}</a>
-            <button onClick={() => navigate('/pricing')} className="text-[#E0E0E0] hover:text-white transition-colors">{landingCopy.pricing}</button>
-            <button onClick={() => navigate('/privacy')} className="text-[#E0E0E0] hover:text-white transition-colors">{landingCopy.privacy}</button>
-            <button onClick={() => navigate('/about')} className="text-[#E0E0E0] hover:text-white transition-colors">{landingCopy.about}</button>
-            <button onClick={toggleLanguage} className="text-[#FF8A00] hover:text-white transition-colors">{language === 'ar' ? 'EN' : 'AR'}</button>
+          {/* Desktop Navigation Links */}
+          <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
+            <a href="#home" className="text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.home}</a>
+            <a href="#how-it-works" className="text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.howItWorksNav}</a>
+            <a href="#features" className="text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.features}</a>
+            <a href="#privacy" className="text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.privacy}</a>
+            <button onClick={() => navigate('/pricing')} className="text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.pricing}</button>
+            <button onClick={() => navigate('/about')} className="text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.about}</button>
           </div>
 
-          {/* Desktop Sign In Button */}
-          <button
-            onClick={handleLogin}
-            disabled={authLoading}
-            className="hidden md:block bg-[#FF8A00] hover:bg-[#E67B00] text-black font-semibold px-6 py-3 rounded-2xl transition-all duration-300 hover:shadow-[0px_4px_15px_rgba(255,138,0,0.2)]"
-          >
-            {authLoading ? landingCopy.signingIn : landingCopy.signIn}
-          </button>
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center space-x-3 rtl:space-x-reverse">
+            <button
+              type="button"
+              onClick={() => setTheme(applyTheme(theme === 'dark' ? 'light' : 'dark'))}
+              className="w-10 h-10 rounded-xl flex items-center justify-center border border-black/[0.08] dark:border-white/[0.08] text-[#0F1015] dark:text-[#EDEDEF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-colors"
+              title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            >
+              <Icon name={theme === 'dark' ? 'Sun' : 'Moon'} size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="atos-language-toggle"
+              title={isAr ? 'English' : 'عربي'}
+            >
+              <Icon name="Languages" size={16} />
+              <span className="font-bold">{isAr ? 'EN' : 'AR'}</span>
+            </button>
+            <button
+              onClick={handleLogin}
+              disabled={authLoading}
+              className="inline-flex items-center justify-center bg-gradient-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#4338CA] hover:to-[#4F46E5] text-white px-6 py-2.5 rounded-full text-sm font-semibold shadow-[0_0_20px_rgba(79,70,229,0.35)] hover:shadow-[0_0_25px_rgba(79,70,229,0.5)] transition-all"
+            >
+              {authLoading ? landingCopy.signingIn : landingCopy.signIn}
+            </button>
+          </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-white p-2"
-            aria-label="Toggle mobile menu"
-          >
-            <Icon name={isMobileMenuOpen ? "X" : "Menu"} size={24} />
-          </button>
+          {/* Mobile Menu Toggle Button */}
+          <div className="md:hidden flex items-center space-x-2 rtl:space-x-reverse">
+            <button
+              type="button"
+              onClick={() => setTheme(applyTheme(theme === 'dark' ? 'light' : 'dark'))}
+              className="w-9 h-9 rounded-xl flex items-center justify-center border border-black/[0.08] dark:border-white/[0.08] text-[#0F1015] dark:text-[#EDEDEF]"
+            >
+              <Icon name={theme === 'dark' ? 'Sun' : 'Moon'} size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="atos-language-toggle"
+            >
+              <Icon name="Languages" size={15} />
+              <span className="font-bold">{isAr ? 'EN' : 'AR'}</span>
+            </button>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-[#0F1015] dark:text-[#EDEDEF] p-2"
+              aria-label="Toggle mobile menu"
+            >
+              <Icon name={isMobileMenuOpen ? "X" : "Menu"} size={24} />
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Dropdown Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-[#1A1A1A] border-t border-[rgba(255,255,255,0.1)] shadow-lg">
-            <div className="px-6 py-4 space-y-4">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 dark:bg-[#070811]/95 backdrop-blur-2xl border-t border-black/[0.08] dark:border-white/[0.06] shadow-2xl z-50">
+            <div className="px-6 py-4 space-y-3">
               <a
                 href="#home"
-                className="block text-[#E0E0E0] hover:text-white transition-colors py-2"
+                className="block text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-white font-medium text-sm py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {landingCopy.home}
+              </a>
+              <a
+                href="#features"
+                className="block text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-white font-medium text-sm py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {landingCopy.features}
+              </a>
+              <a
+                href="#privacy"
+                className="block text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-white font-medium text-sm py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {landingCopy.privacy}
               </a>
               <button
                 onClick={() => {
                   navigate('/pricing');
                   setIsMobileMenuOpen(false);
                 }}
-                className="block text-[#E0E0E0] hover:text-white transition-colors py-2 w-full text-left"
+                className="block text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-white font-medium text-sm py-2 w-full text-start"
               >
                 {landingCopy.pricing}
-              </button>
-              <button
-                onClick={() => {
-                  navigate('/privacy');
-                  setIsMobileMenuOpen(false);
-                }}
-                className="block text-[#E0E0E0] hover:text-white transition-colors py-2 w-full text-left"
-              >
-                {landingCopy.privacy}
               </button>
               <button
                 onClick={() => {
                   navigate('/about');
                   setIsMobileMenuOpen(false);
                 }}
-                className="block text-[#E0E0E0] hover:text-white transition-colors py-2 w-full text-left"
+                className="block text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-white font-medium text-sm py-2 w-full text-start"
               >
                 {landingCopy.about}
               </button>
@@ -200,289 +517,538 @@ const LandingPage = () => {
                   setIsMobileMenuOpen(false);
                 }}
                 disabled={authLoading}
-                className="w-full bg-[#FF8A00] hover:bg-[#E67B00] text-black font-semibold px-6 py-3 rounded-2xl transition-all duration-300 hover:shadow-[0px_4px_15px_rgba(255,138,0,0.2)] mt-4"
+                className="w-full bg-[#4353FF] text-white py-3 rounded-xl text-sm font-semibold shadow-[0_0_20px_rgba(67,83,255,0.35)] mt-4"
               >
                 {authLoading ? landingCopy.signingIn : landingCopy.signIn}
-              </button>
-              <button onClick={toggleLanguage} className="block text-[#FF8A00] py-2 w-full text-left">
-                {language === 'ar' ? 'English' : 'العربية'}
               </button>
             </div>
           </div>
         )}
       </nav>
 
-      {/* Hero Section */}
-      <section id="home" className="relative z-10 pt-4 pb-12 lg:pt-6 lg:pb-16">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
-            {/* Left Content */}
-            <div className={`space-y-6 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="space-y-6">
-                <h1 className="text-6xl font-bold leading-tight text-white">
-                  <div className="mb-3">{landingCopy.form}</div>
-                  <div className="text-[#FF8A00] mb-4">{landingCopy.results}</div>
-                </h1>
-                <p className="text-xl text-[#E0E0E0] leading-relaxed max-w-lg">
-                  <span className="text-[#FF8A00] font-semibold">ATOS fit</span> {landingCopy.intro}
-                </p>
+      {/* ============================================================ */}
+      {/* Hero Section: Distributed, Creative, High-Impact             */}
+      {/* ============================================================ */}
+      <section id="home" className="relative z-10 pt-8 sm:pt-12 lg:pt-16 pb-12 sm:pb-20">
+        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 xl:gap-14 items-center">
+            {/* Left Column: Vision, Headline, Actions (Spans 6 cols, no center cramp) */}
+            <div className={`lg:col-span-6 xl:col-span-6 space-y-6 sm:space-y-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+              
+              {/* Pulsing Athletic Pill Badge */}
+              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#4F46E5]/10 dark:bg-[#4F46E5]/15 border border-[#4F46E5]/25 dark:border-[#4F46E5]/30 backdrop-blur-md shadow-[0_0_20px_rgba(79,70,229,0.15)]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FF7A00] animate-pulse shadow-[0_0_10px_#FF7A00]"></span>
+                <span className="text-xs sm:text-sm font-bold text-[#4F46E5] dark:text-[#A5B4FC] tracking-wider uppercase">
+                  {landingCopy.badge}
+                </span>
               </div>
 
-              <button
-                onClick={handleGetStarted}
-                disabled={authLoading}
-                className="bg-[#FF8A00] hover:bg-[#E67B00] text-black font-semibold px-8 py-4 rounded-2xl text-lg transition-all duration-300 hover:shadow-[0px_4px_15px_rgba(255,138,0,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {authLoading ? landingCopy.starting : landingCopy.start}
-              </button>
+              {/* Bold Futuristic Typographic Headline with Athletic Accent */}
+              <h1 className="text-4xl sm:text-6xl xl:text-7xl font-extrabold tracking-tight leading-[1.08]">
+                <span className="block text-[#0F1015] dark:text-white">
+                  {landingCopy.form}
+                </span>
+                <span className="block bg-gradient-to-r from-[#4F46E5] via-[#7C3AED] to-[#FF7A00] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(79,70,229,0.3)]">
+                  {landingCopy.results}
+                </span>
+              </h1>
+
+              {/* Rich Value Proposition Subtitle */}
+              <p className="text-base sm:text-lg lg:text-xl text-[#525866] dark:text-[#9DA4B2] leading-relaxed max-w-xl">
+                <span className="text-[#0F1015] dark:text-white font-bold">ATOS fit</span> {landingCopy.intro}
+              </p>
+
+              {/* Athletic Training Disciplines Chips */}
+              <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
+                {landingCopy.categories.map((cat, i) => (
+                  <span 
+                    key={i} 
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] text-xs font-semibold text-[#525866] dark:text-[#A0A5B5] hover:border-[#4F46E5]/40 transition-colors"
+                  >
+                    <span>{cat.icon}</span>
+                    <span>{cat.label}</span>
+                  </span>
+                ))}
+              </div>
+
+              {/* Action Buttons Cluster */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+                <button
+                  onClick={handleGetStarted}
+                  disabled={authLoading}
+                  className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#4F46E5] via-[#5B4DF0] to-[#6366F1] hover:from-[#4338CA] hover:to-[#4F46E5] text-white font-bold px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(79,70,229,0.5)] hover:shadow-[0_0_50px_rgba(79,70,229,0.7)] hover:scale-[1.02] active:scale-[0.98] border border-white/15 hover:border-orange-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span>{authLoading ? landingCopy.starting : landingCopy.start}</span>
+                  <Icon 
+                    name="ArrowRight" 
+                    size={20} 
+                    className={isAr ? 'rotate-180 group-hover:-translate-x-1 transition-transform' : 'group-hover:translate-x-1 transition-transform'} 
+                  />
+                </button>
+
+                <a
+                  href="#how-it-works"
+                  className="inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl text-base font-semibold border border-black/10 dark:border-white/10 hover:border-[#4F46E5]/50 text-[#0F1015] dark:text-[#EDEDEF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all"
+                >
+                  <Icon name="Compass" size={18} className="text-[#4F46E5]" />
+                  <span>{landingCopy.howItWorks}</span>
+                </a>
+              </div>
+
+              {/* Live Trust & Telemetry Strip */}
+              <div className="grid grid-cols-3 gap-4 pt-6 border-t border-black/[0.06] dark:border-white/[0.08] max-w-xl">
+                <div className="flex flex-col">
+                  <span className="text-xl sm:text-2xl font-black text-[#0F1015] dark:text-white" dir="ltr">99.4%</span>
+                  <span className="text-xs text-[#636779] dark:text-[#8A8F98] font-medium">{landingCopy.accuracyStat}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xl sm:text-2xl font-black text-[#0F1015] dark:text-white" dir="ltr">&lt; 20ms</span>
+                  <span className="text-xs text-[#636779] dark:text-[#8A8F98] font-medium">{landingCopy.latencyStat}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xl sm:text-2xl font-black text-[#0F1015] dark:text-white" dir="ltr">100%</span>
+                  <span className="text-xs text-[#636779] dark:text-[#8A8F98] font-medium">{landingCopy.privacyStat}</span>
+                </div>
+              </div>
             </div>
 
-            {/* Right Content - Interactive iPhone */}
-            <div className="relative">
+            {/* Right Column: Interactive Phone Mockup with Floating Micro-Widgets (Spans 6 cols) */}
+            <div className="lg:col-span-6 xl:col-span-6 relative w-full flex items-center justify-center">
               <InteractiveImage />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section Title */}
-      <section className="relative z-10 pt-16 lg:pt-20 pb-8">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
-          <h2 className="text-5xl font-semibold text-white mb-6">
-            Why Choose <span className="text-[#FF8A00]">ATOS fit</span>?
-          </h2>
-          <p className="text-xl text-[#E0E0E0] max-w-3xl mx-auto">
-            Discover the revolutionary features that make ATOS fit the ultimate AI-powered fitness companion
-          </p>
-        </div>
-      </section>
-
-      {/* Features Grid Section */}
-      <section className="relative z-10 pb-16 lg:pb-20">
-        <div className="max-w-full px-6 lg:px-8">
-          <div className="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 auto-rows-[minmax(300px,auto)]">
-            {featureWidgets.map((feature, index) => {
-              const isLargeWidget = feature.id === 'real_time_feedback' || feature.id === 'rep_counting';
-              return (
-                <div
-                  key={feature.id}
-                  className={`bg-[#1A1A1A] border border-[rgba(255,255,255,0.1)] rounded-[32px] ${isLargeWidget ? '' : 'p-6 md:p-8'} flex flex-col text-white transition-all duration-300 hover:border-[rgba(255,138,0,0.5)] hover:shadow-[0px_0px_60px_rgba(255,138,0,0.2)] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} ${feature.className}`}
-                >
-                  {isLargeWidget ? (
-                    <div className="relative flex-grow flex flex-col justify-end">
-                      {feature.video ? (
-                        <video
-                          src={feature.video}
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                          className="absolute inset-0 w-full h-full object-cover rounded-[32px]"
-                        />
-                      ) : (
-                        <img src={feature.image} alt={feature.heading} className="absolute inset-0 w-full h-full object-contain rounded-[32px]" />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent rounded-[32px]"></div>
-                      <div className="relative p-4">
-                        <h3 className="text-2xl md:text-3xl font-semibold mb-2 text-[#FF8A00]">{feature.heading}</h3>
-                        <p className="text-base text-[rgba(255,255,255,0.8)] leading-relaxed">{feature.body}</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex-grow flex flex-col">
-                      {/* Use a row flex with gap to control spacing between image and heading consistently */}
-                      <div className="flex items-start mb-4 gap-4">
-                        {/* For food_scanner: image on the left, heading next to it */}
-                        {feature.id === 'food_scanner' && (
-                          <img src={feature.image} alt={feature.heading} className={`w-16 h-16 object-contain flex-shrink-0 ${feature.className.includes('svg-white') ? 'filter-white' : ''}`} />
-                        )}
-
-                        <div className="flex-1">
-                          <h3 className="text-3xl font-semibold text-[#FF8A00]">{feature.heading}</h3>
-                        </div>
-
-                        {/* For ai_coach: image on the right */}
-                        {feature.id === 'ai_coach' && (
-                          <img src={feature.image} alt={feature.heading} className={`w-16 h-16 object-contain flex-shrink-0 ${feature.className.includes('svg-white') ? 'filter-white' : ''}`} />
-                        )}
-                      </div>
-
-                      <p className="text-lg text-[rgba(255,255,255,0.4)] leading-relaxed">{feature.body}</p>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Privacy Section */}
-      <section className="relative z-10 py-16 lg:py-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-20 lg:mb-24">
-            <h2 className="text-5xl font-semibold text-white mb-6">
-              Your Privacy is <span className="text-[#FF8A00]">Our Foundation</span>
+      {/* ============================================================ */}
+      {/* How It Works: 3 Simple Athletic Steps                       */}
+      {/* ============================================================ */}
+      <section id="how-it-works" className="relative z-10 py-16 sm:py-20 border-t border-black/[0.06] dark:border-white/[0.06] bg-black/[0.01] dark:bg-white/[0.01]">
+        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FF7A00]/10 border border-[#FF7A00]/30 text-xs font-bold text-[#FF7A00] uppercase tracking-wider mb-4">
+              {landingCopy.stepsTag}
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0F1015] dark:text-white mb-4">
+              {landingCopy.stepsTitle}
             </h2>
-            <p className="text-xl text-[#E0E0E0] max-w-3xl mx-auto">
-              Built with privacy-first architecture, ATOS fit ensures your data stays yours while delivering cutting-edge AI fitness coaching
+            <p className="text-base sm:text-lg text-[#636779] dark:text-[#9DA4B2] leading-relaxed">
+              {landingCopy.stepsSubtitle}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
-            {/* Local Processing */}
-            <div className={`bg-[#1A1A1A] border border-[rgba(255,255,255,0.1)] rounded-[32px] p-8 transition-all duration-300 hover:border-[rgba(255,138,0,0.5)] hover:shadow-[0px_0px_60px_rgba(255,138,0,0.2)] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="text-center">
-                <div className="w-20 h-20 bg-[rgba(255,255,255,0.05)] rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <img src="/ai-secured.svg" alt="AI Secured" className="w-12 h-12 object-contain filter-orange" />
+          {/* 3 Steps Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            {landingCopy.steps.map((step, idx) => (
+              <div 
+                key={idx}
+                className="relative rounded-[28px] p-8 bg-white dark:bg-[#0C0E18]/85 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#4F46E5]/40 hover:shadow-[0_0_35px_rgba(79,70,229,0.15)] transition-all duration-300 flex flex-col justify-between group"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-14 h-14 rounded-2xl bg-[#4F46E5]/15 border border-[#4F46E5]/30 flex items-center justify-center text-[#4F46E5] group-hover:scale-110 transition-transform">
+                    <Icon name={step.icon} size={26} />
+                  </div>
+                  <span className="text-3xl font-black text-black/15 dark:text-white/10 group-hover:text-[#4F46E5]/30 transition-colors" dir="ltr">
+                    {step.num}
+                  </span>
                 </div>
-                <h3 className="text-2xl font-medium text-white mb-4">
-                  Local AI Processing
-                </h3>
-                <p className="text-[#E0E0E0] mb-6 leading-relaxed">
-                  Your workout videos are processed entirely on your device using MediaPipe technology. No video data ever leaves your phone.
-                </p>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <Icon name="Check" size={16} className="text-[#FF8A00] flex-shrink-0" />
-                    <span className="text-[rgba(255,255,255,0.4)] text-sm">Real-time pose analysis on-device</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Icon name="Check" size={16} className="text-[#FF8A00] flex-shrink-0" />
-                    <span className="text-[rgba(255,255,255,0.4)] text-sm">No video transmission to servers</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Icon name="Check" size={16} className="text-[#FF8A00] flex-shrink-0" />
-                    <span className="text-[rgba(255,255,255,0.4)] text-sm">Works completely offline</span>
-                  </div>
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white mb-3">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm text-[#525866] dark:text-[#8A8F98] leading-relaxed">
+                    {step.desc}
+                  </p>
                 </div>
               </div>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            {/* Internet Identity */}
-            <div className={`bg-[#1A1A1A] border border-[rgba(255,255,255,0.1)] rounded-[32px] p-8 transition-all duration-300 hover:border-[rgba(255,138,0,0.5)] hover:shadow-[0px_0px_60px_rgba(255,138,0,0.2)] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="text-center">
-                <div className="w-20 h-20 bg-[rgba(255,255,255,0.05)] rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <img src="/global-identity.svg" alt="Global Identity" className="w-12 h-12 object-contain filter-orange" />
-                </div>
-                <h3 className="text-2xl font-medium text-white mb-4">
-                  Anonymous Authentication
-                </h3>
-                <p className="text-[#E0E0E0] mb-6 leading-relaxed">
-                  Internet Identity provides secure, anonymous login without emails or personal data. Your identity stays completely private.
-                </p>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <Icon name="Check" size={16} className="text-[#FF8A00] flex-shrink-0" />
-                    <span className="text-[rgba(255,255,255,0.4)] text-sm">No email or personal info required</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Icon name="Check" size={16} className="text-[#FF8A00] flex-shrink-0" />
-                    <span className="text-[rgba(255,255,255,0.4)] text-sm">Cryptographically secure</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Icon name="Check" size={16} className="text-[#FF8A00] flex-shrink-0" />
-                    <span className="text-[rgba(255,255,255,0.4)] text-sm">Resistant to hacking attempts</span>
-                  </div>
-                </div>
-              </div>
+      {/* ============================================================ */}
+      {/* Features Bento Grid Section                                   */}
+      {/* ============================================================ */}
+      <section id="features" className="relative z-10 py-16 sm:py-24">
+        {/* Ambient Violet Atmospheric Glow behind Bento Grid (Dashboard Style) */}
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] sm:w-[1100px] h-[650px] dark:opacity-80 opacity-35 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(67, 83, 255, 0.22) 0%, rgba(94, 75, 255, 0.08) 50%, transparent 75%)',
+            filter: 'blur(75px)',
+          }}
+        />
+        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
+          
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-20">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#4353FF]/10 dark:bg-[#4353FF]/15 border border-[#4353FF]/25 text-xs font-bold text-[#4353FF] dark:text-[#828FFF] uppercase tracking-wider mb-4">
+              {landingCopy.featuresTag}
             </div>
-
-            {/* Blockchain Storage */}
-            <div className={`bg-[#1A1A1A] border border-[rgba(255,255,255,0.1)] rounded-[32px] p-8 transition-all duration-300 hover:border-[rgba(255,138,0,0.5)] hover:shadow-[0px_0px_60px_rgba(255,138,0,0.2)] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="text-center">
-                <div className="w-20 h-20 bg-[rgba(255,255,255,0.05)] rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <img src="/internet-computer.svg" alt="Internet Computer" className="w-12 h-12 object-contain filter-orange" />
-                </div>
-                <h3 className="text-2xl font-medium text-white mb-4">
-                  Decentralized Storage
-                </h3>
-                <p className="text-[#E0E0E0] mb-6 leading-relaxed">
-                  Your data is stored on the Internet Computer blockchain, making it tamper-proof and inaccessible to unauthorized parties.
-                </p>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <Icon name="Check" size={16} className="text-[#FF8A00] flex-shrink-0" />
-                    <span className="text-[rgba(255,255,255,0.4)] text-sm">Distributed across multiple nodes</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Icon name="Check" size={16} className="text-[#FF8A00] flex-shrink-0" />
-                    <span className="text-[rgba(255,255,255,0.4)] text-sm">Cryptographically secured</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Icon name="Check" size={16} className="text-[#FF8A00] flex-shrink-0" />
-                    <span className="text-[rgba(255,255,255,0.4)] text-sm">You own and control your data</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0F1015] dark:text-white mb-4">
+              {landingCopy.featuresTitle}
+            </h2>
+            <p className="text-base sm:text-lg text-[#636779] dark:text-[#9DA4B2] leading-relaxed">
+              {landingCopy.featuresSubtitle}
+            </p>
           </div>
 
-          {/* Privacy CTA */}
-          <div className="text-center mt-20 lg:mt-24">
-            <div className="bg-[rgba(255,138,0,0.1)] border border-[rgba(255,138,0,0.2)] rounded-[32px] p-10 lg:p-12 max-w-4xl mx-auto">
-              <h3 className="text-3xl font-semibold text-white mb-4">
-                Complete Privacy Transparency
+          {/* Bento Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+            
+            {/* Widget 1: Real-Time Feedback Video Card (Large 6 cols / 2 rows) */}
+            <div className="lg:col-span-12 xl:col-span-6 relative rounded-[28px] overflow-hidden bg-[#0C0E17] border border-black/10 dark:border-white/10 shadow-lg hover:border-[#4353FF]/50 hover:shadow-[0_0_45px_rgba(67,83,255,0.2)] transition-all duration-300 min-h-[440px] flex flex-col justify-end group">
+              <video
+                src={featureWidgets[0].video}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#05060D] via-[#05060D]/60 to-transparent" />
+              
+              <div className="relative z-10 p-6 sm:p-8 space-y-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#4353FF]/20 border border-[#4353FF]/40 text-xs font-bold text-[#7082FF]">
+                  <Icon name="Activity" size={14} />
+                  <span>{featureWidgets[0].tag}</span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
+                  {featureWidgets[0].heading}
+                </h3>
+                <p className="text-sm sm:text-base text-[#C2C7D0] leading-relaxed max-w-xl">
+                  {featureWidgets[0].body}
+                </p>
+                <div className="pt-2 flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>{featureWidgets[0].badgeText}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column Stack (AI Coach + Food Scanner) */}
+            <div className="lg:col-span-12 xl:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              
+              {/* Widget 2: AI Coach Card */}
+              <div className="rounded-[28px] p-6 sm:p-8 bg-white dark:bg-[#0C0E17]/85 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#4353FF]/50 hover:shadow-[0_0_40px_rgba(67,83,255,0.18)] transition-all duration-300 flex flex-col justify-between group">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="w-12 h-12 rounded-2xl bg-[#4353FF]/15 border border-[#4353FF]/30 flex items-center justify-center text-[#4353FF] shadow-[0_0_20px_rgba(67,83,255,0.25)] group-hover:scale-110 transition-transform">
+                      <Icon name="Bot" size={24} />
+                    </div>
+                    <span className="text-[11px] font-bold text-[#4353FF] dark:text-[#828FFF] uppercase tracking-wider bg-[#4353FF]/10 px-2.5 py-1 rounded-full">
+                      {featureWidgets[1].tag}
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white">
+                    {featureWidgets[1].heading}
+                  </h3>
+                  <p className="text-sm text-[#525866] dark:text-[#8A8F98] leading-relaxed">
+                    {featureWidgets[1].body}
+                  </p>
+                </div>
+
+                <div className="mt-6 p-3.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.05] dark:border-white/[0.06] text-xs font-medium text-[#4353FF] dark:text-[#A5B4FC]">
+                  {featureWidgets[1].interactivePreview}
+                </div>
+              </div>
+
+              {/* Widget 3: Food Scanner Card */}
+              <div className="rounded-[28px] p-6 sm:p-8 bg-white dark:bg-[#0C0E17]/85 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FFAE00]/50 hover:shadow-[0_0_40px_rgba(255,174,0,0.18)] transition-all duration-300 flex flex-col justify-between group">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="w-12 h-12 rounded-2xl bg-[#FFAE00]/15 border border-[#FFAE00]/30 flex items-center justify-center text-[#FFAE00] shadow-[0_0_20px_rgba(255,174,0,0.25)] group-hover:scale-110 transition-transform">
+                      <Icon name="Scan" size={24} />
+                    </div>
+                    <span className="text-[11px] font-bold text-[#FFAE00] uppercase tracking-wider bg-[#FFAE00]/10 px-2.5 py-1 rounded-full">
+                      {featureWidgets[2].tag}
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white">
+                    {featureWidgets[2].heading}
+                  </h3>
+                  <p className="text-sm text-[#525866] dark:text-[#8A8F98] leading-relaxed">
+                    {featureWidgets[2].body}
+                  </p>
+                </div>
+
+                <div className="mt-6 p-3.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.05] dark:border-white/[0.06] text-xs font-medium text-[#FFAE00]">
+                  {featureWidgets[2].interactivePreview}
+                </div>
+              </div>
+            </div>
+
+            {/* Widget 4: Rep Counting Card (Full-width spanning banner with precision mockup image) */}
+            <div className="lg:col-span-12 relative rounded-[28px] overflow-hidden bg-[#0C0E17] border border-black/10 dark:border-white/10 shadow-lg hover:border-[#4353FF]/50 transition-all duration-300 flex flex-col md:flex-row items-center justify-between group min-h-[300px]">
+              <div className="relative z-10 p-6 sm:p-10 md:max-w-xl space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#4353FF]/20 border border-[#4353FF]/40 text-xs font-bold text-[#7082FF]">
+                  <Icon name="Target" size={14} />
+                  <span>{featureWidgets[3].tag}</span>
+                </div>
+                <h3 className="text-2xl sm:text-4xl font-extrabold text-white">
+                  {featureWidgets[3].heading}
+                </h3>
+                <p className="text-sm sm:text-base text-[#C2C7D0] leading-relaxed">
+                  {featureWidgets[3].body}
+                </p>
+                <div className="flex items-center gap-3 pt-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>{featureWidgets[3].badgeText}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Visual image preview with dark gradient blend */}
+              <div className="relative w-full md:w-1/2 h-[260px] md:h-full flex items-center justify-center p-4">
+                <img 
+                  src={featureWidgets[3].image} 
+                  alt={featureWidgets[3].heading} 
+                  className="max-h-[260px] w-auto object-contain rounded-2xl drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-500" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-[#0C0E17] via-transparent to-transparent pointer-events-none" />
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/* Supported Exercises & Biomechanics Showcase                 */}
+      {/* ============================================================ */}
+      <section className="relative z-10 py-16 sm:py-20 border-t border-black/[0.06] dark:border-white/[0.06]">
+        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-xs font-bold text-emerald-500 uppercase tracking-wider mb-4">
+              {landingCopy.supportedTag}
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0F1015] dark:text-white mb-4">
+              {landingCopy.supportedTitle}
+            </h2>
+            <p className="text-base sm:text-lg text-[#636779] dark:text-[#9DA4B2] leading-relaxed">
+              {landingCopy.supportedSubtitle}
+            </p>
+          </div>
+
+          {/* Exercises Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+            {landingCopy.exercises.map((ex, idx) => (
+              <div 
+                key={idx}
+                className="p-5 rounded-2xl bg-white dark:bg-[#0C0E18]/85 border border-black/[0.08] dark:border-white/[0.08] hover:border-[#4F46E5]/50 hover:shadow-[0_0_25px_rgba(79,70,229,0.15)] hover:scale-[1.02] transition-all flex flex-col justify-between group"
+              >
+                <div>
+                  <span className="text-[11px] font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-wider block mb-1">
+                    {ex.badge}
+                  </span>
+                  <h4 className="text-base sm:text-lg font-bold text-[#0F1015] dark:text-white group-hover:text-[#4F46E5] dark:group-hover:text-[#818CF8] transition-colors">
+                    {ex.name}
+                  </h4>
+                </div>
+                <div className="mt-3 pt-3 border-t border-black/[0.05] dark:border-white/[0.06] text-xs font-medium text-[#636779] dark:text-[#8A8F98]">
+                  {ex.target}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/* Privacy Architecture Section (3 Pillars)                      */}
+      {/* ============================================================ */}
+      <section id="privacy" className="relative z-10 py-16 sm:py-24 border-t border-black/[0.06] dark:border-white/[0.06] bg-black/[0.01] dark:bg-white/[0.01]">
+        {/* Ambient Violet Atmospheric Glow behind Privacy Section */}
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] sm:w-[950px] h-[500px] dark:opacity-70 opacity-30 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse 65% 50% at 50% 50%, rgba(79, 70, 229, 0.18) 0%, rgba(255, 122, 0, 0.05) 45%, transparent 70%)',
+            filter: 'blur(75px)',
+          }}
+        />
+        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
+          
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-xs font-bold text-emerald-500 uppercase tracking-wider mb-4">
+              {landingCopy.privacyTag}
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0F1015] dark:text-white mb-4">
+              {landingCopy.privacyTitle}
+            </h2>
+            <p className="text-base sm:text-lg text-[#636779] dark:text-[#9DA4B2] leading-relaxed">
+              {landingCopy.privacySubtitle}
+            </p>
+          </div>
+
+          {/* 3 Privacy Pillars */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {privacyCards.map((card, idx) => (
+              <div 
+                key={idx}
+                className="rounded-[28px] p-8 bg-white dark:bg-[#0C0E17]/80 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#4F46E5]/50 hover:shadow-[0_0_45px_rgba(79,70,229,0.16)] transition-all duration-300 flex flex-col justify-between group"
+              >
+                <div>
+                  <div className="w-14 h-14 rounded-2xl bg-[#4F46E5]/15 border border-[#4F46E5]/30 flex items-center justify-center text-[#4F46E5] mb-6 shadow-[0_0_20px_rgba(79,70,229,0.2)] group-hover:scale-110 transition-transform">
+                    <Icon name={card.icon} size={28} />
+                  </div>
+                  <span className="text-[11px] font-bold text-[#4F46E5] dark:text-[#828FFF] uppercase tracking-wider block mb-2">
+                    {card.tag}
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white mb-3">
+                    {card.title}
+                  </h3>
+                  <p className="text-sm text-[#525866] dark:text-[#8A8F98] leading-relaxed mb-6">
+                    {card.desc}
+                  </p>
+                </div>
+
+                <div className="space-y-3 pt-6 border-t border-black/[0.06] dark:border-white/[0.08]">
+                  {card.checks.map((check, cIdx) => (
+                    <div key={cIdx} className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                        <Icon name="Check" size={12} strokeWidth={3} />
+                      </div>
+                      <span className="text-xs sm:text-sm font-medium text-[#525866] dark:text-[#A0A5B1]">
+                        {check}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Privacy Transparency CTA Banner */}
+          <div className="mt-16 sm:mt-20">
+            <div className="rounded-[32px] p-8 sm:p-12 bg-gradient-to-r from-[#4F46E5]/10 via-[#4F46E5]/5 to-transparent border border-[#4F46E5]/30 backdrop-blur-xl max-w-4xl mx-auto text-center space-y-6">
+              <h3 className="text-2xl sm:text-3xl font-bold text-[#0F1015] dark:text-white">
+                {isAr ? 'شفافية وأمان لا مثيل لهما' : 'Complete Privacy Transparency'}
               </h3>
-              <p className="text-[#E0E0E0] mb-6 leading-relaxed">
-                Learn exactly how we protect your privacy and why ATOS fit is the most secure fitness app available today.
+              <p className="text-sm sm:text-base text-[#525866] dark:text-[#8A8F98] max-w-2xl mx-auto leading-relaxed">
+                {isAr 
+                  ? 'اطّلع على كيفية معالجة خوارزميات الذكاء الاصطناعي لحركاتك محلياً دون تخزين أو نقل أي بيانات حساسة.'
+                  : 'Learn how our on-device MediaPipe models compute your pose kinematics without ever recording or transmitting video.'}
               </p>
               <button
                 onClick={() => navigate('/privacy')}
-                className="bg-[#FF8A00] hover:bg-[#E67B00] text-black font-semibold px-8 py-4 rounded-2xl transition-all duration-300 hover:shadow-[0px_4px_15px_rgba(255,138,0,0.2)]"
+                className="inline-flex items-center justify-center gap-2 bg-[#4F46E5] hover:bg-[#6366F1] text-white px-8 py-3.5 rounded-full text-sm font-bold shadow-[0_0_25px_rgba(79,70,229,0.4)] transition-all"
               >
-                Read Our Privacy Policy
+                <span>{landingCopy.readPrivacy}</span>
+                <Icon name="ArrowRight" size={16} className={isAr ? 'rotate-180' : ''} />
               </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/* High-Impact Final Athletic CTA Section                        */}
+      {/* ============================================================ */}
+      <section className="relative z-10 py-16 sm:py-24">
+        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="relative rounded-[36px] overflow-hidden p-8 sm:p-14 lg:p-16 bg-[#0C0E18] border border-white/12 shadow-[0_20px_70px_rgba(79,70,229,0.3)] text-center">
+            
+            {/* Inner Atmospheric Glow */}
+            <div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full pointer-events-none"
+              style={{
+                background: 'radial-gradient(circle, rgba(79, 70, 229, 0.45) 0%, rgba(255, 122, 0, 0.15) 50%, transparent 75%)',
+                filter: 'blur(60px)',
+              }}
+            />
+
+            <div className="relative z-10 max-w-3xl mx-auto space-y-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FF7A00]/15 border border-[#FF7A00]/30 text-xs font-bold text-[#FF7A00] uppercase tracking-wider">
+                {landingCopy.ctaTag}
+              </div>
+
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]">
+                {landingCopy.ctaTitle}
+              </h2>
+
+              <p className="text-base sm:text-lg text-[#9DA4B2] leading-relaxed max-w-2xl mx-auto">
+                {landingCopy.ctaSubtitle}
+              </p>
+
+              <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button
+                  onClick={handleGetStarted}
+                  disabled={authLoading}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#4F46E5] via-[#5B4DF0] to-[#6366F1] hover:from-[#4338CA] hover:to-[#4F46E5] text-white font-bold px-10 py-4 rounded-2xl text-base sm:text-lg shadow-[0_0_35px_rgba(79,70,229,0.6)] hover:shadow-[0_0_55px_rgba(79,70,229,0.8)] hover:scale-[1.02] border border-white/15 hover:border-orange-400/40 transition-all"
+                >
+                  <span>{authLoading ? landingCopy.starting : landingCopy.ctaButton}</span>
+                  <Icon name="ArrowRight" size={20} className={isAr ? 'rotate-180' : ''} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 px-6 lg:px-8 py-16 lg:py-20 border-t border-[rgba(255,255,255,0.1)] mt-16 lg:mt-20">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center space-x-3">
-              <img src="/assets/images/atosfit.png" alt="ATOS fit Logo" className="w-8 h-8 object-contain" />
-              <span className="text-xl font-bold text-white">ATOS fit</span>
+      {/* ============================================================ */}
+      {/* Footer                                                        */}
+      {/* ============================================================ */}
+      <footer className="relative z-10 px-6 sm:px-8 py-12 border-t border-black/[0.08] dark:border-white/[0.06] bg-white/50 dark:bg-[#030408]/80 text-[#636779] dark:text-[#8A8F98] backdrop-blur-md">
+        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            
+            {/* Logo and Brand */}
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+              <img src="/assets/images/atosfit.png" alt="ATOS fit Logo" className="w-10 h-10 object-contain drop-shadow-[0_2px_12px_rgba(79,70,229,0.35)]" />
+              <div className="flex items-baseline gap-1" dir="ltr">
+                <span className="text-xl font-bold text-[#0F1015] dark:text-white">ATOS</span>
+                <span className="text-xl font-bold bg-gradient-to-r from-[#4F46E5] to-[#FF7A00] bg-clip-text text-transparent">fit</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-8">
-              <a href="#home" className="text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">Home</a>
-              <button onClick={() => navigate('/pricing')} className="text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">Pricing</button>
-              <button onClick={() => navigate('/privacy')} className="text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">Privacy</button>
-              <button onClick={() => navigate('/about')} className="text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">About Us</button>
+            {/* Navigation Links */}
+            <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-sm">
+              <a href="#home" className="hover:text-[#0F1015] dark:hover:text-white transition-colors">{landingCopy.home}</a>
+              <a href="#how-it-works" className="hover:text-[#0F1015] dark:hover:text-white transition-colors">{landingCopy.howItWorksNav}</a>
+              <a href="#features" className="hover:text-[#0F1015] dark:hover:text-white transition-colors">{landingCopy.features}</a>
+              <a href="#privacy" className="hover:text-[#0F1015] dark:hover:text-white transition-colors">{landingCopy.privacy}</a>
+              <button onClick={() => navigate('/pricing')} className="hover:text-[#0F1015] dark:hover:text-white transition-colors">{landingCopy.pricing}</button>
+              <button onClick={() => navigate('/about')} className="hover:text-[#0F1015] dark:hover:text-white transition-colors">{landingCopy.about}</button>
             </div>
 
-            <div className="flex items-center space-x-4">
+            {/* Social Links */}
+            <div className="flex items-center space-x-4 rtl:space-x-reverse text-[#636779] dark:text-[#8A8F98]">
               <a
                 href="https://www.linkedin.com/company/atos-fit"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[rgba(255,255,255,0.4)] hover:text-[#FF8A00] transition-colors"
+                className="hover:text-[#4F46E5] transition-colors p-1"
                 aria-label="LinkedIn"
               >
-                <Icon name="Linkedin" size={24} />
+                <Icon name="Linkedin" size={20} />
               </a>
               <a
                 href="https://twitter.com/AtosFit"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[rgba(255,255,255,0.4)] hover:text-[#FF8A00] transition-colors"
+                className="hover:text-[#4F46E5] transition-colors p-1"
                 aria-label="Twitter/X"
               >
-                <Icon name="Twitter" size={24} />
+                <Icon name="Twitter" size={20} />
               </a>
               <a
-                href="https://www.producthunt.com/posts/atos-fit?utm_source=other&utm_medium=social"
+                href="https://www.producthunt.com/posts/atos-fit"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[rgba(255,255,255,0.4)] hover:text-[#FF8A00] transition-colors"
+                className="hover:text-[#4F46E5] transition-colors p-1"
                 aria-label="Product Hunt"
               >
-                <Icon name="ExternalLink" size={24} />
+                <Icon name="ExternalLink" size={20} />
               </a>
             </div>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-black/[0.05] dark:border-white/[0.04] text-center text-xs text-[#8A8F98]">
+            {landingCopy.copyright}
           </div>
         </div>
       </footer>

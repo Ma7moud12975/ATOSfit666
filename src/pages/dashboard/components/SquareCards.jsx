@@ -195,7 +195,7 @@ export const PerformanceOverviewCard = () => {
           <div className="text-xs text-muted-foreground">This Week</div>
         </div>
         <div className="text-center">
-          <div className="text-xl font-bold text-orange-500">
+          <div className="text-xl font-bold text-[#4353FF]">
             {Math.floor(analytics.averageWorkoutDuration / 60)}m
           </div>
           <div className="text-xs text-muted-foreground">Avg Duration</div>

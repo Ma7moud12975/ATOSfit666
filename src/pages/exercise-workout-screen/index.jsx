@@ -63,7 +63,7 @@ const ExerciseWorkoutScreen = () => {
   
   // Initialize theme on component mount - ensure dark mode is applied
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const savedTheme = localStorage.getItem('theme') || 'light';
     if (savedTheme === 'dark') {
       document.documentElement.classList.add('dark');
       document.body.classList.add('dark');

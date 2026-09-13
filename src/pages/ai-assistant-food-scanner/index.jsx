@@ -209,6 +209,7 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
   }, [messages, chatSessionId]);
 
   const CHATBOT_API_KEY = import.meta.env.VITE_CHATBOT_API_KEY || '';
+  const CHATBOT_MODEL_NAME = import.meta.env.VITE_CHATBOT_MODEL_NAME || 'gemini-3.6-flash';
   const handleSendMessage = async (message) => {
     const userMessage = {
       id: Date.now(),
@@ -276,7 +277,7 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
 
       const userContextText = `\n---\n## User Profile Context\n- Name: ${currentUserProfile?.name || 'Unknown'}\n- Age: ${ageYears ?? 'Unknown'}\n- Height (cm): ${heightCm ?? 'Unknown'}\n- Weight (kg): ${weightKg ?? 'Unknown'}\n- BMI: ${bmi ?? 'Unknown'}${bmi != null ? ` (${bmiCategory(bmi)})` : ''}\n- Fitness Level: ${fitnessLevel || 'Unknown'}\n- Primary Goal: ${primaryGoal || 'Unknown'}\n---\n`;
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${CHATBOT_API_KEY}`;
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${CHATBOT_MODEL_NAME}:generateContent?key=${CHATBOT_API_KEY}`;
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -500,7 +501,7 @@ User message: ${message}`
         throw new Error('Gemini API key is missing. Add a fresh VITE_CHATBOT_API_KEY to .env.');
       }
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${CHATBOT_API_KEY}`;
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${CHATBOT_MODEL_NAME}:generateContent?key=${CHATBOT_API_KEY}`;
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {

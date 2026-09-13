@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { applyTheme, getSavedTheme } from '../../utils/theme';
 
 const PrivacyPage = () => {
   const navigate = useNavigate();
+  const { language, toggleLanguage } = useLanguage();
+  const [theme, setTheme] = useState(getSavedTheme);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const privacyFeatures = [
@@ -49,58 +53,94 @@ const PrivacyPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0F0F0F] text-white font-['Halyard_Display',sans-serif]">
+    <div className="min-h-screen bg-[#F7F8FA] dark:bg-[#020203] text-[#0F1015] dark:text-[#EDEDEF] font-sans relative overflow-x-hidden selection:bg-[#4353FF]/30 selection:text-white">
       {/* Background accent glows */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[rgba(255,138,0,0.15)] rounded-full blur-3xl" />
-        <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-[rgba(255,138,0,0.1)] rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 w-[700px] h-[700px] bg-[rgba(255,138,0,0.08)] rounded-full blur-3xl" />
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[rgba(67, 83, 245,0.12)] dark:bg-[rgba(67, 83, 245,0.15)] rounded-full blur-3xl" />
+        <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-[rgba(67, 83, 245,0.08)] dark:bg-[rgba(67, 83, 245,0.1)] rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/2 w-[700px] h-[700px] bg-[rgba(67, 83, 245,0.06)] dark:bg-[rgba(67, 83, 245,0.08)] rounded-full blur-3xl" />
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-50 px-6 py-6">
+      <nav className="relative z-50 px-6 py-4 border-b border-black/[0.08] dark:border-white/[0.06] bg-white/80 dark:bg-[#050506]/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
             <img src="/assets/images/atosfit.png" alt="ATOS fit Logo" className="w-10 h-10 object-contain" />
-            <span className="text-2xl font-bold text-white">ATOS fit</span>
+            <span className="text-2xl font-bold text-[#0F1015] dark:text-[#EDEDEF] tracking-tight">ATOS fit</span>
           </div>
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <button onClick={() => navigate('/')} className="text-[#E0E0E0] hover:text-white transition-colors">Home</button>
-            <button onClick={() => navigate('/pricing')} className="text-[#E0E0E0] hover:text-white transition-colors">Pricing</button>
-            <span className="text-white font-medium">Privacy</span>
-            <button onClick={() => navigate('/about')} className="text-[#E0E0E0] hover:text-white transition-colors">About Us</button>
+            <button onClick={() => navigate('/')} className="text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-[#0F1015] dark:text-[#EDEDEF] font-medium transition-colors text-sm">Home</button>
+            <button onClick={() => navigate('/pricing')} className="text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-[#0F1015] dark:text-[#EDEDEF] font-medium transition-colors text-sm">Pricing</button>
+            <span className="text-[#4353FF] font-semibold text-sm">Privacy</span>
+            <button onClick={() => navigate('/about')} className="text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-[#0F1015] dark:text-[#EDEDEF] font-medium transition-colors text-sm">About Us</button>
           </div>
 
-          {/* Desktop Sign In Button */}
-          <button
-            onClick={() => navigate('/login-screen')}
-            className="hidden md:block bg-[#FF8A00] hover:bg-[#E67B00] text-black font-semibold px-6 py-3 rounded-2xl transition-all duration-300 hover:shadow-[0px_4px_15px_rgba(255,138,0,0.2)]"
-          >
-            Sign In
-          </button>
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            <button
+              type="button"
+              onClick={() => setTheme(applyTheme(theme === 'dark' ? 'light' : 'dark'))}
+              className="w-9 h-9 rounded-xl flex items-center justify-center border border-black/[0.08] dark:border-white/[0.08] text-[#0F1015] dark:text-[#EDEDEF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-colors"
+              title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            >
+              <Icon name={theme === 'dark' ? 'Sun' : 'Moon'} size={17} />
+            </button>
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="atos-language-toggle"
+              title={language === 'ar' ? 'English' : 'عربي'}
+            >
+              <Icon name="Languages" size={16} />
+              <span>{language === 'ar' ? 'EN' : 'AR'}</span>
+            </button>
+            <button
+              onClick={() => navigate('/login-screen')}
+              className="inline-flex items-center justify-center linear-btn-primary px-5 py-2 rounded-full text-sm font-medium"
+            >
+              Sign In
+            </button>
+          </div>
 
           {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-white p-2"
-            aria-label="Toggle mobile menu"
-          >
-            <Icon name={isMobileMenuOpen ? "X" : "Menu"} size={24} />
-          </button>
+          <div className="md:hidden flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => setTheme(applyTheme(theme === 'dark' ? 'light' : 'dark'))}
+              className="w-9 h-9 rounded-xl flex items-center justify-center border border-black/[0.08] dark:border-white/[0.08] text-[#0F1015] dark:text-[#EDEDEF]"
+            >
+              <Icon name={theme === 'dark' ? 'Sun' : 'Moon'} size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="atos-language-toggle"
+            >
+              <Icon name="Languages" size={15} />
+              <span>{language === 'ar' ? 'EN' : 'AR'}</span>
+            </button>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-[#0F1015] dark:text-[#EDEDEF] p-2"
+              aria-label="Toggle mobile menu"
+            >
+              <Icon name={isMobileMenuOpen ? "X" : "Menu"} size={24} />
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-[#1A1A1A] border-t border-[rgba(255,255,255,0.1)] shadow-lg">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 dark:bg-[#0a0a0c]/95 backdrop-blur-2xl border-t border-black/[0.08] dark:border-white/[0.06] shadow-2xl">
             <div className="px-6 py-4 space-y-4">
               <button 
                 onClick={() => {
                   navigate('/');
                   setIsMobileMenuOpen(false);
                 }} 
-                className="block text-[#E0E0E0] hover:text-white transition-colors py-2 w-full text-left"
+                className="block text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-[#0F1015] dark:text-[#EDEDEF] font-medium transition-colors text-sm py-2 w-full text-left"
               >
                 Home
               </button>
@@ -109,11 +149,11 @@ const PrivacyPage = () => {
                   navigate('/pricing');
                   setIsMobileMenuOpen(false);
                 }} 
-                className="block text-[#E0E0E0] hover:text-white transition-colors py-2 w-full text-left"
+                className="block text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-[#0F1015] dark:text-[#EDEDEF] font-medium transition-colors text-sm py-2 w-full text-left"
               >
                 Pricing
               </button>
-              <span className="block text-white font-medium py-2">
+              <span className="block text-[#4353FF] font-semibold py-2">
                 Privacy
               </span>
               <button 
@@ -121,7 +161,7 @@ const PrivacyPage = () => {
                   navigate('/about');
                   setIsMobileMenuOpen(false);
                 }} 
-                className="block text-[#E0E0E0] hover:text-white transition-colors py-2 w-full text-left"
+                className="block text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-[#0F1015] dark:text-[#EDEDEF] font-medium transition-colors text-sm py-2 w-full text-left"
               >
                 About Us
               </button>
@@ -130,7 +170,7 @@ const PrivacyPage = () => {
                   navigate('/login-screen');
                   setIsMobileMenuOpen(false);
                 }}
-                className="w-full bg-[#FF8A00] hover:bg-[#E67B00] text-black font-semibold px-6 py-3 rounded-2xl transition-all duration-300 hover:shadow-[0px_4px_15px_rgba(255,138,0,0.2)] mt-4"
+                className="w-full linear-btn-primary py-2.5 rounded-full text-sm font-medium mt-4"
               >
                 Sign In
               </button>
@@ -142,10 +182,10 @@ const PrivacyPage = () => {
       {/* Hero Section */}
       <section className="relative z-10 px-6 py-20">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-6xl font-bold text-white mb-6">
-            Your Privacy is <span className="text-[#FF8A00]">Our Priority</span>
+          <h1 className="text-4xl md:text-6xl font-bold linear-gradient-text mb-4 tracking-tight">
+            Your Privacy is <span className="text-[#4353FF]">Our Priority</span>
           </h1>
-          <p className="text-xl text-[#E0E0E0] leading-relaxed mb-12">
+          <p className="text-xl text-sm text-[#8A8F98] leading-relaxed mb-12">
             ATOS fit is built from the ground up with privacy-first architecture. 
             Your data stays yours, your workouts remain private, and your identity is protected.
           </p>
@@ -158,22 +198,22 @@ const PrivacyPage = () => {
             {privacyFeatures.map((feature, index) => (
               <div
                 key={index}
-                className="bg-[#1A1A1A] border border-[rgba(255,255,255,0.1)] rounded-[32px] p-8 hover:border-[rgba(255,138,0,0.3)] hover:shadow-[0px_0px_40px_rgba(255,138,0,0.1)] transition-all duration-300"
+                className="linear-card rounded-3xl p-8 hover:border-white/[0.15] hover:shadow-[0_0_25px_rgba(67, 83, 245,0.15)] transition-all duration-300"
               >
-                <div className="w-16 h-16 bg-[rgba(255,255,255,0.05)] rounded-2xl flex items-center justify-center mb-6">
+                <div className="w-16 h-16 bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl flex items-center justify-center mb-6">
                   <img 
                     src={feature.icon} 
                     alt={feature.title} 
-                    className="w-10 h-10 object-contain filter-orange" 
+                    className="w-10 h-10 object-contain filter-blue" 
                   />
                 </div>
-                <h3 className="text-2xl font-medium text-white mb-4">{feature.title}</h3>
-                <p className="text-[#E0E0E0] mb-6 leading-relaxed">{feature.description}</p>
+                <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#EDEDEF] mb-3">{feature.title}</h3>
+                <p className="text-[#8A8F98] mb-6 leading-relaxed">{feature.description}</p>
                 <ul className="space-y-3">
                   {feature.details.map((detail, detailIndex) => (
                     <li key={detailIndex} className="flex items-start space-x-3">
-                      <Icon name="Check" size={16} className="text-[#FF8A00] mt-1 flex-shrink-0" />
-                      <span className="text-[rgba(255,255,255,0.4)] text-sm">{detail}</span>
+                      <Icon name="Check" size={16} className="text-[#4353FF] mt-1 flex-shrink-0" />
+                      <span className="text-[#8A8F98] text-xs">{detail}</span>
                     </li>
                   ))}
                 </ul>
@@ -182,26 +222,26 @@ const PrivacyPage = () => {
           </div>
 
           {/* Detailed Privacy Policy */}
-          <div className="bg-[#1A1A1A] border border-[rgba(255,255,255,0.1)] rounded-[32px] p-10 hover:border-[rgba(255,138,0,0.3)] hover:shadow-[0px_0px_40px_rgba(255,138,0,0.1)] transition-all duration-300">
-            <h2 className="text-4xl font-semibold text-white mb-8 text-center">
+          <div className="linear-card rounded-3xl p-10 hover:border-white/[0.15] hover:shadow-[0_0_25px_rgba(67, 83, 245,0.15)] transition-all duration-300">
+            <h2 className="text-3xl md:text-4xl font-semibold linear-gradient-text mb-8 text-center">
               Complete Privacy Policy
             </h2>
             
             <div className="space-y-12">
               {/* Data Collection */}
               <div>
-                <h3 className="text-2xl font-medium text-white mb-4 flex items-center">
-                  <Icon name="Database" size={24} className="text-[#FF8A00] mr-3" />
+                <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#EDEDEF] mb-3 flex items-center">
+                  <Icon name="Database" size={24} className="text-[#4353FF] mr-3" />
                   What Data We Collect
                 </h3>
-                <div className="space-y-4 text-[#E0E0E0] leading-relaxed">
+                <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
                   <p>
                     ATOS fit follows a strict data minimization principle, collecting only essential data for app functionality:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3 flex items-center">
-                        <Icon name="Activity" size={20} className="text-[#FF8A00] mr-2" />
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 flex items-center">
+                        <Icon name="Activity" size={20} className="text-[#4353FF] mr-2" />
                         Fitness Data We Store
                       </h4>
                       <ul className="space-y-2 text-sm">
@@ -213,9 +253,9 @@ const PrivacyPage = () => {
                         <li>• Progress metrics and achievements</li>
                       </ul>
                     </div>
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3 flex items-center">
-                        <Icon name="Settings" size={20} className="text-[#FF8A00] mr-2" />
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 flex items-center">
+                        <Icon name="Settings" size={20} className="text-[#4353FF] mr-2" />
                         Technical Data We Store
                       </h4>
                       <ul className="space-y-2 text-sm">
@@ -228,8 +268,8 @@ const PrivacyPage = () => {
                       </ul>
                     </div>
                   </div>
-                  <div className="bg-[rgba(255,138,0,0.1)] border border-[rgba(255,138,0,0.2)] rounded-xl p-6 mt-6">
-                    <h4 className="text-[#FF8A00] font-medium mb-3 flex items-center">
+                  <div className="linear-card border border-white/[0.08] rounded-2xl p-6 mt-6">
+                    <h4 className="text-[#4353FF] font-medium mb-3 flex items-center">
                       <Icon name="Shield" size={20} className="mr-2" />
                       What We NEVER Collect
                     </h4>
@@ -253,19 +293,19 @@ const PrivacyPage = () => {
 
               {/* Local Processing */}
               <div>
-                <h3 className="text-2xl font-medium text-white mb-4 flex items-center">
-                  <Icon name="Smartphone" size={24} className="text-[#FF8A00] mr-3" />
+                <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#EDEDEF] mb-3 flex items-center">
+                  <Icon name="Smartphone" size={24} className="text-[#4353FF] mr-3" />
                   Advanced Local Processing Technology
                 </h3>
-                <div className="space-y-4 text-[#E0E0E0] leading-relaxed">
+                <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
                   <p>
                     ATOS fit leverages cutting-edge on-device AI processing to ensure your workout videos never leave your device. 
                     We combine Google's MediaPipe with MocapNET for real-time 3D motion analysis:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3 flex items-center">
-                        <Icon name="Camera" size={18} className="text-[#FF8A00] mr-2" />
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 flex items-center">
+                        <Icon name="Camera" size={18} className="text-[#4353FF] mr-2" />
                         Real-Time Analysis
                       </h4>
                       <ul className="space-y-2 text-sm">
@@ -276,9 +316,9 @@ const PrivacyPage = () => {
                         <li>• Multi-joint movement tracking</li>
                       </ul>
                     </div>
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3 flex items-center">
-                        <Icon name="Cpu" size={18} className="text-[#FF8A00] mr-2" />
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 flex items-center">
+                        <Icon name="Cpu" size={18} className="text-[#4353FF] mr-2" />
                         On-Device Processing
                       </h4>
                       <ul className="space-y-2 text-sm">
@@ -289,9 +329,9 @@ const PrivacyPage = () => {
                         <li>• No cloud dependencies</li>
                       </ul>
                     </div>
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3 flex items-center">
-                        <Icon name="Shield" size={18} className="text-[#FF8A00] mr-2" />
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 flex items-center">
+                        <Icon name="Shield" size={18} className="text-[#4353FF] mr-2" />
                         Privacy Guarantees
                       </h4>
                       <ul className="space-y-2 text-sm">
@@ -303,8 +343,8 @@ const PrivacyPage = () => {
                       </ul>
                     </div>
                   </div>
-                  <div className="bg-[rgba(255,138,0,0.1)] border border-[rgba(255,138,0,0.2)] rounded-xl p-6 mt-6">
-                    <h4 className="text-[#FF8A00] font-medium mb-3 flex items-center">
+                  <div className="linear-card border border-white/[0.08] rounded-2xl p-6 mt-6">
+                    <h4 className="text-[#4353FF] font-medium mb-3 flex items-center">
                       <Icon name="Zap" size={20} className="mr-2" />
                       Technical Implementation
                     </h4>
@@ -335,73 +375,73 @@ const PrivacyPage = () => {
 
               {/* Internet Identity */}
               <div>
-                <h3 className="text-2xl font-medium text-white mb-4 flex items-center">
-                  <Icon name="Key" size={24} className="text-[#FF8A00] mr-3" />
+                <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#EDEDEF] mb-3 flex items-center">
+                  <Icon name="Key" size={24} className="text-[#4353FF] mr-3" />
                   Revolutionary Internet Identity Authentication
                 </h3>
-                <div className="space-y-4 text-[#E0E0E0] leading-relaxed">
+                <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
                   <p>
                     ATOS fit uses Internet Identity, the world's most advanced privacy-preserving authentication system. 
                     Built by the DFINITY Foundation, it eliminates traditional privacy vulnerabilities:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3 flex items-center">
-                        <Icon name="UserCheck" size={18} className="text-[#FF8A00] mr-2" />
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 flex items-center">
+                        <Icon name="UserCheck" size={18} className="text-[#4353FF] mr-2" />
                         Anonymous by Design
                       </h4>
                       <ul className="space-y-2 text-sm">
                         <li className="flex items-start space-x-2">
-                          <Icon name="Check" size={14} className="text-[#FF8A00] mt-1" />
+                          <Icon name="Check" size={14} className="text-[#4353FF] mt-1" />
                           <span>No email, phone, or personal info required</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                          <Icon name="Check" size={14} className="text-[#FF8A00] mt-1" />
+                          <Icon name="Check" size={14} className="text-[#4353FF] mt-1" />
                           <span>Cryptographic identity anchors</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                          <Icon name="Check" size={14} className="text-[#FF8A00] mt-1" />
+                          <Icon name="Check" size={14} className="text-[#4353FF] mt-1" />
                           <span>Biometric authentication (stays on device)</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                          <Icon name="Check" size={14} className="text-[#FF8A00] mt-1" />
+                          <Icon name="Check" size={14} className="text-[#4353FF] mt-1" />
                           <span>Hardware security key support</span>
                         </li>
                       </ul>
                     </div>
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3 flex items-center">
-                        <Icon name="Lock" size={18} className="text-[#FF8A00] mr-2" />
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 flex items-center">
+                        <Icon name="Lock" size={18} className="text-[#4353FF] mr-2" />
                         Unbreakable Security
                       </h4>
                       <ul className="space-y-2 text-sm">
                         <li className="flex items-start space-x-2">
-                          <Icon name="Shield" size={14} className="text-[#FF8A00] mt-1" />
+                          <Icon name="Shield" size={14} className="text-[#4353FF] mt-1" />
                           <span>Immune to password breaches</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                          <Icon name="Shield" size={14} className="text-[#FF8A00] mt-1" />
+                          <Icon name="Shield" size={14} className="text-[#4353FF] mt-1" />
                           <span>Resistant to phishing attacks</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                          <Icon name="Shield" size={14} className="text-[#FF8A00] mt-1" />
+                          <Icon name="Shield" size={14} className="text-[#4353FF] mt-1" />
                           <span>No central authority to compromise</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                          <Icon name="Shield" size={14} className="text-[#FF8A00] mt-1" />
+                          <Icon name="Shield" size={14} className="text-[#4353FF] mt-1" />
                           <span>Quantum-resistant cryptography</span>
                         </li>
                       </ul>
                     </div>
                   </div>
-                  <div className="bg-[rgba(255,138,0,0.1)] border border-[rgba(255,138,0,0.2)] rounded-xl p-6 mt-6">
-                    <h4 className="text-[#FF8A00] font-medium mb-3 flex items-center">
+                  <div className="linear-card border border-white/[0.08] rounded-2xl p-6 mt-6">
+                    <h4 className="text-[#4353FF] font-medium mb-3 flex items-center">
                       <Icon name="Globe" size={20} className="mr-2" />
                       How Internet Identity Protects You
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                       <div>
-                        <h5 className="text-white font-medium mb-2">Traditional Login Problems:</h5>
+                        <h5 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-2">Traditional Login Problems:</h5>
                         <ul className="space-y-1 text-red-400">
                           <li>• Passwords can be stolen or guessed</li>
                           <li>• Email addresses link to your identity</li>
@@ -411,7 +451,7 @@ const PrivacyPage = () => {
                         </ul>
                       </div>
                       <div>
-                        <h5 className="text-white font-medium mb-2">Internet Identity Solutions:</h5>
+                        <h5 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-2">Internet Identity Solutions:</h5>
                         <ul className="space-y-1 text-green-400">
                           <li>• Cryptographic keys replace passwords</li>
                           <li>• Anonymous anchors protect identity</li>
@@ -427,19 +467,19 @@ const PrivacyPage = () => {
 
               {/* ICP Blockchain Storage */}
               <div>
-                <h3 className="text-2xl font-medium text-white mb-4 flex items-center">
-                  <Icon name="Lock" size={24} className="text-[#FF8A00] mr-3" />
+                <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#EDEDEF] mb-3 flex items-center">
+                  <Icon name="Lock" size={24} className="text-[#4353FF] mr-3" />
                   Internet Computer Protocol (ICP) Blockchain Storage
                 </h3>
-                <div className="space-y-4 text-[#E0E0E0] leading-relaxed">
+                <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
                   <p>
                     ATOS fit stores your fitness data on the Internet Computer Protocol (ICP) blockchain, the world's most advanced 
                     decentralized computing platform. This provides unprecedented security, transparency, and user control:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3 flex items-center">
-                        <Icon name="Globe" size={20} className="text-[#FF8A00] mr-2" />
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 flex items-center">
+                        <Icon name="Globe" size={20} className="text-[#4353FF] mr-2" />
                         True Decentralization
                       </h4>
                       <p className="text-sm mb-3">
@@ -454,9 +494,9 @@ const PrivacyPage = () => {
                       </ul>
                     </div>
                     
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3 flex items-center">
-                        <Icon name="Shield" size={20} className="text-[#FF8A00] mr-2" />
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 flex items-center">
+                        <Icon name="Shield" size={20} className="text-[#4353FF] mr-2" />
                         Military-Grade Security
                       </h4>
                       <p className="text-sm mb-3">
@@ -471,9 +511,9 @@ const PrivacyPage = () => {
                       </ul>
                     </div>
 
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3 flex items-center">
-                        <Icon name="User" size={20} className="text-[#FF8A00] mr-2" />
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 flex items-center">
+                        <Icon name="User" size={20} className="text-[#4353FF] mr-2" />
                         Complete Data Ownership
                       </h4>
                       <p className="text-sm mb-3">
@@ -488,9 +528,9 @@ const PrivacyPage = () => {
                       </ul>
                     </div>
 
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3 flex items-center">
-                        <Icon name="Zap" size={20} className="text-[#FF8A00] mr-2" />
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 flex items-center">
+                        <Icon name="Zap" size={20} className="text-[#4353FF] mr-2" />
                         Smart Contract Automation
                       </h4>
                       <p className="text-sm mb-3">
@@ -505,14 +545,14 @@ const PrivacyPage = () => {
                       </ul>
                     </div>
                   </div>
-                  <div className="bg-[rgba(255,138,0,0.1)] border border-[rgba(255,138,0,0.2)] rounded-xl p-6 mt-6">
-                    <h4 className="text-[#FF8A00] font-medium mb-3 flex items-center">
+                  <div className="linear-card border border-white/[0.08] rounded-2xl p-6 mt-6">
+                    <h4 className="text-[#4353FF] font-medium mb-3 flex items-center">
                       <Icon name="Info" size={20} className="mr-2" />
                       Why ICP is Different from Other Blockchains
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                       <div>
-                        <h5 className="text-white font-medium mb-2">Traditional Cloud Storage:</h5>
+                        <h5 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-2">Traditional Cloud Storage:</h5>
                         <ul className="space-y-1 text-red-400">
                           <li>• Controlled by single companies</li>
                           <li>• Subject to government requests</li>
@@ -522,7 +562,7 @@ const PrivacyPage = () => {
                         </ul>
                       </div>
                       <div>
-                        <h5 className="text-white font-medium mb-2">ICP Blockchain Advantages:</h5>
+                        <h5 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-2">ICP Blockchain Advantages:</h5>
                         <ul className="space-y-1 text-green-400">
                           <li>• Governed by decentralized protocol</li>
                           <li>• Censorship-resistant by design</li>
@@ -538,15 +578,15 @@ const PrivacyPage = () => {
 
               {/* Data Usage */}
               <div>
-                <h3 className="text-2xl font-medium text-white mb-4 flex items-center">
-                  <Icon name="Eye" size={24} className="text-[#FF8A00] mr-3" />
+                <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#EDEDEF] mb-3 flex items-center">
+                  <Icon name="Eye" size={24} className="text-[#4353FF] mr-3" />
                   How We Use Your Data
                 </h3>
-                <div className="space-y-4 text-[#E0E0E0] leading-relaxed">
+                <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
                   <p>Your data is used exclusively to provide and improve ATOS fit services:</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <div>
-                      <h4 className="text-white font-medium mb-3 text-[#FF8A00]">✓ What We Do</h4>
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 text-[#4353FF]">✓ What We Do</h4>
                       <ul className="space-y-2 text-sm">
                         <li>• Provide personalized workout recommendations</li>
                         <li>• Track your fitness progress over time</li>
@@ -556,7 +596,7 @@ const PrivacyPage = () => {
                       </ul>
                     </div>
                     <div>
-                      <h4 className="text-white font-medium mb-3 text-red-400">✗ What We Never Do</h4>
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 text-red-400">✗ What We Never Do</h4>
                       <ul className="space-y-2 text-sm">
                         <li>• Sell your data to third parties</li>
                         <li>• Share data with advertisers</li>
@@ -571,41 +611,41 @@ const PrivacyPage = () => {
 
               {/* Your Rights */}
               <div>
-                <h3 className="text-2xl font-medium text-white mb-4 flex items-center">
-                  <Icon name="Users" size={24} className="text-[#FF8A00] mr-3" />
+                <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#EDEDEF] mb-3 flex items-center">
+                  <Icon name="Users" size={24} className="text-[#4353FF] mr-3" />
                   Your Privacy Rights
                 </h3>
-                <div className="space-y-4 text-[#E0E0E0] leading-relaxed">
+                <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
                   <p>You have complete control over your privacy and data:</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <div className="space-y-4">
                       <div className="flex items-start space-x-3">
-                        <Icon name="Download" size={20} className="text-[#FF8A00] mt-1" />
+                        <Icon name="Download" size={20} className="text-[#4353FF] mt-1" />
                         <div>
-                          <h4 className="text-white font-medium">Data Export</h4>
+                          <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium">Data Export</h4>
                           <p className="text-sm">Download all your data in a standard format anytime.</p>
                         </div>
                       </div>
                       <div className="flex items-start space-x-3">
-                        <Icon name="Trash2" size={20} className="text-[#FF8A00] mt-1" />
+                        <Icon name="Trash2" size={20} className="text-[#4353FF] mt-1" />
                         <div>
-                          <h4 className="text-white font-medium">Data Deletion</h4>
+                          <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium">Data Deletion</h4>
                           <p className="text-sm">Permanently delete your account and all associated data.</p>
                         </div>
                       </div>
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-start space-x-3">
-                        <Icon name="Settings" size={20} className="text-[#FF8A00] mt-1" />
+                        <Icon name="Settings" size={20} className="text-[#4353FF] mt-1" />
                         <div>
-                          <h4 className="text-white font-medium">Privacy Controls</h4>
+                          <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium">Privacy Controls</h4>
                           <p className="text-sm">Granular controls over what data is collected and how it's used.</p>
                         </div>
                       </div>
                       <div className="flex items-start space-x-3">
-                        <Icon name="AlertCircle" size={20} className="text-[#FF8A00] mt-1" />
+                        <Icon name="AlertCircle" size={20} className="text-[#4353FF] mt-1" />
                         <div>
-                          <h4 className="text-white font-medium">Transparency</h4>
+                          <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium">Transparency</h4>
                           <p className="text-sm">Full visibility into what data we have and how it's processed.</p>
                         </div>
                       </div>
@@ -616,17 +656,17 @@ const PrivacyPage = () => {
 
               {/* Third-Party Services */}
               <div>
-                <h3 className="text-2xl font-medium text-white mb-4 flex items-center">
-                  <Icon name="ExternalLink" size={24} className="text-[#FF8A00] mr-3" />
+                <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#EDEDEF] mb-3 flex items-center">
+                  <Icon name="ExternalLink" size={24} className="text-[#4353FF] mr-3" />
                   Third-Party Services & Integrations
                 </h3>
-                <div className="space-y-4 text-[#E0E0E0] leading-relaxed">
+                <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
                   <p>
                     ATOSfit minimizes third-party dependencies to protect your privacy. Here's what we use and why:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3 flex items-center">
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 flex items-center">
                         <Icon name="CheckCircle" size={18} className="text-green-400 mr-2" />
                         Privacy-Safe Services
                       </h4>
@@ -637,8 +677,8 @@ const PrivacyPage = () => {
                         <li>• <strong>Open Source Libraries:</strong> Auditable and transparent</li>
                       </ul>
                     </div>
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3 flex items-center">
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3 flex items-center">
                         <Icon name="XCircle" size={18} className="text-red-400 mr-2" />
                         What We Don't Use
                       </h4>
@@ -656,17 +696,17 @@ const PrivacyPage = () => {
 
               {/* Data Retention */}
               <div>
-                <h3 className="text-2xl font-medium text-white mb-4 flex items-center">
-                  <Icon name="Clock" size={24} className="text-[#FF8A00] mr-3" />
+                <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#EDEDEF] mb-3 flex items-center">
+                  <Icon name="Clock" size={24} className="text-[#4353FF] mr-3" />
                   Data Retention & Deletion
                 </h3>
-                <div className="space-y-4 text-[#E0E0E0] leading-relaxed">
+                <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
                   <p>
                     We believe in your right to be forgotten. Here's how we handle data retention and deletion:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3">Automatic Retention Policies</h4>
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3">Automatic Retention Policies</h4>
                       <ul className="space-y-2 text-sm">
                         <li>• Workout videos: Never stored (processed and deleted immediately)</li>
                         <li>• Fitness metrics: Kept until you delete your account</li>
@@ -674,8 +714,8 @@ const PrivacyPage = () => {
                         <li>• Anonymous analytics: Aggregated and anonymized after 90 days</li>
                       </ul>
                     </div>
-                    <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-6">
-                      <h4 className="text-white font-medium mb-3">User-Controlled Deletion</h4>
+                    <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
+                      <h4 className="text-[#0F1015] dark:text-[#EDEDEF] font-medium mb-3">User-Controlled Deletion</h4>
                       <ul className="space-y-2 text-sm">
                         <li>• Delete individual workouts anytime</li>
                         <li>• Clear all fitness history with one click</li>
@@ -688,26 +728,26 @@ const PrivacyPage = () => {
               </div>
 
               {/* Contact */}
-              <div className="bg-[rgba(255,138,0,0.1)] border border-[rgba(255,138,0,0.2)] rounded-xl p-8 text-center">
-                <h3 className="text-2xl font-medium text-white mb-4">
+              <div className="bg-[rgba(67, 83, 245,0.1)] border border-[rgba(67, 83, 245,0.2)] rounded-xl p-8 text-center">
+                <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#EDEDEF] mb-3">
                   Questions About Your Privacy?
                 </h3>
-                <p className="text-[#E0E0E0] mb-6">
+                <p className="text-[#8A8F98] mb-6">
                   We're committed to transparency. If you have any questions about how we protect your privacy, 
                   we're here to help. Our privacy team responds to all inquiries within 24 hours.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <button className="bg-[#FF8A00] hover:bg-[#E67B00] text-black font-semibold px-8 py-4 rounded-2xl transition-all duration-300">
+                  <button className="bg-[#4353FF] hover:bg-[#5668FF] text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300">
                     Contact Privacy Team
                   </button>
                   <button 
                     onClick={() => navigate('/about')}
-                    className="border border-[rgba(255,255,255,0.1)] hover:border-[#FF8A00] text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300"
+                    className="inline-flex items-center justify-center linear-btn-secondary px-8 py-3 rounded-full text-sm font-semibold"
                   >
                     Learn About Our Team
                   </button>
                 </div>
-                <p className="text-[rgba(255,255,255,0.4)] text-sm mt-4">
+                <p className="text-[#8A8F98] text-xs mt-4">
                   Last updated: December 2024 | Version 2.0
                 </p>
               </div>
@@ -717,19 +757,19 @@ const PrivacyPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 px-6 py-12 border-t border-[rgba(255,255,255,0.1)]">
+      <footer className="relative z-10 px-6 py-12 border-t border-black/[0.08] dark:border-white/[0.06] bg-[#ECEFF3] dark:bg-[#020203] text-[#636779] dark:text-[#8A8F98]">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
               <img src="/assets/images/atosfit.png" alt="ATOS fit Logo" className="w-8 h-8 object-contain" />
-              <span className="text-xl font-bold text-white">ATOS fit</span>
+              <span className="text-xl font-bold text-[#0F1015] dark:text-white">ATOS fit</span>
             </div>
             
             <div className="flex items-center space-x-8">
-              <button onClick={() => navigate('/')} className="text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">Home</button>
-              <button onClick={() => navigate('/pricing')} className="text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">Pricing</button>
-              <span className="text-white">Privacy</span>
-              <button onClick={() => navigate('/about')} className="text-[rgba(255,255,255,0.4)] hover:text-white transition-colors">About Us</button>
+              <button onClick={() => navigate('/')} className="text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-[#EDEDEF] transition-colors text-sm">Home</button>
+              <button onClick={() => navigate('/pricing')} className="text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-[#EDEDEF] transition-colors text-sm">Pricing</button>
+              <span className="text-[#4353FF] font-semibold">Privacy</span>
+              <button onClick={() => navigate('/about')} className="text-[#636779] dark:text-[#8A8F98] hover:text-[#0F1015] dark:hover:text-[#EDEDEF] transition-colors text-sm">About Us</button>
             </div>
             
             <div className="flex items-center space-x-4">
@@ -737,7 +777,7 @@ const PrivacyPage = () => {
                 href="https://www.linkedin.com/company/atos-fit" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-[rgba(255,255,255,0.4)] hover:text-[#FF8A00] transition-colors"
+                className="text-[rgba(255,255,255,0.4)] hover:text-[#4353FF] transition-colors"
                 aria-label="LinkedIn"
               >
                 <Icon name="Linkedin" size={24} />
@@ -746,7 +786,7 @@ const PrivacyPage = () => {
                 href="https://twitter.com/AtosFit" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-[rgba(255,255,255,0.4)] hover:text-[#FF8A00] transition-colors"
+                className="text-[rgba(255,255,255,0.4)] hover:text-[#4353FF] transition-colors"
                 aria-label="Twitter/X"
               >
                 <Icon name="Twitter" size={24} />
@@ -755,7 +795,7 @@ const PrivacyPage = () => {
                 href="https://www.producthunt.com/posts/atos-fit?utm_source=other&utm_medium=social" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-[rgba(255,255,255,0.4)] hover:text-[#FF8A00] transition-colors"
+                className="text-[rgba(255,255,255,0.4)] hover:text-[#4353FF] transition-colors"
                 aria-label="Product Hunt"
               >
                 <Icon name="ExternalLink" size={24} />

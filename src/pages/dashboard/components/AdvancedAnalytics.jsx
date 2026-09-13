@@ -150,7 +150,7 @@ const AdvancedAnalytics = () => {
             value={`${Math.floor(analytics.averageWorkoutDuration / 60)}m ${analytics.averageWorkoutDuration % 60}s`}
             subtitle="per workout"
             icon="Clock"
-            color="text-orange-500"
+            color="text-[#4353FF]"
           />
           <StatCard
             title="Current Streak"

@@ -6,93 +6,93 @@
 
 @layer base {
   :root {
-    /* Light Theme: white and orange */
-    --color-background: #FFFFFF; /* white */
-    --color-foreground: #1F2937; /* gray-800 */
-    --color-border: #E5E7EB; /* gray-200 */
-    --color-input: #FFFFFF; /* white */
-    --color-ring: #F59E0B; /* orange-500 */
-    --color-card: #FFFFFF; /* white */
-    --color-card-foreground: #1F2937; /* gray-800 */
-    --color-popover: #FFFFFF; /* white */
-    --color-popover-foreground: #1F2937; /* gray-800 */
-    --color-muted: #F8F9FA; /* gray-50 */
-    --color-muted-foreground: #6B7280; /* gray-500 */
-    --color-primary: #F59E0B; /* orange-500 */
-    --color-primary-foreground: #FFFFFF; /* white */
-    --color-secondary: #F8F9FA; /* gray-50 */
-    --color-secondary-foreground: #1F2937; /* gray-800 */
-    --color-accent: #F59E0B; /* orange-500 */
-    --color-accent-foreground: #FFFFFF; /* white */
-    --color-success: #10B981; /* emerald-500 */
-    --color-success-foreground: #FFFFFF; /* white */
-    --color-warning: #D97706; /* amber-600 */
-    --color-warning-foreground: #FFFFFF; /* white */
-    --color-error: #DC2626; /* red-600 */
-    --color-error-foreground: #FFFFFF; /* white */
-    --color-destructive: #DC2626; /* red-600 */
-    --color-destructive-foreground: #FFFFFF; /* white */
-    --color-surface: #F8F9FA; /* gray-50 */
-    --color-text-primary: #1F2937; /* gray-800 */
-    --color-text-secondary: #6B7280; /* gray-500 */
-    --color-success-deep: #059669; /* emerald-600 */
-    --bento-bg: #f6f2e8;
-    --bento-bg-deep: #efe6d2;
-    --bento-card: rgba(255, 253, 247, 0.94);
-    --bento-card-strong: rgba(255, 254, 250, 0.98);
-    --bento-text: #211b14;
-    --bento-soft-text: #493d2d;
-    --bento-muted: #776850;
-    --bento-border: rgba(109, 89, 57, 0.2);
-    --bento-chip: rgba(107, 89, 61, 0.09);
-    --bento-chip-hover: rgba(255, 138, 0, 0.14);
-    --bento-field: #fff9ec;
-    --bento-shadow: 0 14px 34px rgba(76, 55, 23, 0.1);
+    /* Linear Modern Light Theme (Default when .dark is absent) */
+    --color-background: #F6F8FD;
+    --color-foreground: #0F1015;
+    --color-border: rgba(0, 0, 0, 0.08);
+    --color-input: #FFFFFF;
+    --color-ring: #4353FF;
+    --color-card: #FFFFFF;
+    --color-card-foreground: #0F1015;
+    --color-popover: #FFFFFF;
+    --color-popover-foreground: #0F1015;
+    --color-muted: rgba(0, 0, 0, 0.04);
+    --color-muted-foreground: #636779;
+    --color-primary: #4353FF;
+    --color-primary-foreground: #FFFFFF;
+    --color-secondary: rgba(0, 0, 0, 0.05);
+    --color-secondary-foreground: #0F1015;
+    --color-accent: #4353FF;
+    --color-accent-foreground: #FFFFFF;
+    --color-success: #10B981;
+    --color-success-foreground: #FFFFFF;
+    --color-warning: #F59E0B;
+    --color-warning-foreground: #FFFFFF;
+    --color-error: #EF4444;
+    --color-error-foreground: #FFFFFF;
+    --color-destructive: #EF4444;
+    --color-destructive-foreground: #FFFFFF;
+    --color-surface: #FFFFFF;
+    --color-text-primary: #0F1015;
+    --color-text-secondary: #636779;
+    --color-success-deep: #059669;
+    --bento-bg: #F6F8FD;
+    --bento-bg-deep: #ECEFF3;
+    --bento-card: rgba(255, 255, 255, 0.90);
+    --bento-card-strong: #FFFFFF;
+    --bento-text: #0F1015;
+    --bento-soft-text: #20222B;
+    --bento-muted: #636779;
+    --bento-border: rgba(0, 0, 0, 0.08);
+    --bento-chip: rgba(0, 0, 0, 0.04);
+    --bento-chip-hover: rgba(67, 83, 245, 0.10);
+    --bento-field: #FFFFFF;
+    --bento-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
   }
 
   .dark {
-    /* Dark Theme: deep dark with coral accents */
-    --color-background: #181818; /* bento theme background */
-    --color-foreground: #f5f3e5; /* warm white text */
-    --color-border: #222222; /* dark border */
-    --color-input: #1A1A1A; /* dark input */
-    --color-ring: #FFA500; /* orange ring/accent */
-    --color-card: #1A1A1A; /* dark card */
-    --color-card-foreground: #ffffff; /* white card text */
-    --color-popover: #1A1A1A; /* dark popover */
-    --color-popover-foreground: #ffffff; /* white popover text */
-    --color-muted: #222222; /* muted dark */
-    --color-muted-foreground: #888888; /* muted gray */
-    --color-primary: #FFA500; /* orange for primary buttons/accents */
-    --color-primary-foreground: #000000; /* black */
-    --color-secondary: #222222; /* dark secondary */
-    --color-secondary-foreground: #ffffff; /* white secondary text */
-    --color-accent: #FFA500; /* orange accent */
-    --color-accent-foreground: #000000; /* black */
-    --color-success: #10B981; /* emerald-500 */
-    --color-success-foreground: #ffffff; /* white */
-    --color-warning: #D97706; /* amber-600 */
-    --color-warning-foreground: #ffffff; /* white */
-    --color-error: #EF4444; /* red-500 */
-    --color-error-foreground: #ffffff; /* white */
-    --color-destructive: #EF4444; /* red-500 */
-    --color-destructive-foreground: #ffffff; /* white */
-    --color-surface: #222222; /* dark surface */
-    --color-text-primary: #ffffff; /* white */
-    --color-text-secondary: #FFA500; /* orange for highlights only */
-    --color-success-deep: #059669; /* emerald-600 */
-    --bento-bg: #181818;
-    --bento-bg-deep: #101010;
-    --bento-card: rgba(24, 24, 24, 0.75);
-    --bento-card-strong: rgba(24, 24, 24, 0.95);
-    --bento-text: #fffef5;
-    --bento-soft-text: #f5f3e5;
-    --bento-muted: #a7a289;
-    --bento-border: rgba(167, 162, 137, 0.18);
-    --bento-chip: rgba(167, 162, 137, 0.1);
-    --bento-chip-hover: rgba(255, 138, 0, 0.1);
-    --bento-field: #181818;
-    --bento-shadow: 0 12px 48px rgba(0, 0, 0, 0.55);
+    /* Linear Modern Dark Theme */
+    --color-background: #05060D;
+    --color-foreground: #EDEDEF;
+    --color-border: rgba(255, 255, 255, 0.06);
+    --color-input: #0a0a0c;
+    --color-ring: #4353FF;
+    --color-card: #0a0a0c;
+    --color-card-foreground: #EDEDEF;
+    --color-popover: #0a0a0c;
+    --color-popover-foreground: #EDEDEF;
+    --color-muted: rgba(255, 255, 255, 0.05);
+    --color-muted-foreground: #8A8F98;
+    --color-primary: #4353FF;
+    --color-primary-foreground: #FFFFFF;
+    --color-secondary: rgba(255, 255, 255, 0.06);
+    --color-secondary-foreground: #EDEDEF;
+    --color-accent: #4353FF;
+    --color-accent-foreground: #FFFFFF;
+    --color-success: #10B981;
+    --color-success-foreground: #FFFFFF;
+    --color-warning: #F59E0B;
+    --color-warning-foreground: #FFFFFF;
+    --color-error: #EF4444;
+    --color-error-foreground: #FFFFFF;
+    --color-destructive: #EF4444;
+    --color-destructive-foreground: #FFFFFF;
+    --color-surface: #0a0a0c;
+    --color-text-primary: #EDEDEF;
+    --color-text-secondary: #8A8F98;
+    --color-success-deep: #059669;
+    --bento-bg: #05060D;
+    --bento-bg-deep: #020307;
+    --bento-card: rgba(10, 10, 12, 0.75);
+    --bento-card-strong: #0a0a0c;
+    --bento-text: #EDEDEF;
+    --bento-soft-text: #EDEDEF;
+    --bento-muted: #8A8F98;
+    --bento-border: rgba(255, 255, 255, 0.06);
+    --bento-chip: rgba(255, 255, 255, 0.05);
+    --bento-chip-hover: rgba(67, 83, 245, 0.15);
+    --bento-field: #0a0a0c;
+    --bento-shadow: 0 12px 48px rgba(0, 0, 0, 0.7);
   }
 
   * {
@@ -164,6 +164,116 @@
   .transition-smooth {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  /* Linear Atmospheric & Utility Classes */
+  .linear-canvas {
+    background: radial-gradient(ellipse at top, #EEF0F8 0%, #F6F8FD 50%, #ECEEF2 100%);
+    position: relative;
+    overflow-x: hidden;
+  }
+  .dark .linear-canvas {
+    background: radial-gradient(ellipse at top, #0e0e17 0%, #05060D 50%, #020307 100%);
+  }
+
+  .linear-grid {
+    background-size: 48px 48px;
+    background-image: 
+      linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  }
+  .dark .linear-grid {
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  }
+
+  .linear-card {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.02), 0 2px 16px rgba(0, 0, 0, 0.04);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .dark .linear-card {
+    background: rgba(10, 10, 12, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 2px 20px rgba(0, 0, 0, 0.45);
+  }
+
+  .linear-card:hover {
+    border-color: rgba(67, 83, 245, 0.35);
+    box-shadow: 0 0 0 1px rgba(67, 83, 245, 0.25), 0 8px 24px rgba(67, 83, 245, 0.08);
+  }
+  .dark .linear-card:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 1px rgba(67, 83, 245, 0.3), 0 10px 32px rgba(0, 0, 0, 0.6), 0 0 30px rgba(67, 83, 245, 0.12);
+  }
+
+  .linear-btn-primary {
+    background: #4353FF;
+    color: #FFFFFF;
+    font-weight: 600;
+    box-shadow: 0 0 0 1px rgba(67, 83, 245, 0.5), 0 4px 14px rgba(67, 83, 245, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .linear-btn-primary:hover {
+    background: #5668FF;
+    box-shadow: 0 0 0 1px rgba(86, 104, 255, 0.7), 0 6px 20px rgba(67, 83, 245, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .linear-btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .linear-btn-secondary {
+    background: rgba(0, 0, 0, 0.04);
+    color: #0F1015;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+  }
+  .dark .linear-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: #EDEDEF;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .linear-btn-secondary:hover {
+    background: rgba(67, 83, 245, 0.08);
+    border-color: rgba(67, 83, 245, 0.3);
+    color: #4353FF;
+    transform: translateY(-1px);
+  }
+  .dark .linear-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+    color: #FFFFFF;
+    transform: translateY(-1px);
+  }
+
+  .linear-gradient-text {
+    background: linear-gradient(180deg, #0F1015 0%, #353844 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .dark .linear-gradient-text {
+    background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.68) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .linear-pill-badge {
+    background: rgba(67, 83, 245, 0.1);
+    border: 1px solid rgba(67, 83, 245, 0.22);
+    color: #4353FF;
+  }
+  .dark .linear-pill-badge {
+    background: rgba(67, 83, 245, 0.12);
+    border: 1px solid rgba(67, 83, 245, 0.25);
+    color: #828FFF;
+  }
 }
 
 @layer utilities {
@@ -229,3 +339,32 @@ fication animations */
   .animate-bounce-in {
     animation: bounce-in 0.6s ease-out;
   }
+
+  /* Creative Hero Floating Animations */
+  @keyframes floatSlow1 {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-9px) rotate(0.5deg); }
+  }
+
+  @keyframes floatSlow2 {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(9px) rotate(-0.5deg); }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 0.95; transform: scale(1.05); }
+  }
+
+  .animate-float-1 {
+    animation: floatSlow1 5.5s ease-in-out infinite;
+  }
+
+  .animate-float-2 {
+    animation: floatSlow2 6.5s ease-in-out infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulseGlow 4s ease-in-out infinite;
+  }
+

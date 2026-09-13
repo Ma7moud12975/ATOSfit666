@@ -53,7 +53,7 @@ const FeatureShowcase = () => {
                 placeholder="Paste GIF URL (https://...)"
                 className="px-3 py-2 rounded-l-md w-72 text-black"
               />
-              <button onClick={useRemote} className="bg-[#FF8A00] px-4 py-2 rounded-r-md text-black font-semibold">Load</button>
+              <button onClick={useRemote} className="bg-[#4353FF] px-4 py-2 rounded-r-md text-black font-semibold">Load</button>
             </div>
             <p className="text-sm text-slate-300 mt-3">Or add <code className="bg-slate-800 px-1 rounded">video-analysis-demo.gif</code> to <code className="bg-slate-800 px-1 rounded">public/assets/images</code></p>
           </div>

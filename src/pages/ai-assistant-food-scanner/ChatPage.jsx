@@ -90,6 +90,7 @@ const ChatPage = () => {
   }, [messages, isTyping]);
 
   const CHATBOT_API_KEY = import.meta.env.VITE_CHATBOT_API_KEY || '';
+  const CHATBOT_MODEL_NAME = import.meta.env.VITE_CHATBOT_MODEL_NAME || 'gemini-3.6-flash';
 
   const handleSendMessage = async (message) => {
     const userMessage = { id: Date.now(), message, isUser: true, timestamp: new Date() };
@@ -106,7 +107,7 @@ const ChatPage = () => {
         throw new Error('Gemini API key is missing. Add a fresh VITE_CHATBOT_API_KEY to .env.');
       }
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${CHATBOT_API_KEY}`;
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${CHATBOT_MODEL_NAME}:generateContent?key=${CHATBOT_API_KEY}`;
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -238,13 +239,13 @@ User message: ${message}`
               {/* Chat Header */}
               <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--bento-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'var(--bento-chip)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(255, 138, 0,0.15)', border: '1px solid rgba(255, 138, 0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(255, 138, 0,0.2)' }}>
-                    <Icon name="Bot" size={20} color="#FF8A00" />
+                  <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(67, 83, 245, 0.12)', border: '1px solid rgba(67, 83, 245, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(67, 83, 245, 0.15)' }}>
+                    <Icon name="Bot" size={20} color="#4353FF" />
                   </div>
                   <div>
                     <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--bento-text)', margin: 0 }}>{t('chat.coach')}</h3>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF8A00', boxShadow: '0 0 8px #FF8A00' }}></span>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10B981', boxShadow: '0 0 8px #10B981' }}></span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--bento-muted)', fontWeight: 600 }}>{t('chat.ready')}</span>
                     </div>
                   </div>

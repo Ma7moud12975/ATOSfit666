@@ -18,7 +18,7 @@ const PresetPlans = ({ onStartPlan }) => {
       ],
       targetMuscles: 'Legs, Glutes',
       calories: 350,
-      color: '#a7a289' // Olive theme
+      color: 'var(--bento-muted)' // Olive theme
     },
     {
       id: 'upper-body',
@@ -35,7 +35,7 @@ const PresetPlans = ({ onStartPlan }) => {
       ],
       targetMuscles: 'Chest, Arms',
       calories: 300,
-      color: '#FF8A00' // Coral theme
+      color: '#4353FF'
     },
     {
       id: 'core-focused',
@@ -52,7 +52,7 @@ const PresetPlans = ({ onStartPlan }) => {
       ],
       targetMuscles: 'Core, Abs',
       calories: 280,
-      color: '#FF8A00'
+      color: '#4353FF'
     },
     {
       id: 'full-body',
@@ -70,7 +70,7 @@ const PresetPlans = ({ onStartPlan }) => {
       ],
       targetMuscles: 'Full Body',
       calories: 450,
-      color: '#FF8A00'
+      color: '#4353FF'
     },
     {
       id: 'beginner-friendly',
@@ -87,7 +87,7 @@ const PresetPlans = ({ onStartPlan }) => {
       ],
       targetMuscles: 'Full Body',
       calories: 200,
-      color: '#a7a289'
+      color: 'var(--bento-muted)'
     },
     {
       id: 'cardio-intense',
@@ -103,16 +103,16 @@ const PresetPlans = ({ onStartPlan }) => {
       ],
       targetMuscles: 'Cardio',
       calories: 400,
-      color: '#FF8A00'
+      color: '#4353FF'
     }
   ];
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
-      case 'Beginner': return { bg: 'rgba(167,162,137,0.15)', text: '#a7a289', border: 'rgba(167,162,137,0.3)' };
-      case 'Intermediate': return { bg: 'rgba(255, 138, 0,0.1)', text: '#FF8A00', border: 'rgba(255, 138, 0,0.25)' };
-      case 'Advanced': return { bg: 'rgba(255, 138, 0,0.2)', text: '#FF8A00', border: 'rgba(255, 138, 0,0.4)' };
-      default: return { bg: 'rgba(167,162,137,0.1)', text: '#a7a289', border: 'rgba(167,162,137,0.2)' };
+      case 'Beginner': return { bg: 'rgba(167,162,137,0.15)', text: 'var(--bento-muted)', border: 'rgba(167,162,137,0.3)' };
+      case 'Intermediate': return { bg: 'rgba(67, 83, 255, 0.1)', text: '#4353FF', border: 'rgba(67, 83, 255, 0.25)' };
+      case 'Advanced': return { bg: 'rgba(67, 83, 255, 0.2)', text: '#4353FF', border: 'rgba(67, 83, 255, 0.4)' };
+      default: return { bg: 'rgba(167,162,137,0.1)', text: 'var(--bento-muted)', border: 'rgba(167,162,137,0.2)' };
     }
   };
 
@@ -140,15 +140,15 @@ const PresetPlans = ({ onStartPlan }) => {
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '1.25rem', paddingBottom: '1.25rem', borderBottom: '1px solid var(--bento-border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--bento-text)', fontSize: '0.8rem', fontWeight: 600 }}>
-            <Icon name="Clock" size={14} color="#FF8A00" />
+            <Icon name="Clock" size={14} color="#4353FF" />
             {plan.duration}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--bento-text)', fontSize: '0.8rem', fontWeight: 600 }}>
-            <Icon name="Zap" size={14} color="#FF8A00" />
+            <Icon name="Zap" size={14} color="#4353FF" />
             {plan.calories} cal
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--bento-text)', fontSize: '0.8rem', fontWeight: 600 }}>
-            <Icon name="Target" size={14} color="#FF8A00" />
+            <Icon name="Target" size={14} color="#4353FF" />
             {plan.targetMuscles}
           </div>
         </div>
@@ -165,7 +165,7 @@ const PresetPlans = ({ onStartPlan }) => {
               </div>
             ))}
             {plan.exercises.length > 3 && (
-              <div style={{ color: '#FF8A00', fontSize: '0.75rem', fontWeight: 700, marginTop: '4px' }}>
+              <div style={{ color: '#4353FF', fontSize: '0.75rem', fontWeight: 700, marginTop: '4px' }}>
                 +{plan.exercises.length - 3} more exercises
               </div>
             )}
@@ -177,7 +177,7 @@ const PresetPlans = ({ onStartPlan }) => {
           style={{ width: '100%', justifyContent: 'center', padding: '0.8rem' }}
           onClick={() => onStartPlan(plan)}
         >
-          <Icon name="Play" size={16} color="#181818" />
+          <Icon name="Play" size={16} color="#FFFFFF" />
           Start Plan
         </button>
       </div>

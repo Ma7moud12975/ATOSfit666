@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -24,10 +24,10 @@ const ExerciseCard = ({ exercise }) => {
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
-      case 'Beginner': return { bg: 'rgba(167,162,137,0.15)', text: '#a7a289', border: 'rgba(167,162,137,0.3)' };
-      case 'Intermediate': return { bg: 'rgba(255, 138, 0,0.1)', text: '#FF8A00', border: 'rgba(255, 138, 0,0.25)' };
-      case 'Advanced': return { bg: 'rgba(255, 138, 0,0.2)', text: '#FF8A00', border: 'rgba(255, 138, 0,0.4)' };
-      default: return { bg: 'rgba(167,162,137,0.1)', text: '#a7a289', border: 'rgba(167,162,137,0.2)' };
+      case 'Beginner': return { bg: 'rgba(167,162,137,0.15)', text: 'var(--bento-muted)', border: 'rgba(167,162,137,0.3)' };
+      case 'Intermediate': return { bg: 'rgba(67, 83, 245,0.1)', text: '#4353FF', border: 'rgba(67, 83, 245,0.25)' };
+      case 'Advanced': return { bg: 'rgba(67, 83, 245,0.2)', text: '#4353FF', border: 'rgba(67, 83, 245,0.4)' };
+      default: return { bg: 'rgba(167,162,137,0.1)', text: 'var(--bento-muted)', border: 'rgba(167,162,137,0.2)' };
     }
   };
 
@@ -35,6 +35,8 @@ const ExerciseCard = ({ exercise }) => {
     'Push-ups': 'https://i.pinimg.com/originals/47/0d/31/470d318a551421e46c3891fb1f04dd50.gif',
     'Push Ups': 'https://i.pinimg.com/originals/47/0d/31/470d318a551421e46c3891fb1f04dd50.gif',
     'Squats': 'https://i.pinimg.com/originals/27/30/c2/2730c2da52a5f9200caa7e5d8705efde.gif',
+    'Bodyweight Squat': 'https://i.pinimg.com/originals/27/30/c2/2730c2da52a5f9200caa7e5d8705efde.gif',
+    'Jump Squat': 'https://i.pinimg.com/originals/27/30/c2/2730c2da52a5f9200caa7e5d8705efde.gif',
     'Lunges': 'https://i.pinimg.com/originals/66/78/58/6678589817d6026fab7bd23838a8e3eb.gif',
     'Burpees': 'https://i.pinimg.com/originals/f0/a3/da/f0a3da2890f6edf4c7b45845fa14e39c.gif',
     'Mountain Climbers': 'https://i.pinimg.com/originals/bd/f2/a3/bdf2a3ec9beb4f231033af0d744057bb.gif',
@@ -46,6 +48,7 @@ const ExerciseCard = ({ exercise }) => {
     'Knee Plank': 'https://i.pinimg.com/originals/8d/51/1e/8d511edb34e36c468aef1027f7642621.gif',
     'Knee Push Ups': 'https://i.pinimg.com/originals/f6/20/c9/f620c92cf9f2631338f51f711669d320.gif',
     'Sit Ups': 'https://i.pinimg.com/originals/53/05/a5/5305a5d4e53c24604ccdc1c1ba564561.gif',
+    'Sit-Ups': 'https://i.pinimg.com/originals/53/05/a5/5305a5d4e53c24604ccdc1c1ba564561.gif',
     'Reverse Straight Arm Plank': 'https://i.pinimg.com/736x/37/ca/7e/37ca7ebf394ecc3df96f3c2c700f9738.jpg',
     'Straight Arm Plank': 'https://i.pinimg.com/736x/d2/42/af/d242af1590d71c24ab930d6588f710d3.jpg',
     'Reverse Plank': 'https://i.pinimg.com/736x/f4/1e/0f/f41e0f356b1cd9202ad0dda957cee97a.jpg',
@@ -100,7 +103,7 @@ const ExerciseCard = ({ exercise }) => {
         style={{ width: '100%', justifyContent: 'center', padding: '0.8rem' }}
         onClick={handleStartWorkout}
       >
-        <Icon name="Play" size={16} color="#181818" />
+        <Icon name="Play" size={16} color="#FFFFFF" />
         {t('dashboard.startWorkout')}
       </button>
     </div>
