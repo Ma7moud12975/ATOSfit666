@@ -75,19 +75,23 @@ export async function saveCloudUserProfile(userProfile, trainingMesocycle = null
   let supabaseSuccess = false;
   try {
     if (supabase && typeof supabase.from === 'function') {
+      const basePayload = {
+        id: userId,
+        email: enrichedProfile.email,
+        full_name: enrichedProfile.name,
+        role: 'user',
+        fitness_level: enrichedProfile.fitnessLevel || 'intermediate',
+        goals: Array.isArray(enrichedProfile.goals) ? enrichedProfile.goals : [enrichedProfile.primaryGoal].filter(Boolean),
+        age: Number(enrichedProfile.age) || null,
+        height: Number(enrichedProfile.height) || null,
+        weight: Number(enrichedProfile.weight) || null,
+        last_login: now,
+      };
+
       const { data, error } = await supabase
         .from('users')
         .upsert({
-          id: userId,
-          email: enrichedProfile.email,
-          full_name: enrichedProfile.name,
-          role: 'user',
-          fitness_level: enrichedProfile.fitnessLevel || 'intermediate',
-          goals: Array.isArray(enrichedProfile.goals) ? enrichedProfile.goals : [enrichedProfile.primaryGoal].filter(Boolean),
-          age: Number(enrichedProfile.age) || null,
-          height: Number(enrichedProfile.height) || null,
-          weight: Number(enrichedProfile.weight) || null,
-          last_login: now,
+          ...basePayload,
           raw_user_meta_data: fullPayload
         }, { onConflict: 'id' })
         .select()
@@ -97,7 +101,16 @@ export async function saveCloudUserProfile(userProfile, trainingMesocycle = null
         supabaseSuccess = true;
         console.log('[CloudSync] Successfully saved to Supabase:', userId);
       } else {
-        console.warn('[CloudSync] Supabase upsert non-blocking warning:', error.message);
+        // Fallback without raw_user_meta_data in case column doesn't exist
+        const { error: fallbackErr } = await supabase
+          .from('users')
+          .upsert(basePayload, { onConflict: 'id' });
+        if (!fallbackErr) {
+          supabaseSuccess = true;
+          console.log('[CloudSync] Successfully saved base profile to Supabase:', userId);
+        } else {
+          console.warn('[CloudSync] Supabase upsert notice:', fallbackErr.message);
+        }
       }
     }
   } catch (sbErr) {
@@ -161,7 +174,8 @@ export async function fetchCloudUserProfile(identifier) {
           weight: data.weight,
           onboardingCompleted: true,
         };
-        return { user: reconstructedUser, trainingPlan: null };
+        const activePlan = getUserTrainingPlan(data.id, reconstructedUser);
+        return { user: reconstructedUser, trainingPlan: activePlan };
       }
     }
   } catch (sbErr) {
