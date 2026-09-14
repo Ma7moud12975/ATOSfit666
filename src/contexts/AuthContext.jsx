@@ -1,76 +1,108 @@
-﻿import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { AuthClient } from '@dfinity/auth-client';
 import { Principal } from '@dfinity/principal';
-import { getOrCreateSupabaseUser, getSupabaseUserStats } from '../utils/icpSupabaseAuth';
 import { supabase } from '../utils/supabase';
 import {
   getSavedGoogleUser,
   saveGoogleSession,
   clearGoogleSession,
   formatGoogleUser,
-  signInWithGoogle as initiateGoogleSignIn
+  signInWithGoogle as initiateGoogleSignIn,
 } from '../utils/googleAuth';
-import { fetchCloudUserProfile, hydrateLocalSession } from '../utils/cloudSync';
+import {
+  fetchCloudUserProfile,
+  hydrateLocalSession,
+  saveCloudUserProfile,
+} from '../utils/cloudSync';
 
 const AuthContext = createContext(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };
 
 export const AuthProvider = ({ children }) => {
-  const [authClient, setAuthClient] = useState(null);
-  const [identity, setIdentity] = useState(null);
-  const [principal, setPrincipal] = useState(null);
-  const [googleUser, setGoogleUser] = useState(null);
+  const [authClient, setAuthClient]       = useState(null);
+  const [identity, setIdentity]           = useState(null);
+  const [principal, setPrincipal]         = useState(null);
+  const [googleUser, setGoogleUser]       = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [supabaseUser, setSupabaseUser] = useState(null);
-  const [userStats, setUserStats] = useState(null);
-  const [isNewUser, setIsNewUser] = useState(false);
+  const [loading, setLoading]             = useState(true);
+  const [supabaseUser, setSupabaseUser]   = useState(null);
+  const [userStats, setUserStats]         = useState(null);
+  const [isNewUser, setIsNewUser]         = useState(false);
 
   const isProduction =
     import.meta.env.PROD ||
-    (typeof window !== 'undefined' && (
-      window.location.hostname.includes('vercel.app') ||
-      window.location.hostname.includes('ic0.app') ||
-      window.location.hostname.includes('icp0.io')
-    ));
+    (typeof window !== 'undefined' &&
+      (window.location.hostname.includes('vercel.app') ||
+       window.location.hostname.includes('ic0.app') ||
+       window.location.hostname.includes('icp0.io')));
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // Handle Supabase OAuth callback (fires after Google redirect)
+  // ─────────────────────────────────────────────────────────────────────────
   useEffect(() => {
-    initializeMasterAuth();
-
-    // Listen for Supabase auth state change (e.g. Google OAuth redirect callback)
     let authSub = null;
     try {
       if (supabase && typeof supabase.auth?.onAuthStateChange === 'function') {
         const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
           console.log('[AuthContext] Supabase Auth event:', event);
+
           if (session?.user) {
+            const rawUser = session.user;
             const googleProfile = formatGoogleUser({
-              id: session.user.id,
-              sub: session.user.id,
-              email: session.user.email,
-              name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0],
-              picture: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture,
+              id: rawUser.id,
+              sub: rawUser.id,
+              email: rawUser.email,
+              name:
+                rawUser.user_metadata?.full_name ||
+                rawUser.user_metadata?.name ||
+                rawUser.email?.split('@')[0],
+              picture:
+                rawUser.user_metadata?.avatar_url ||
+                rawUser.user_metadata?.picture,
             });
 
             saveGoogleSession(googleProfile);
             setGoogleUser(googleProfile);
             setIsAuthenticated(true);
 
-            // Fetch and hydrate cloud profile
-            const cloudData = await fetchCloudUserProfile(session.user.email);
-            if (cloudData && cloudData.user && cloudData.user.onboardingCompleted) {
+            // Fetch existing cloud profile
+            const cloudData = await fetchCloudUserProfile(rawUser.email);
+            if (cloudData?.user?.onboardingCompleted) {
               hydrateLocalSession(cloudData);
+              setSupabaseUser(cloudData.user);
               setIsNewUser(false);
+
+              // Navigate to dashboard
+              if (window.location.pathname !== '/dashboard') {
+                window.location.replace('/dashboard');
+              }
             } else {
+              // New user → pre-fill minimal profile and send to onboarding
+              const minimalUser = {
+                id: googleProfile.id,
+                name: googleProfile.name,
+                email: googleProfile.email,
+                picture: googleProfile.picture,
+                provider: 'google',
+                onboardingCompleted: false,
+              };
+              localStorage.setItem('user', JSON.stringify(minimalUser));
               setIsNewUser(true);
+
+              if (
+                window.location.pathname !== '/onboarding' &&
+                window.location.pathname !== '/login-screen'
+              ) {
+                window.location.replace('/onboarding');
+              }
             }
+
+            setLoading(false);
           }
         });
         authSub = data?.subscription;
@@ -86,15 +118,35 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // Initial auth check on mount
+  // ─────────────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    initializeMasterAuth();
+  }, []);
+
   const initializeMasterAuth = async () => {
     try {
-      // 1. Check for active Google session first (Real user login)
+      // 1. Check for active Supabase session (persists across tabs/refresh)
+      if (supabase && typeof supabase.auth?.getSession === 'function') {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            // Session already handled by onAuthStateChange
+            setLoading(false);
+            return;
+          }
+        } catch {}
+      }
+
+      // 2. Check for saved Google session (GIS path or previous session)
       const savedGoogle = getSavedGoogleUser();
       const localUserRaw = localStorage.getItem('user');
 
       if (savedGoogle) {
         setGoogleUser(savedGoogle);
         setIsAuthenticated(true);
+
         if (localUserRaw) {
           try {
             const localUser = JSON.parse(localUserRaw);
@@ -103,12 +155,15 @@ export const AuthProvider = ({ children }) => {
           } catch {
             setIsNewUser(true);
           }
+        } else {
+          setIsNewUser(true);
         }
+
         setLoading(false);
         return;
       }
 
-      // 2. Check if a local user exists in localStorage
+      // 3. Check local user in localStorage
       if (localUserRaw) {
         try {
           const parsed = JSON.parse(localUserRaw);
@@ -119,27 +174,26 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
             return;
           }
-        } catch {
-          // ignore
-        }
+        } catch {}
       }
 
-      // 3. Fallback ICP or Dev mode
-      const envFake = import.meta.env.VITE_FAKE_AUTH === 'true';
+      // 4. Dev fake auth fallback
+      const envFake    = import.meta.env.VITE_FAKE_AUTH === 'true';
       const envDisable = import.meta.env.VITE_DISABLE_FAKE_AUTH === 'true';
       const shouldFakeDev = !isProduction && !envDisable && envFake;
 
       if (shouldFakeDev) {
-        const fakePrincipal = Principal.fromText(import.meta.env.VITE_FAKE_PRINCIPAL || '2vxsx-fae');
-        const fakeIdentity = { getPrincipal: () => fakePrincipal };
-        setIdentity(fakeIdentity);
+        const fakePrincipal = Principal.fromText(
+          import.meta.env.VITE_FAKE_PRINCIPAL || '2vxsx-fae'
+        );
+        setIdentity({ getPrincipal: () => fakePrincipal });
         setPrincipal(fakePrincipal);
         setIsAuthenticated(true);
         setLoading(false);
         return;
       }
 
-      // User not authenticated yet
+      // Not authenticated
       setIsAuthenticated(false);
       setLoading(false);
     } catch (err) {
@@ -148,33 +202,56 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = async (options = {}) => {
-    return await initiateGoogleSignIn(options);
-  };
-
-  const logout = async () => {
+  // ─────────────────────────────────────────────────────────────────────────
+  // Called by GIS path (when user signed in via popup, not redirect)
+  // ─────────────────────────────────────────────────────────────────────────
+  const handleGisSignIn = useCallback(async (googleProfile) => {
     setLoading(true);
     try {
-      // Clear Google
+      saveGoogleSession(googleProfile);
+      setGoogleUser(googleProfile);
+      setIsAuthenticated(true);
+
+      // Check if existing profile with completed onboarding in cloud
+      const cloudData = await fetchCloudUserProfile(googleProfile.email);
+      if (cloudData?.user?.onboardingCompleted) {
+        hydrateLocalSession(cloudData);
+        setSupabaseUser(cloudData.user);
+        setIsNewUser(false);
+        return { isNewUser: false, user: cloudData.user };
+      } else {
+        const minimalUser = {
+          ...googleProfile,
+          onboardingCompleted: false,
+        };
+        localStorage.setItem('user', JSON.stringify(minimalUser));
+        setSupabaseUser(minimalUser);
+        setIsNewUser(true);
+        // Only save initial minimal record to Supabase if brand new
+        await saveCloudUserProfile(minimalUser);
+        return { isNewUser: true, user: minimalUser };
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loginWithGoogle = useCallback(async (options = {}) => {
+    return await initiateGoogleSignIn(options);
+  }, []);
+
+  const logout = useCallback(async () => {
+    setLoading(true);
+    try {
       clearGoogleSession();
       setGoogleUser(null);
 
-      // Clear Supabase
       if (supabase && typeof supabase.auth?.signOut === 'function') {
-        try {
-          await supabase.auth.signOut();
-        } catch (e) {
-          console.warn('Supabase signout warning:', e);
-        }
+        try { await supabase.auth.signOut(); } catch {}
       }
 
-      // Clear ICP
       if (authClient) {
-        try {
-          await authClient.logout();
-        } catch (e) {
-          console.warn('ICP logout warning:', e);
-        }
+        try { await authClient.logout(); } catch {}
       }
 
       setIdentity(null);
@@ -184,7 +261,6 @@ export const AuthProvider = ({ children }) => {
       setUserStats(null);
       setIsNewUser(false);
 
-      // Clear user storage
       localStorage.removeItem('user');
       localStorage.removeItem('atos_google_session');
     } catch (error) {
@@ -192,17 +268,16 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authClient]);
 
-  const login = async () => {
-    // Legacy ICP fallback login
+  // Legacy ICP fallback
+  const login = useCallback(async () => {
     const fakePrincipal = Principal.fromText('2vxsx-fae');
-    const fakeIdentity = { getPrincipal: () => fakePrincipal };
-    setIdentity(fakeIdentity);
+    setIdentity({ getPrincipal: () => fakePrincipal });
     setPrincipal(fakePrincipal);
     setIsAuthenticated(true);
     setLoading(false);
-  };
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -221,6 +296,7 @@ export const AuthProvider = ({ children }) => {
         isNewUser,
         setSupabaseUser,
         setIsNewUser,
+        handleGisSignIn,
       }}
     >
       {children}
