@@ -172,23 +172,62 @@ export const getTodayWorkoutStats = (date = new Date()) => {
   const dateKey = toDateKey(date);
   const allProgress = getAllDailyProgress();
   const progress = allProgress[dateKey] || {};
-  const plan = readJson(STORAGE_KEYS.TODAY_PLAN, null);
+  let plan = readJson(STORAGE_KEYS.TODAY_PLAN, null);
+  let mesocycleDay = null;
+
+  try {
+    const user = getUserProfile();
+    const accountId = getAccountId(user.principal || user.id || user.email || user.name);
+    const rawMesocycle = readJson(`atos_training_mesocycle:${accountId}`, null);
+    if (rawMesocycle && Array.isArray(rawMesocycle.days)) {
+      mesocycleDay = rawMesocycle.days.find(d => d.date === dateKey) || rawMesocycle.days.find(d => !d.completed) || rawMesocycle.days[0];
+      if ((!plan || !plan.exercises?.length) && mesocycleDay) {
+        plan = {
+          name: mesocycleDay.title,
+          titleAr: mesocycleDay.titleAr,
+          phase: mesocycleDay.phase,
+          phaseAr: mesocycleDay.phaseAr,
+          isRestDay: mesocycleDay.isRestDay,
+          dayIndex: mesocycleDay.dayIndex,
+          weekNumber: mesocycleDay.weekNumber,
+          estimatedCalories: mesocycleDay.estimatedCalories,
+          estimatedDurationMin: mesocycleDay.estimatedDurationMin,
+          exercises: (mesocycleDay.exercises || []).map(ex => ({
+            name: ex.name,
+            nameAr: ex.nameAr,
+            category: ex.category,
+            difficulty: mesocycleDay.phase,
+            duration: ex.durationSec ? `${Math.round(ex.durationSec / 60)} min` : `${ex.sets} sets`,
+            sets: ex.sets,
+            reps: ex.reps,
+            completed: Boolean(ex.completed)
+          }))
+        };
+      }
+    }
+  } catch {}
+
   const planItems = plan?.exercises || plan?.items || [];
   const completedPlanItems = planItems.filter(item => item.completed);
+  const isRestDay = Boolean(plan?.isRestDay || mesocycleDay?.isRestDay);
+  const isPlanDone = planItems.length > 0 && completedPlanItems.length === planItems.length;
+  const isCompleted = (Number(progress.workoutsCompleted) || 0) > 0 || isPlanDone || Boolean(mesocycleDay?.completed);
 
   return {
     date: dateKey,
     plan,
     planItems,
+    mesocycleDay,
+    isRestDay,
     completedPlanItems,
     completedPlanCount: completedPlanItems.length,
     totalPlanCount: planItems.length,
-    workoutsCompleted: Number(progress.workoutsCompleted) || 0,
-    caloriesBurned: Number(progress.caloriesBurned) || 0,
-    totalWorkoutTime: Number(progress.totalWorkoutTime) || 0,
+    workoutsCompleted: Number(progress.workoutsCompleted) || (isCompleted && !isRestDay ? 1 : 0),
+    caloriesBurned: Number(progress.caloriesBurned) || (mesocycleDay?.actualCaloriesBurned || 0),
+    totalWorkoutTime: Number(progress.totalWorkoutTime) || (mesocycleDay?.actualDurationSec || 0),
     exercisesCompleted: progress.exercisesCompleted || [],
     exerciseDetails: progress.exerciseDetails || [],
-    isCompleted: (Number(progress.workoutsCompleted) || 0) > 0 || (planItems.length > 0 && completedPlanItems.length === planItems.length)
+    isCompleted
   };
 };
 
@@ -367,18 +406,29 @@ export const getReadinessScore = ({ todayWorkout, weeklyWorkout, hydration, nutr
 };
 
 export const getDailyMissionProgress = ({ todayWorkout, nutrition, hydration }) => {
+  const isRestDay = Boolean(todayWorkout.isRestDay || todayWorkout.plan?.isRestDay);
+  const workoutTitle = todayWorkout.isCompleted
+    ? 'Workout complete'
+    : isRestDay
+    ? (todayWorkout.plan?.name || 'Active Recovery & Mobility')
+    : (todayWorkout.plan?.name || 'Choose a workout');
+
+  const workoutMeta = todayWorkout.isCompleted
+    ? `${Math.round(todayWorkout.caloriesBurned)} kcal burned today`
+    : isRestDay
+    ? 'Active recovery day. Prioritize hydration and joint mobility.'
+    : (todayWorkout.planItems.length ? `${todayWorkout.completedPlanCount}/${todayWorkout.totalPlanCount} exercises done` : 'Start a guided workout to begin.');
+
   const items = [
     {
       id: 'workout',
-      icon: 'flame',
-      label: 'Today plan',
-      title: todayWorkout.isCompleted ? 'Workout complete' : (todayWorkout.plan?.name || 'Choose a workout'),
-      meta: todayWorkout.isCompleted
-        ? `${Math.round(todayWorkout.caloriesBurned)} kcal burned today`
-        : (todayWorkout.planItems.length ? `${todayWorkout.completedPlanCount}/${todayWorkout.totalPlanCount} exercises done` : 'Start a guided workout to begin.'),
-      done: todayWorkout.isCompleted,
-      action: 'workout',
-      cta: todayWorkout.isCompleted ? 'Review' : 'Start'
+      icon: isRestDay ? 'zap' : 'flame',
+      label: isRestDay ? 'Rest & Recovery' : 'Today plan',
+      title: workoutTitle,
+      meta: workoutMeta,
+      done: todayWorkout.isCompleted || isRestDay,
+      action: isRestDay ? 'hydrate' : 'workout',
+      cta: todayWorkout.isCompleted ? 'Review' : (isRestDay ? 'Rest' : 'Start')
     },
     {
       id: 'meal',

@@ -14,6 +14,11 @@ import {
   setHydrationGoal,
   undoHydration
 } from '../../utils/dashboardStatsService';
+import {
+  getUserTrainingPlan,
+  resetTrainingPlan
+} from '../../utils/trainingPlanEngine';
+import MonthlyPlanOverviewModal from '../../components/MonthlyPlanOverviewModal';
 import { useLanguage } from '../../contexts/LanguageContext';
 import '../../styles/bento-dashboard.css';
 
@@ -40,6 +45,7 @@ const ICONS = {
   scan:    ['M4 7V5a1 1 0 011-1h2','M17 4h2a1 1 0 011 1v2','M20 17v2a1 1 0 01-1 1h-2','M7 20H5a1 1 0 01-1-1v-2','M8 12h8'],
   fork:    ['M6 2v8','M10 2v8','M6 6h4','M8 10v12','M17 2v20','M14 2h3a3 3 0 013 3v5a3 3 0 01-3 3h-3'],
   target:  ['M12 21a9 9 0 100-18 9 9 0 000 18z','M12 17a5 5 0 100-10 5 5 0 000 10z','M12 13a1 1 0 100-2 1 1 0 000 2z'],
+  calendar: ['M19 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2z','M16 2v4','M8 2v4','M3 10h18'],
 };
 
 const normalizeText = value => String(value || '').toLowerCase();
@@ -189,7 +195,16 @@ export default function Dashboard() {
   const { language, t } = useLanguage();
   const [user, setUser] = useState({ name: 'Mahmoud Ayman', profilePicture: '' });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState(() => getDashboardSnapshot());
+  const [trainingPlan, setTrainingPlan] = useState(() => {
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      return getUserTrainingPlan(u.principal || u.id || u.email || u.name, u);
+    } catch {
+      return null;
+    }
+  });
   const [quoteIdx, setQuoteIdx] = useState(0);
   const hydration = dashboardData.hydration;
   const nutrition = dashboardData.nutrition;
@@ -216,13 +231,18 @@ export default function Dashboard() {
     try {
       const u = JSON.parse(localStorage.getItem('user') || '{}');
       if (u?.name) setUser(u);
-      setDashboardData(getDashboardSnapshot(u.principal || u.id || u.email || u.name));
+      const accountId = u.principal || u.id || u.email || u.name;
+      setDashboardData(getDashboardSnapshot(accountId));
+      setTrainingPlan(getUserTrainingPlan(accountId, u));
     } catch {}
   }, [todayKey]);
 
   useEffect(() => {
     const refreshDashboard = () => {
-      setDashboardData(getDashboardSnapshot(user.principal || user.id || user.email || user.name));
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      const accountId = user.principal || user.id || user.email || user.name || u.principal || u.id || u.email || u.name;
+      setDashboardData(getDashboardSnapshot(accountId));
+      setTrainingPlan(getUserTrainingPlan(accountId, u));
     };
     window.addEventListener(DASHBOARD_DATA_UPDATED, refreshDashboard);
     window.addEventListener('workoutCompleted', refreshDashboard);
@@ -236,6 +256,44 @@ export default function Dashboard() {
     };
   }, [user]);
 
+  const handleResetPlan = useCallback(() => {
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      const accountId = user.principal || user.id || user.email || user.name || u.principal || u.id || u.email || u.name;
+      const newPlan = resetTrainingPlan(accountId, u);
+      setTrainingPlan(newPlan);
+      setDashboardData(getDashboardSnapshot(accountId));
+    } catch (e) {
+      console.error('Error resetting plan:', e);
+    }
+  }, [user]);
+
+  const handleStartWorkout = useCallback((customDay = null) => {
+    const planToPass = customDay || todayWorkout.plan;
+    if (planToPass) {
+      navigate('/exercise-workout-screen', {
+        state: {
+          todayPlan: {
+            name: planToPass.title || planToPass.name,
+            phase: planToPass.phase,
+            isRestDay: planToPass.isRestDay,
+            dayIndex: planToPass.dayIndex,
+            exercises: (planToPass.exercises || []).map(ex => ({
+              name: ex.name,
+              category: ex.category,
+              sets: ex.sets,
+              reps: ex.reps,
+              duration: ex.durationSec ? `${Math.round(ex.durationSec / 60)} min` : `${ex.sets} sets`,
+              completed: Boolean(ex.completed)
+            }))
+          }
+        }
+      });
+    } else {
+      navigate('/exercise-workout-screen');
+    }
+  }, [navigate, todayWorkout.plan]);
+
   const handleLogout = useCallback(async () => {
     try { await logout(); } catch {}
     localStorage.removeItem('user');
@@ -246,7 +304,7 @@ export default function Dashboard() {
     ? ['ضغط', 'ضغط واسع', 'سكوات', 'بلانك', 'اندفاع', 'متسلق الجبل']
     : ['Push-ups','Wide Push Ups','Squats','Plank','Lunges','Mountain Climbers'];
   const displayedExercises = todayWorkout.planItems.length
-    ? todayWorkout.planItems.map(item => item.name).filter(Boolean)
+    ? todayWorkout.planItems.map(item => (language === 'ar' && item.nameAr ? item.nameAr : item.name)).filter(Boolean)
     : exercises;
 
   const dailyMission = dashboardData.missions;
@@ -264,7 +322,7 @@ export default function Dashboard() {
   };
   const handleMissionAction = (action) => {
     if (action === 'workout') {
-      navigate('/exercise-workout-screen');
+      handleStartWorkout();
       return;
     }
     if (action === 'meal') {
@@ -356,28 +414,96 @@ export default function Dashboard() {
               <div className="p-5 sm:p-7 relative z-10">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5">
                   <div className="flex-1">
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(250, 168, 2, 0.12)', border: '1px solid rgba(250, 168, 2, 0.25)', borderRadius: 999, padding: '.3rem .85rem', marginBottom: '.75rem' }}>
-                      <Ic d={ICONS.flame} size={13} stroke="#FAA802" sw={2} />
-                      <span style={{ fontSize: '.7rem', color: '#FAA802', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>{t('dashboard.todaysWorkout')}</span>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(250, 168, 2, 0.12)', border: '1px solid rgba(250, 168, 2, 0.25)', borderRadius: 999, padding: '.3rem .85rem' }}>
+                        <Ic d={ICONS.flame} size={13} stroke="#FAA802" sw={2} />
+                        <span style={{ fontSize: '.7rem', color: '#FAA802', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                          {t('dashboard.todaysWorkout')}
+                        </span>
+                      </div>
+
+                      {todayWorkout.plan?.phase && (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: 999, padding: '.3rem .75rem' }}>
+                          <span style={{ fontSize: '.68rem', color: 'var(--bento-text)', fontWeight: 600 }}>
+                            {language === 'ar'
+                              ? `الأسبوع ${todayWorkout.plan.weekNumber || 1}: ${todayWorkout.plan.phaseAr || todayWorkout.plan.phase}`
+                              : `Week ${todayWorkout.plan.weekNumber || 1}: ${todayWorkout.plan.phase}`}
+                          </span>
+                        </div>
+                      )}
+
+                      {todayWorkout.isRestDay && (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: 999, padding: '.3rem .75rem' }}>
+                          <span style={{ fontSize: '.68rem', color: '#60A5FA', fontWeight: 700 }}>
+                            {language === 'ar' ? 'استشفاء نشط' : 'Rest & Recovery'}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--bento-text)] m-0 leading-tight tracking-tight">{todayWorkout.plan?.name || (todayWorkout.isCompleted ? 'Workout completed today' : t('dashboard.fullBodyStrength'))}</h2>
+
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[var(--bento-text)] m-0 leading-tight tracking-tight">
+                      {language === 'ar'
+                        ? (todayWorkout.plan?.titleAr || todayWorkout.plan?.name || (todayWorkout.isCompleted ? 'اكتمل تمرين اليوم' : t('dashboard.fullBodyStrength')))
+                        : (todayWorkout.plan?.name || (todayWorkout.isCompleted ? 'Workout completed today' : t('dashboard.fullBodyStrength')))}
+                    </h2>
+
                     <p style={{ color: 'var(--bento-muted)', marginTop: 6, fontSize: '.9rem', fontWeight: 500 }}>
-                      {todayWorkout.totalPlanCount
-                        ? `${todayWorkout.completedPlanCount}/${todayWorkout.totalPlanCount} exercises - ${Math.round(todayWorkout.totalWorkoutTime / 60)} min logged`
+                      {todayWorkout.isRestDay
+                        ? (language === 'ar' ? 'يوم استشفاء مخصص لترميم الألياف العضلية وترطيب الجسم.' : 'Active recovery day. Prioritize hydration and joint mobility.')
+                        : todayWorkout.totalPlanCount
+                        ? `${todayWorkout.completedPlanCount}/${todayWorkout.totalPlanCount} ${language === 'ar' ? 'تمارين موجهة' : 'exercises'} • ${Math.round(todayWorkout.totalWorkoutTime / 60 || todayWorkout.plan?.estimatedDurationMin || 25)} ${language === 'ar' ? 'دقيقة' : 'min'}`
                         : todayWorkout.isCompleted
-                          ? `${Math.round(todayWorkout.caloriesBurned)} kcal - ${Math.round(todayWorkout.totalWorkoutTime / 60)} min`
-                          : 'No workout completed yet today'}
+                          ? `${Math.round(todayWorkout.caloriesBurned)} kcal • ${Math.round(todayWorkout.totalWorkoutTime / 60)} min`
+                          : (language === 'ar' ? 'جلسة تدريبية مخصصة تنتظرك اليوم' : 'No workout completed yet today')}
                     </p>
                   </div>
-                  <button className="btn-coral w-full sm:w-auto justify-center" onClick={() => navigate('/exercise-workout-screen')}>
-                    <Ic d={ICONS.play} size={15} stroke="#FFFFFF" fill="#FFFFFF" sw={2} />
-                    {todayWorkout.isCompleted ? 'Review workout' : t('dashboard.startWorkout')}
-                  </button>
+
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => setIsPlanModalOpen(true)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 7,
+                        padding: '.65rem 1.15rem',
+                        borderRadius: 12,
+                        fontSize: '.85rem',
+                        fontWeight: 700,
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        color: 'var(--bento-text)',
+                        cursor: 'pointer',
+                        transition: 'all .2s'
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(250, 168, 2, 0.6)'; e.currentTarget.style.background = 'rgba(250, 168, 2, 0.08)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'; }}
+                    >
+                      <Ic d={ICONS.calendar} size={16} stroke="#FAA802" sw={2} />
+                      <span>{language === 'ar' ? 'خطة الـ 4 أسابيع' : '4-Week Plan'}</span>
+                    </button>
+
+                    <button className="btn-coral justify-center" onClick={() => handleStartWorkout()}>
+                      <Ic d={ICONS.play} size={15} stroke="#FFFFFF" fill="#FFFFFF" sw={2} />
+                      <span>
+                        {todayWorkout.isCompleted
+                          ? (language === 'ar' ? 'مراجعة التمرين' : 'Review workout')
+                          : todayWorkout.isRestDay
+                          ? (language === 'ar' ? 'جلسة استشفاء' : 'Mobility session')
+                          : t('dashboard.startWorkout')}
+                      </span>
+                    </button>
+                  </div>
                 </div>
+
                 {/* Exercise chips */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {displayedExercises.map((ex, i) => (
-                    <div key={i} style={{ background: 'var(--bento-chip)', border: '1px solid var(--bento-border)', borderRadius: 999, padding: '.35rem .85rem', fontSize: '.78rem', color: 'var(--bento-soft-text)', fontWeight: 500, cursor: 'pointer', transition: 'all .2s' }}
+                    <div
+                      key={i}
+                      onClick={() => setIsPlanModalOpen(true)}
+                      style={{ background: 'var(--bento-chip)', border: '1px solid var(--bento-border)', borderRadius: 999, padding: '.35rem .85rem', fontSize: '.78rem', color: 'var(--bento-soft-text)', fontWeight: 500, cursor: 'pointer', transition: 'all .2s' }}
                       onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(250, 168, 2, 0.5)'; e.currentTarget.style.color = '#FAA802'; }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bento-border)'; e.currentTarget.style.color = 'var(--bento-soft-text)'; }}>
                       {ex}
@@ -587,6 +713,15 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
+
+      <MonthlyPlanOverviewModal
+        isOpen={isPlanModalOpen}
+        onClose={() => setIsPlanModalOpen(false)}
+        plan={trainingPlan}
+        userProfile={user}
+        onSelectWorkout={(day) => handleStartWorkout(day)}
+        onResetPlan={handleResetPlan}
+      />
     </div>
   );
 }

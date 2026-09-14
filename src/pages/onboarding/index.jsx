@@ -6,6 +6,7 @@ import Input from '../../components/ui/Input';
 import Icon from '../../components/AppIcon';
 import { updateUserProfile } from '../../utils/db';
 import { calculateMetabolicTargets } from '../../utils/metabolism';
+import { generateMonthlyMesocycle, saveUserTrainingPlan, determineSplitStrategy } from '../../utils/trainingPlanEngine';
 import fullBodyImg from './full body.png';
 import shouldersImg from './shoulders.png';
 import bicepsImg from './biceps.png';
@@ -374,6 +375,14 @@ const OnboardingScreen = () => {
       estimatedWeeksToGoal: calculatedMetabolic.estimatedWeeksToGoal,
       metabolicProfile: calculatedMetabolic,
     };
+
+    try {
+      const mesocycle = generateMonthlyMesocycle(userProfile);
+      saveUserTrainingPlan(principalId, mesocycle);
+      userProfile.trainingMesocycleId = mesocycle.id;
+    } catch (planError) {
+      console.error('Error generating training plan in onboarding:', planError);
+    }
 
     localStorage.setItem('user', JSON.stringify(userProfile));
     return { principalId, userProfile };
@@ -919,6 +928,40 @@ const OnboardingScreen = () => {
                 <MiniStat icon="Clock3" label="Training Window" value={getLabelById(workoutTimeOptions, formData.workoutTime)} />
                 <MiniStat icon="ScanLine" label="Priority Areas" value={getSelectedLabels(focusAreaOptions, formData.focusAreas)} />
               </div>
+
+              {/* 4-Week Periodized Mesocycle Card */}
+              {(() => {
+                const planStrategy = determineSplitStrategy(formData);
+                return (
+                  <div className="rounded-[8px] border border-primary/30 bg-primary/5 p-4 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-primary uppercase tracking-wider">4-Week Mesocycle</p>
+                      <span className="rounded bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary">RP Periodization</span>
+                    </div>
+                    <div className="text-xs text-foreground font-semibold">
+                      {planStrategy.trainingDaysPerWeek} sessions / week • {planStrategy.trainingDaysPerWeek * 4} periodized workouts
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                      <div className="rounded border border-border/70 bg-background/50 p-2">
+                        <span className="text-muted-foreground block text-[10px]">W1: Baseline</span>
+                        <strong className="text-foreground">MEV & Technique</strong>
+                      </div>
+                      <div className="rounded border border-border/70 bg-background/50 p-2">
+                        <span className="text-muted-foreground block text-[10px]">W2: Overload</span>
+                        <strong className="text-foreground">+15% Volume & Burn</strong>
+                      </div>
+                      <div className="rounded border border-border/70 bg-background/50 p-2">
+                        <span className="text-muted-foreground block text-[10px]">W3: Peak Volume</span>
+                        <strong className="text-foreground">MAV & High Density</strong>
+                      </div>
+                      <div className="rounded border border-border/70 bg-background/50 p-2">
+                        <span className="text-muted-foreground block text-[10px]">W4: Deload</span>
+                        <strong className="text-foreground">Active Recovery</strong>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               <InsightStrip
                 icon="ShieldCheck"

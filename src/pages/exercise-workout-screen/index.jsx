@@ -13,6 +13,12 @@ import '../../styles/bento-dashboard.css';
 import { db, recordWorkoutSession, updateAggregateStats } from '../../utils/db';
 import { evaluateAchievements } from '../../utils/achievements';
 import { recordCompletedWorkout } from '../../utils/workoutStorage';
+import {
+  completeScheduledWorkout,
+  markPlanExerciseCompleted,
+  getUserTrainingPlan,
+  getTodayScheduledWorkout
+} from '../../utils/trainingPlanEngine';
 import { recordExercise, recordExercises } from '../../utils/api/exerciseApi';
 import { updateSupabaseUserStats, getSupabaseUserStats } from '../../utils/icpSupabaseAuth';
 import { updateAchievements } from '../../utils/api/achievementsApi';
@@ -280,10 +286,11 @@ const ExerciseWorkoutScreen = () => {
           try {
             const stored = JSON.parse(localStorage.getItem(PLAN_KEY) || '{}');
             if (stored?.exercises) {
-              // find by name match to be robust
               stored.exercises = stored.exercises.map((e) => normalizeName(e.name) === normalizeName(selectedExercise.name) ? { ...e, completed: true } : e);
               localStorage.setItem(PLAN_KEY, JSON.stringify(stored));
             }
+            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+            markPlanExerciseCompleted(currentUser?.id, selectedExercise.name);
           } catch {}
         }
         // persist session update for stats
@@ -444,26 +451,38 @@ const ExerciseWorkoutScreen = () => {
     const plan = location?.state?.todayPlan;
     if (plan) {
       const items = plan.exercises || [];
-      setTodayPlan({ name: plan.name, items });
+      setTodayPlan({ name: plan.name, items, dayIndex: plan.dayIndex });
       const firstIncomplete = items.find(e => !e.completed);
       const initial = passed || firstIncomplete || items[0];
       if (initial) setSelectedExercise(initial);
     } else if (passed) {
       setSelectedExercise(passed);
     } else {
-      // Fallback: load from localStorage
-      try {
-        const raw = localStorage.getItem(PLAN_KEY);
-        if (raw) {
-          const stored = JSON.parse(raw);
-          if (stored?.exercises?.length) {
-            const items = stored.exercises;
-            setTodayPlan({ name: stored.name, items });
+      // Fallback: load from localStorage or mesocycle
+      (async () => {
+        try {
+          const raw = localStorage.getItem(PLAN_KEY);
+          if (raw) {
+            const stored = JSON.parse(raw);
+            if (stored?.exercises?.length) {
+              const items = stored.exercises;
+              setTodayPlan({ name: stored.name, items, dayIndex: stored.dayIndex });
+              const firstIncomplete = items.find(e => !e.completed);
+              setSelectedExercise(firstIncomplete || items[0]);
+              return;
+            }
+          }
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          const mesocycle = getUserTrainingPlan(user?.id, user);
+          const scheduled = getTodayScheduledWorkout(mesocycle);
+          if (scheduled && scheduled.exercises?.length) {
+            const items = scheduled.exercises;
+            setTodayPlan({ name: scheduled.title, items, dayIndex: scheduled.dayIndex });
             const firstIncomplete = items.find(e => !e.completed);
             setSelectedExercise(firstIncomplete || items[0]);
           }
-        }
-      } catch {}
+        } catch {}
+      })();
     }
   }, [location?.state]);
 
@@ -587,6 +606,16 @@ const ExerciseWorkoutScreen = () => {
         }, 3000);
       } else {
         console.error('❌ Failed to record workout:', result.error);
+      }
+
+      // Sync with trainingPlanEngine 4-week periodized mesocycle
+      try {
+        completeScheduledWorkout(sessionUser.id, todayPlan?.dayIndex || new Date().toISOString().slice(0, 10), {
+          caloriesBurned: Math.round(caloriesBurned),
+          durationSec: workoutTime
+        });
+      } catch (e) {
+        console.warn('Mesocycle completion sync error:', e);
       }
 
       // Save to Supabase database
