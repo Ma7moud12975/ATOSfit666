@@ -1,7 +1,9 @@
-import { READINESS_STATES, POSTURE_VALIDATION_CONFIG } from './pose/exerciseValidationRules';
+import { READINESS_STATES, POSTURE_VALIDATION_CONFIG, CRITICAL_INDICES_BY_EXERCISE } from './pose/exerciseValidationRules';
 import { evaluatePostureFrame } from './pose/postureValidation';
 import { ReadinessStateMachine } from './pose/readinessStateMachine';
 import { VideoTimelineMarkers } from './pose/videoTimelineMarkers';
+import { PoseLandmarkSmoother } from './pose/landmarkFilter';
+import { globalAudioFeedback } from './pose/audioFeedbackController';
 
 /**
  * RepTracker - Reusable state management component for exercise repetition tracking
@@ -244,6 +246,9 @@ class PoseDetectionUtils {
     this._lastRepTimestamp = 0; // Track last rep time for cadence anomaly detection
     this._repTimings = []; // Store recent rep timings for cadence analysis
     this._maxRepTimingsHistory = 10; // Keep last 10 rep timings
+
+    // Landmark temporal filter & confidence gating (One Euro Filter)
+    this.landmarkSmoother = new PoseLandmarkSmoother({ minConfidence: 0.65, maxCoastMs: 350 });
   }
 
 
@@ -745,105 +750,9 @@ class PoseDetectionUtils {
     return null;
   }
 
-  // Knee push-up counter: exact copy of push-up logic scoped to perModeState['kneepushups']
-  updateKneePushupCounter(landmarks){
-    try {
-      const config = window.MediaPipeConfig?.POSE_LANDMARKS || {};
-      const pushupConfig = window.MediaPipeConfig?.PUSHUP_CONFIG || {};
-      const leftShoulder = landmarks[config.LEFT_SHOULDER || 11];
-      const leftElbow = landmarks[config.LEFT_ELBOW || 13];
-      const leftWrist = landmarks[config.LEFT_WRIST || 15];
-      const rightShoulder = landmarks[config.RIGHT_SHOULDER || 12];
-      const rightElbow = landmarks[config.RIGHT_ELBOW || 14];
-      const rightWrist = landmarks[config.RIGHT_WRIST || 16];
-      const leftHip = landmarks[config.LEFT_HIP || 23];
-      const rightHip = landmarks[config.RIGHT_HIP || 24];
-
-      if (!leftShoulder || !leftElbow || !leftWrist || !rightShoulder || !rightElbow || !rightWrist || !leftHip || !rightHip) {
-        return;
-      }
-
-      // Calculate elbow angles
-      const leftElbowAngle = this.calculateAngle(leftShoulder, leftElbow, leftWrist);
-      const rightElbowAngle = this.calculateAngle(rightShoulder, rightElbow, rightWrist);
-      const avgElbowAngle = this._averageFiniteAngles(leftElbowAngle, rightElbowAngle);
-
-      // Average shoulder position (for height detection)
-      const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
-
-      const downThreshold = pushupConfig.ELBOW_ANGLE_DOWN || 95;
-      const upThreshold = pushupConfig.ELBOW_ANGLE_UP || 155;
-      const shoulderHeightThreshold = pushupConfig.SHOULDER_HEIGHT_DOWN || 0.02;
-
-      // Push-up position: elbows bent OR shoulders close to ground
-      // Determine if user is likely standing: if shoulders are well above hips and torso vertical
-      const shoulderHipDy = Math.abs(((leftShoulder.y + rightShoulder.y) / 2) - ((leftHip.y + rightHip.y) / 2));
-      const torsoVerticalThreshold = pushupConfig.TORSO_VERTICAL_DY ?? 0.15; // if shoulders far above hips (normalized units)
-      const isLikelyStanding = shoulderHipDy < (pushupConfig.STANDING_DY_MIN ?? 0.05) ? false : ((leftShoulder.y + rightShoulder.y) / 2) < ((leftHip.y + rightHip.y) / 2) - (pushupConfig.STANDING_DY_MIN ?? 0.02);
-
-      // Baseline shoulder level (approx when 'up' state) — store per-mode baseline
-      const pstate = this.perModeState['widepushups'];
-      if (!pstate._baselineShoulderY) {
-        // initialize baseline to current shoulder Y when pose roughly horizontal
-        pstate._baselineShoulderY = avgShoulderY;
-      }
-
-      // If posture is not horizontal, don't update baseline; else slowly adapt baseline
-      if (Math.abs(((leftShoulder.y + rightShoulder.y) / 2) - ((leftHip.y + rightHip.y) / 2)) < 0.12) {
-        // adapt baseline slowly
-        pstate._baselineShoulderY = (pstate._baselineShoulderY * 0.95) + (avgShoulderY * 0.05);
-      }
-
-      // Push-up position: significant drop from baseline OR elbow angle threshold
-      const shoulderDrop = avgShoulderY - (pstate._baselineShoulderY || avgShoulderY);
-      const shoulderDropThreshold = pushupConfig.SHOULDER_DROP_THRESHOLD ?? 0.06; // normalized units
-      const pushupPosition = (avgElbowAngle <= downThreshold) || (shoulderDrop >= shoulderDropThreshold) || (avgShoulderY >= (1 - shoulderHeightThreshold));
-
-      // Standing position: elbows straight and shoulders high (not horizontal)
-      const standingPosition = (avgElbowAngle >= upThreshold) && isLikelyStanding;
-
-      // In-position gating: require user to assume a stable push-up start pose before starting counting
-      if (!pstate._inPositionCount) pstate._inPositionCount = 0;
-      const inStart = this.isPushupStartPose(landmarks);
-      if (inStart) {
-        pstate._inPositionCount += 1;
-      } else {
-        pstate._inPositionCount = 0;
-      }
-
-      const REQUIRED_STABLE_FRAMES = window.MediaPipeConfig?.PUSHUP_CONFIG?.START_STABLE_FRAMES ?? 6; // ~6 frames
-      pstate._isInStartPose = pstate._inPositionCount >= REQUIRED_STABLE_FRAMES;
-
-      // Debounce reps: minimum ms between consecutive counts
-      const MIN_REP_MS = window.MediaPipeConfig?.PUSHUP_CONFIG?.MIN_REP_MS ?? 400;
-      if (!pstate._lastRepAt) pstate._lastRepAt = 0;
-      const now = Date.now();
-
-      // Only count if posture is correct and user is in start pose
-      if (this.postureStatus !== 'correct' || !pstate._isInStartPose) {
-        return; // do not count
-      }
-
-      if (pstate.state === 'up') {
-        if (pushupPosition && (now - pstate._lastRepAt) > MIN_REP_MS) {
-          pstate.state = 'down';
-          pstate.count += 1; // Count on descent
-          pstate._lastRepAt = now;
-          this.playSuccessSound(); // Play success sound
-          if (this.onPushupCount) this.onPushupCount(pstate.count);
-          if (this.onFormFeedback) {
-            this.onFormFeedback({ message: `Wide Push-up ${pstate.count}`, type: 'success', timestamp: now });
-          }
-        }
-      } else if (pstate.state === 'down') {
-        // return to up when standingPosition or full extension detected
-        if (standingPosition || (!pushupPosition && avgElbowAngle >= upThreshold)) {
-          pstate.state = 'up'; // Reset state for next rep
-        }
-      }
-    } catch (error) {
-      console.error('Error updating wide push-up counter:', error);
-    }
+  // Knee push-up counter: delegates to unified pushup repetition processor
+  updateKneePushupCounter(landmarks) {
+    this._processPushupRep(landmarks, 'kneepushups', 'Knee Push-up');
   }
 
 
@@ -959,45 +868,31 @@ class PoseDetectionUtils {
       return;
     }
 
-    const landmarks = results.poseLandmarks;
+    const rawLandmarks = results.poseLandmarks;
+    const nowMs = Date.now();
     
     // Get critical landmarks for visibility validation
-    const config = window.MediaPipeConfig?.POSE_LANDMARKS || {};
-    const criticalLandmarksMap = window.MediaPipeConfig?.CRITICAL_LANDMARKS_MAP || {};
-    const criticalIndices = criticalLandmarksMap[this.exerciseMode] || [11, 12, 13, 14, 23, 24, 25, 26];
+    const criticalIndices = CRITICAL_INDICES_BY_EXERCISE[this.exerciseMode] || [11, 12, 13, 14, 15, 16, 23, 24];
     
-    // Validate and backfill landmarks
-    const validatedLandmarks = this.validateAndBackfillLandmarks(landmarks, criticalIndices, 0.35);
+    // Pass raw landmarks through temporal One Euro Filter & confidence gating (> 0.65)
+    const smoothedResult = this.landmarkSmoother.process(rawLandmarks, criticalIndices, nowMs);
+    const validatedLandmarks = smoothedResult.landmarks;
     
-    if (!validatedLandmarks) {
+    // Update lastResults with smoothed landmarks for rock-solid jitter-free drawing
+    this.lastResults = {
+      ...results,
+      poseLandmarks: validatedLandmarks || rawLandmarks
+    };
+    
+    if (!validatedLandmarks || smoothedResult.isSearching) {
       this._applyReadinessValidation({
         hasPose: true,
         isValid: false,
         isReadyPose: false,
         requiredVisible: false,
-        reason: 'insufficient_visibility',
-        feedback: 'Move back so your full body is visible'
-      }, landmarks);
-
-      // Emit telemetry for frame-skipped due to insufficient visibility
-      const visibilityData = {};
-      criticalIndices.forEach(idx => {
-        const landmark = landmarks[idx];
-        visibilityData[`landmark_${idx}`] = landmark ? landmark.visibility : 0;
-      });
-      
-      this._emitTelemetry({
-        type: 'pose-frame-skipped',
-        timestamp: Date.now(),
-        frameNumber: this._frameNumber,
-        reason: 'insufficient-visibility',
-        visibility: visibilityData,
-        posture: {
-          isValid: false,
-          reason: 'insufficient_visibility'
-        }
-      });
-      
+        reason: 'searching',
+        feedback: 'Keep your upper body in view of the camera'
+      }, rawLandmarks);
       return;
     }
 
@@ -1059,11 +954,13 @@ class PoseDetectionUtils {
     // Also skip posture warnings and counting block for Sit-Ups (allow counting even if back not perfectly straight)
     if (!readiness.canCount) {
       const currentTime = Date.now();
-      const cooldown = window.MediaPipeConfig?.PLANK_CONFIG?.WARNING_COOLDOWN || 2000;
+      const cooldown = window.MediaPipeConfig?.COOLDOWN_AUDIO_MS || 2800; // 2.8s throttled cooldown
       const rejected = readiness.isReady ? this.readinessMachine.recordRejectedRep(currentTime) : false;
 
       if (currentTime - this.lastWarningTime > cooldown) {
-        if (readiness.isReady) this.playWarningSound();
+        if (readiness.isReady) {
+          globalAudioFeedback.playWarningBeep();
+        }
         this.lastWarningTime = currentTime;
 
         if (this.onFormFeedback) {
@@ -1333,105 +1230,9 @@ class PoseDetectionUtils {
     }
   }
 
-  // Wide push-up counter: duplicate of pushup logic but with wider hand tolerance
+  // Wide push-up counter: delegates to unified pushup repetition processor
   updateWidePushupCounter(landmarks) {
-    try {
-      const config = window.MediaPipeConfig?.POSE_LANDMARKS || {};
-      const pushupConfig = window.MediaPipeConfig?.PUSHUP_CONFIG || {};
-      const leftShoulder = landmarks[config.LEFT_SHOULDER || 11];
-      const leftElbow = landmarks[config.LEFT_ELBOW || 13];
-      const leftWrist = landmarks[config.LEFT_WRIST || 15];
-      const rightShoulder = landmarks[config.RIGHT_SHOULDER || 12];
-      const rightElbow = landmarks[config.RIGHT_ELBOW || 14];
-      const rightWrist = landmarks[config.RIGHT_WRIST || 16];
-      const leftHip = landmarks[config.LEFT_HIP || 23];
-      const rightHip = landmarks[config.RIGHT_HIP || 24];
-
-      if (!leftShoulder || !leftElbow || !leftWrist || !rightShoulder || !rightElbow || !rightWrist || !leftHip || !rightHip) {
-        return;
-      }
-
-      // Calculate elbow angles
-      const leftElbowAngle = this.calculateAngle(leftShoulder, leftElbow, leftWrist);
-      const rightElbowAngle = this.calculateAngle(rightShoulder, rightElbow, rightWrist);
-      const avgElbowAngle = this._averageFiniteAngles(leftElbowAngle, rightElbowAngle);
-
-      // Average shoulder position (for height detection)
-      const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
-
-      const downThreshold = pushupConfig.ELBOW_ANGLE_DOWN || 95;
-      const upThreshold = pushupConfig.ELBOW_ANGLE_UP || 155;
-      const shoulderHeightThreshold = pushupConfig.SHOULDER_HEIGHT_DOWN || 0.02;
-
-      // Push-up position: elbows bent OR shoulders close to ground
-      // Determine if user is likely standing: if shoulders are well above hips and torso vertical
-      const shoulderHipDy = Math.abs(((leftShoulder.y + rightShoulder.y) / 2) - ((leftHip.y + rightHip.y) / 2));
-      const torsoVerticalThreshold = pushupConfig.TORSO_VERTICAL_DY ?? 0.15; // if shoulders far above hips (normalized units)
-      const isLikelyStanding = shoulderHipDy < (pushupConfig.STANDING_DY_MIN ?? 0.05) ? false : ((leftShoulder.y + rightShoulder.y) / 2) < ((leftHip.y + rightHip.y) / 2) - (pushupConfig.STANDING_DY_MIN ?? 0.02);
-
-      // Baseline shoulder level (approx when 'up' state) — store per-mode baseline
-      const pstate = this.perModeState['widepushups'];
-      if (!pstate._baselineShoulderY) {
-        // initialize baseline to current shoulder Y when pose roughly horizontal
-        pstate._baselineShoulderY = avgShoulderY;
-      }
-
-      // If posture is not horizontal, don't update baseline; else slowly adapt baseline
-      if (Math.abs(((leftShoulder.y + rightShoulder.y) / 2) - ((leftHip.y + rightHip.y) / 2)) < 0.12) {
-        // adapt baseline slowly
-        pstate._baselineShoulderY = (pstate._baselineShoulderY * 0.95) + (avgShoulderY * 0.05);
-      }
-
-      // Push-up position: significant drop from baseline OR elbow angle threshold
-      const shoulderDrop = avgShoulderY - (pstate._baselineShoulderY || avgShoulderY);
-      const shoulderDropThreshold = pushupConfig.SHOULDER_DROP_THRESHOLD ?? 0.06; // normalized units
-      const pushupPosition = (avgElbowAngle <= downThreshold) || (shoulderDrop >= shoulderDropThreshold) || (avgShoulderY >= (1 - shoulderHeightThreshold));
-
-      // Standing position: elbows straight and shoulders high (not horizontal)
-      const standingPosition = (avgElbowAngle >= upThreshold) && isLikelyStanding;
-
-      // In-position gating: require user to assume a stable push-up start pose before starting counting
-      if (!pstate._inPositionCount) pstate._inPositionCount = 0;
-      const inStart = this.isPushupStartPose(landmarks);
-      if (inStart) {
-        pstate._inPositionCount += 1;
-      } else {
-        pstate._inPositionCount = 0;
-      }
-
-      const REQUIRED_STABLE_FRAMES = window.MediaPipeConfig?.PUSHUP_CONFIG?.START_STABLE_FRAMES ?? 6; // ~6 frames
-      pstate._isInStartPose = pstate._inPositionCount >= REQUIRED_STABLE_FRAMES;
-
-      // Debounce reps: minimum ms between consecutive counts
-      const MIN_REP_MS = window.MediaPipeConfig?.PUSHUP_CONFIG?.MIN_REP_MS ?? 400;
-      if (!pstate._lastRepAt) pstate._lastRepAt = 0;
-      const now = Date.now();
-
-      // Only count if posture is correct and user is in start pose
-      if (this.postureStatus !== 'correct' || !pstate._isInStartPose) {
-        return; // do not count
-      }
-
-      if (pstate.state === 'up') {
-        if (pushupPosition && (now - pstate._lastRepAt) > MIN_REP_MS) {
-          pstate.state = 'down';
-          pstate.count += 1; // Count on descent
-          pstate._lastRepAt = now;
-          this.playSuccessSound(); // Play success sound
-          if (this.onPushupCount) this.onPushupCount(pstate.count);
-          if (this.onFormFeedback) {
-            this.onFormFeedback({ message: `Wide Push-up ${pstate.count}`, type: 'success', timestamp: now });
-          }
-        }
-      } else if (pstate.state === 'down') {
-        // return to up when standingPosition or full extension detected
-        if (standingPosition || (!pushupPosition && avgElbowAngle >= upThreshold)) {
-          pstate.state = 'up'; // Reset state for next rep
-        }
-      }
-    } catch (error) {
-      console.error('Error updating wide push-up counter:', error);
-    }
+    this._processPushupRep(landmarks, 'widepushups', 'Wide Push-up');
   }
 
   _isAngleLandmarkReliable(point, minVisibility, rejectBackfilled) {
@@ -1592,7 +1393,7 @@ class PoseDetectionUtils {
     }
   }
 
-  // Detect stable push-up start pose: torso roughly horizontal and ankles visible (proxy for being on toes)
+  // Detect stable push-up start pose: upper body roughly horizontal, feet optional
   isPushupStartPose(landmarks) {
     try {
       const cfg = window.MediaPipeConfig?.POSE_LANDMARKS || {};
@@ -1600,25 +1401,47 @@ class PoseDetectionUtils {
       const rightShoulder = landmarks[cfg.RIGHT_SHOULDER || 12];
       const leftHip = landmarks[cfg.LEFT_HIP || 23];
       const rightHip = landmarks[cfg.RIGHT_HIP || 24];
-      const leftAnkle = landmarks[cfg.LEFT_ANKLE || 27];
-      const rightAnkle = landmarks[cfg.RIGHT_ANKLE || 28];
+      const leftElbow = landmarks[cfg.LEFT_ELBOW || 13];
+      const rightElbow = landmarks[cfg.RIGHT_ELBOW || 14];
+      const leftWrist = landmarks[cfg.LEFT_WRIST || 15];
+      const rightWrist = landmarks[cfg.RIGHT_WRIST || 16];
 
-      const vis = (p) => p && (p.visibility == null || p.visibility > 0.5);
-      if (!vis(leftShoulder) || !vis(rightShoulder) || !vis(leftHip) || !vis(rightHip) || !vis(leftAnkle) || !vis(rightAnkle)) {
+      const vis = (p) => p && !p.backfilled && (p.visibility == null || p.visibility >= 0.45);
+      const hasShoulder = vis(leftShoulder) || vis(rightShoulder);
+      const hasHip = vis(leftHip) || vis(rightHip);
+
+      if (!hasShoulder || !hasHip) {
         return false;
       }
 
-      const shoulderCenterY = (leftShoulder.y + rightShoulder.y) / 2;
-      const hipCenterY = (leftHip.y + rightHip.y) / 2;
+      const shoulderCenter = (vis(leftShoulder) && vis(rightShoulder))
+        ? { x: (leftShoulder.x + rightShoulder.x) / 2, y: (leftShoulder.y + rightShoulder.y) / 2 }
+        : (vis(leftShoulder) ? leftShoulder : rightShoulder);
 
-      // torso vertical difference small -> near horizontal
-      const torsoDy = Math.abs(shoulderCenterY - hipCenterY);
-      const THRESH = window.MediaPipeConfig?.PUSHUP_CONFIG?.START_TORSO_DY ?? 0.08;
-      if (torsoDy > THRESH) return false;
+      const hipCenter = (vis(leftHip) && vis(rightHip))
+        ? { x: (leftHip.x + rightHip.x) / 2, y: (leftHip.y + rightHip.y) / 2 }
+        : (vis(leftHip) ? leftHip : rightHip);
 
-      // ankles visible and reasonably below hips (on toes) as an extra proxy
-      const ankleBelowHip = ((leftAnkle.y + rightAnkle.y) / 2) > hipCenterY;
-      if (!ankleBelowHip) return false;
+      const dx = shoulderCenter.x - hipCenter.x;
+      const dy = shoulderCenter.y - hipCenter.y;
+      const orientDeg = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI);
+      const horizAngle = Math.min(orientDeg, Math.abs(180 - orientDeg));
+
+      // Relax camera tilt tolerance up to 55 degrees (supports normal desk/floor webcam angles)
+      const MAX_TILT = window.MediaPipeConfig?.PUSHUP_CONFIG?.START_MAX_TILT_DEG ?? 55;
+      if (horizAngle > MAX_TILT) {
+        return false;
+      }
+
+      // Check elbows are not already collapsed (< 85 degrees) to be considered in starting lockout
+      if (vis(leftShoulder) && vis(leftElbow) && vis(leftWrist)) {
+        const lAngle = this.calculateAngle(leftShoulder, leftElbow, leftWrist);
+        if (Number.isFinite(lAngle) && lAngle < 85) return false;
+      }
+      if (vis(rightShoulder) && vis(rightElbow) && vis(rightWrist)) {
+        const rAngle = this.calculateAngle(rightShoulder, rightElbow, rightWrist);
+        if (Number.isFinite(rAngle) && rAngle < 85) return false;
+      }
 
       return true;
     } catch (e) {
@@ -1833,7 +1656,7 @@ class PoseDetectionUtils {
           const dx = shoulderCenter.x - hipCenter.x;
           const dy = shoulderCenter.y - hipCenter.y;
           const orientDeg = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI);
-          const horizMax = cfg.HORIZ_MAX_DEG ?? 35;
+          const horizMax = cfg.HORIZ_MAX_DEG ?? 55;
           const nearHorizontal = (orientDeg <= horizMax) || (orientDeg >= (180 - horizMax));
           let kneeOk = true;
           if (ankleCenter) {
@@ -1909,8 +1732,8 @@ class PoseDetectionUtils {
         // Two modes: side view (ankles visible) -> use straight-line similarity as before.
         // Front/angled view (no ankle visibility) -> check shoulder-hip orientation close to horizontal
         const cfg = window.MediaPipeConfig?.PUSHUP_CONFIG || {};
-        const SIDE_ABS_COS_MIN = cfg.SIDE_ABS_COS_MIN ?? 0.82; // slightly more lenient
-        const HORIZ_TORSO_MAX_DEG = cfg.HORIZ_TORSO_MAX_DEG ?? 35; // allow more tilt
+        const SIDE_ABS_COS_MIN = cfg.SIDE_ABS_COS_MIN ?? 0.78; // lenient straight line
+        const HORIZ_TORSO_MAX_DEG = cfg.HORIZ_TORSO_MAX_DEG ?? 55; // room-friendly 55 deg tilt
 
         // If ankle center available assume side/diagonal view and use cos similarity
         if (ankleCenter && v2) {
@@ -1921,7 +1744,7 @@ class PoseDetectionUtils {
           const absCos = Math.abs(Math.max(-1, Math.min(1, cosSim)));
           isGoodPostureInstant = absCos >= SIDE_ABS_COS_MIN;
           if (!isGoodPostureInstant) {
-            feedbackMessage = 'Keep your body in a straight line';
+            feedbackMessage = 'Keep hips and back aligned';
             reason = 'body_not_straight';
           }
         } else {
@@ -1929,17 +1752,16 @@ class PoseDetectionUtils {
           const dx = shoulderCenter.x - hipCenter.x;
           const dy = shoulderCenter.y - hipCenter.y;
           const angDeg = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI);
-          // angle near 0 or near 180 -> horizontal
           const nearHorizontal = (angDeg <= HORIZ_TORSO_MAX_DEG) || (angDeg >= (180 - HORIZ_TORSO_MAX_DEG));
-          // Also ensure it's not standing (i.e., torso nearly vertical)
-          const nearVertical = (angDeg >= 90 - 20 && angDeg <= 90 + 20);
+          // Only flag standing if clearly vertical (between 75 and 105 degrees)
+          const nearVertical = (angDeg >= 75 && angDeg <= 105);
           isGoodPostureInstant = nearHorizontal && !nearVertical;
           if (!isGoodPostureInstant) {
             if (nearVertical) {
               feedbackMessage = 'Get into push-up position';
               reason = 'standing_position';
             } else {
-              feedbackMessage = 'Align your body horizontally';
+              feedbackMessage = 'Align your torso horizontally';
               reason = 'body_not_horizontal';
             }
           }
@@ -2001,329 +1823,128 @@ class PoseDetectionUtils {
     }
   }
 
+  /**
+   * Unified push-up repetition processor with hysteresis and debouncing.
+   * - Angle Hysteresis: Down <= 90 deg, Lockout >= 160 deg.
+   * - Hysteresis Zone: 90 deg to 160 deg preserves current state.
+   * - Temporal Debouncing: Minimum rep duration of 650ms.
+   * - Partial Visibility: Tolerates missing feet; relies on upper body (shoulders, elbows, wrists, hips).
+   */
+  _processPushupRep(landmarks, modeName = 'pushups', displayName = 'Push-up') {
+    try {
+      if (!landmarks || landmarks.length === 0) return;
+
+      const cfg = window.MediaPipeConfig?.POSE_LANDMARKS || {};
+      const pushupConfig = window.MediaPipeConfig?.PUSHUP_CONFIG || {};
+
+      const leftShoulder = landmarks[cfg.LEFT_SHOULDER || 11];
+      const leftElbow = landmarks[cfg.LEFT_ELBOW || 13];
+      const leftWrist = landmarks[cfg.LEFT_WRIST || 15];
+      const rightShoulder = landmarks[cfg.RIGHT_SHOULDER || 12];
+      const rightElbow = landmarks[cfg.RIGHT_ELBOW || 14];
+      const rightWrist = landmarks[cfg.RIGHT_WRIST || 16];
+      const leftHip = landmarks[cfg.LEFT_HIP || 23];
+      const rightHip = landmarks[cfg.RIGHT_HIP || 24];
+
+      const vis = (p) => p && !p.backfilled && (p.visibility == null || p.visibility >= 0.5);
+      const hasLeftArm = vis(leftShoulder) && vis(leftElbow) && vis(leftWrist);
+      const hasRightArm = vis(rightShoulder) && vis(rightElbow) && vis(rightWrist);
+
+      if (!hasLeftArm && !hasRightArm) {
+        return;
+      }
+
+      // Calculate elbow angles
+      const leftElbowAngle = hasLeftArm ? this.calculateAngle(leftShoulder, leftElbow, leftWrist) : NaN;
+      const rightElbowAngle = hasRightArm ? this.calculateAngle(rightShoulder, rightElbow, rightWrist) : NaN;
+      const avgElbowAngle = this._averageFiniteAngles(leftElbowAngle, rightElbowAngle);
+
+      if (!Number.isFinite(avgElbowAngle)) return;
+
+      const pstate = this.perModeState[modeName] || this.perModeState['pushups'];
+      const now = Date.now();
+
+      // Hysteresis thresholds:
+      // Down threshold: <= 90 deg
+      // Up lockout threshold: >= 160 deg
+      const downThreshold = pushupConfig.ELBOW_ANGLE_DOWN ?? 90;
+      const upThreshold = pushupConfig.ELBOW_ANGLE_UP ?? 160;
+      const minRepMs = pushupConfig.MIN_REP_MS ?? 650;
+
+      // In-position gating: verify start pose
+      if (!pstate._inPositionCount) pstate._inPositionCount = 0;
+      const inStart = this.isPushupStartPose(landmarks);
+      if (inStart) {
+        pstate._inPositionCount += 1;
+      } else {
+        pstate._inPositionCount = Math.max(0, pstate._inPositionCount - 1);
+      }
+
+      const REQUIRED_STABLE_FRAMES = pushupConfig.START_STABLE_FRAMES ?? 6;
+      pstate._isInStartPose = pstate._inPositionCount >= REQUIRED_STABLE_FRAMES;
+
+      if (!pstate._lastRepAt) pstate._lastRepAt = 0;
+      if (!pstate.state) pstate.state = 'up';
+
+      // Ensure user has adopted start pose or is in an active workout
+      const canCount = this.readinessStatus?.canCount || (this.postureStatus === 'correct');
+      if (!canCount && !pstate._isInStartPose) {
+        return;
+      }
+
+      // State machine with hysteresis:
+      if (pstate.state === 'up') {
+        // Must descend to elbow <= 90 deg
+        if (avgElbowAngle <= downThreshold) {
+          pstate.state = 'down';
+          pstate._enteredDownAt = now;
+        }
+      } else if (pstate.state === 'down') {
+        // Must return to full lockout >= 160 deg
+        if (avgElbowAngle >= upThreshold) {
+          const repDuration = now - (pstate._enteredDownAt || pstate._lastRepAt || 0);
+          const timeSinceLastRep = now - pstate._lastRepAt;
+
+          // Enforce minimum rep duration (650ms) to discard rapid twitches / false positives
+          if (timeSinceLastRep >= minRepMs && repDuration >= 200) {
+            pstate.state = 'up';
+            pstate.count += 1;
+            pstate._lastRepAt = now;
+
+            globalAudioFeedback.playSuccessSound();
+
+            if (this.onPushupCount) this.onPushupCount(pstate.count);
+            if (this.onFormFeedback) {
+              this.onFormFeedback({
+                message: `${displayName} ${pstate.count}`,
+                type: 'success',
+                timestamp: now
+              });
+            }
+          } else {
+            // Still transition back to 'up' without incrementing count
+            pstate.state = 'up';
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`Error in _processPushupRep (${modeName}):`, error);
+    }
+  }
+
   // Update push-up counter
   updatePushupCounter(landmarks) {
-    try {
-      const config = window.MediaPipeConfig?.POSE_LANDMARKS || {};
-      const pushupConfig = window.MediaPipeConfig?.PUSHUP_CONFIG || {};
-
-      const leftShoulder = landmarks[config.LEFT_SHOULDER || 11];
-      const leftElbow = landmarks[config.LEFT_ELBOW || 13];
-      const leftWrist = landmarks[config.LEFT_WRIST || 15];
-      const rightShoulder = landmarks[config.RIGHT_SHOULDER || 12];
-      const rightElbow = landmarks[config.RIGHT_ELBOW || 14];
-      const rightWrist = landmarks[config.RIGHT_WRIST || 16];
-      const leftHip = landmarks[config.LEFT_HIP || 23];
-      const rightHip = landmarks[config.RIGHT_HIP || 24];
-
-      if (!leftShoulder || !leftElbow || !leftWrist || !rightShoulder || !rightElbow || !rightWrist || !leftHip || !rightHip) {
-        return;
-      }
-
-      // Calculate elbow angles
-      const leftElbowAngle = this.calculateAngle(leftShoulder, leftElbow, leftWrist);
-      const rightElbowAngle = this.calculateAngle(rightShoulder, rightElbow, rightWrist);
-      const avgElbowAngle = this._averageFiniteAngles(leftElbowAngle, rightElbowAngle);
-
-      // Average shoulder position (for height detection)
-      const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
-
-      const downThreshold = pushupConfig.ELBOW_ANGLE_DOWN || 95;
-      const upThreshold = pushupConfig.ELBOW_ANGLE_UP || 155;
-      const shoulderHeightThreshold = pushupConfig.SHOULDER_HEIGHT_DOWN || 0.02;
-
-      // Push-up position: elbows bent OR shoulders close to ground
-      // Determine if user is likely standing: if shoulders are well above hips and torso vertical
-      const shoulderHipDy = Math.abs(((leftShoulder.y + rightShoulder.y) / 2) - ((leftHip.y + rightHip.y) / 2));
-      const torsoVerticalThreshold = pushupConfig.TORSO_VERTICAL_DY ?? 0.15; // if shoulders far above hips (normalized units)
-      const isLikelyStanding = shoulderHipDy < (pushupConfig.STANDING_DY_MIN ?? 0.05) ? false : ((leftShoulder.y + rightShoulder.y) / 2) < ((leftHip.y + rightHip.y) / 2) - (pushupConfig.STANDING_DY_MIN ?? 0.02);
-
-      // Baseline shoulder level (approx when 'up' state) — store per-mode baseline
-      const pstate = this.perModeState['pushups'];
-      if (!pstate._baselineShoulderY) {
-        // initialize baseline to current shoulder Y when pose roughly horizontal
-        pstate._baselineShoulderY = avgShoulderY;
-      }
-
-      // If posture is not horizontal, don't update baseline; else slowly adapt baseline
-      if (Math.abs(((leftShoulder.y + rightShoulder.y) / 2) - ((leftHip.y + rightHip.y) / 2)) < 0.12) {
-        // adapt baseline slowly
-        pstate._baselineShoulderY = (pstate._baselineShoulderY * 0.95) + (avgShoulderY * 0.05);
-      }
-
-      // Push-up position: significant drop from baseline OR elbow angle threshold
-      const shoulderDrop = avgShoulderY - (pstate._baselineShoulderY || avgShoulderY);
-      const shoulderDropThreshold = pushupConfig.SHOULDER_DROP_THRESHOLD ?? 0.06; // normalized units
-      const pushupPosition = (avgElbowAngle <= downThreshold) || (shoulderDrop >= shoulderDropThreshold) || (avgShoulderY >= (1 - shoulderHeightThreshold));
-
-      // Standing position: elbows straight and shoulders high (not horizontal)
-      const standingPosition = (avgElbowAngle >= upThreshold) && isLikelyStanding;
-
-      // In-position gating: require user to assume a stable push-up start pose before starting counting
-      if (!pstate._inPositionCount) pstate._inPositionCount = 0;
-      const inStart = this.isPushupStartPose(landmarks);
-      if (inStart) {
-        pstate._inPositionCount += 1;
-      } else {
-        pstate._inPositionCount = 0;
-      }
-
-      const REQUIRED_STABLE_FRAMES = window.MediaPipeConfig?.PUSHUP_CONFIG?.START_STABLE_FRAMES ?? 6; // ~6 frames
-      pstate._isInStartPose = pstate._inPositionCount >= REQUIRED_STABLE_FRAMES;
-
-      // Debounce reps: minimum ms between consecutive counts
-      const MIN_REP_MS = window.MediaPipeConfig?.PUSHUP_CONFIG?.MIN_REP_MS ?? 400;
-      if (!pstate._lastRepAt) pstate._lastRepAt = 0;
-      const now = Date.now();
-
-      // Only count if posture is correct and user is in start pose
-      if (this.postureStatus !== 'correct' || !pstate._isInStartPose) {
-        return; // do not count
-      }
-
-      if (pstate.state === 'up') {
-        if (pushupPosition && (now - pstate._lastRepAt) > MIN_REP_MS) {
-          // Check for unrealistic cadence before counting
-          const cadenceAnomaly = this._trackRepCadence(now);
-          if (cadenceAnomaly) {
-            // Emit telemetry for anomaly detection
-            this._emitTelemetry({
-              type: 'pose-anomaly-detected',
-              timestamp: now,
-              frameNumber: this._frameNumber,
-              anomalyType: cadenceAnomaly.type,
-              anomalyReason: cadenceAnomaly.reason,
-              timeSinceLastRep: cadenceAnomaly.timeSinceLastRep,
-              threshold: cadenceAnomaly.threshold,
-              averageCadence: cadenceAnomaly.averageCadence,
-              repTimings: cadenceAnomaly.repTimings
-            });
-            
-            // Throttle rep counting for unrealistic cadence
-            console.warn('⚠️ Unrealistic cadence detected, throttling rep count');
-            return;
-          }
-          
-          pstate.state = 'down';
-          pstate.count += 1; // Count on descent
-          pstate._lastRepAt = now;
-          this.playSuccessSound(); // Play success sound
-          if (this.onPushupCount) this.onPushupCount(pstate.count);
-          if (this.onFormFeedback) {
-            this.onFormFeedback({ message: `Push-up ${pstate.count}`, type: 'success', timestamp: now });
-          }
-        }
-      } else if (pstate.state === 'down') {
-        // return to up when standingPosition or full extension detected
-        if (standingPosition || (!pushupPosition && avgElbowAngle >= upThreshold)) {
-          pstate.state = 'up'; // Reset state for next rep
-        }
-      }
-    } catch (error) {
-      console.error('Error updating push-up counter:', error);
-    }
+    this._processPushupRep(landmarks, 'pushups', 'Push-up');
   }
 
-  // Narrow push-up counter: exact copy of push-up logic scoped to perModeState['narrowpushups']
+  // Narrow push-up counter: delegates to unified pushup repetition processor
   updateNarrowPushupCounter(landmarks) {
-    try {
-      const config = window.MediaPipeConfig?.POSE_LANDMARKS || {};
-      const pushupConfig = window.MediaPipeConfig?.PUSHUP_CONFIG || {};
-      const leftShoulder = landmarks[config.LEFT_SHOULDER || 11];
-      const leftElbow = landmarks[config.LEFT_ELBOW || 13];
-      const leftWrist = landmarks[config.LEFT_WRIST || 15];
-      const rightShoulder = landmarks[config.RIGHT_SHOULDER || 12];
-      const rightElbow = landmarks[config.RIGHT_ELBOW || 14];
-      const rightWrist = landmarks[config.RIGHT_WRIST || 16];
-      const leftHip = landmarks[config.LEFT_HIP || 23];
-      const rightHip = landmarks[config.RIGHT_HIP || 24];
-
-      if (!leftShoulder || !leftElbow || !leftWrist || !rightShoulder || !rightElbow || !rightWrist || !leftHip || !rightHip) {
-        return;
-      }
-
-      // Calculate elbow angles
-      const leftElbowAngle = this.calculateAngle(leftShoulder, leftElbow, leftWrist);
-      const rightElbowAngle = this.calculateAngle(rightShoulder, rightElbow, rightWrist);
-      const avgElbowAngle = this._averageFiniteAngles(leftElbowAngle, rightElbowAngle);
-
-      // Average shoulder position (for height detection)
-      const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
-
-      const downThreshold = pushupConfig.ELBOW_ANGLE_DOWN || 95;
-      const upThreshold = pushupConfig.ELBOW_ANGLE_UP || 155;
-      const shoulderHeightThreshold = pushupConfig.SHOULDER_HEIGHT_DOWN || 0.02;
-
-      // Push-up position: elbows bent OR shoulders close to ground
-      // Determine if user is likely standing: if shoulders are well above hips and torso vertical
-      const shoulderHipDy = Math.abs(((leftShoulder.y + rightShoulder.y) / 2) - ((leftHip.y + rightHip.y) / 2));
-      const torsoVerticalThreshold = pushupConfig.TORSO_VERTICAL_DY ?? 0.15; // if shoulders far above hips (normalized units)
-      const isLikelyStanding = shoulderHipDy < (pushupConfig.STANDING_DY_MIN ?? 0.05) ? false : ((leftShoulder.y + rightShoulder.y) / 2) < ((leftHip.y + rightHip.y) / 2) - (pushupConfig.STANDING_DY_MIN ?? 0.02);
-
-      // Baseline shoulder level (approx when 'up' state) — store per-mode baseline
-      const pstate = this.perModeState['narrowpushups'];
-      if (!pstate._baselineShoulderY) {
-        // initialize baseline to current shoulder Y when pose roughly horizontal
-        pstate._baselineShoulderY = avgShoulderY;
-      }
-
-      // If posture is not horizontal, don't update baseline; else slowly adapt baseline
-      if (Math.abs(((leftShoulder.y + rightShoulder.y) / 2) - ((leftHip.y + rightHip.y) / 2)) < 0.12) {
-        // adapt baseline slowly
-        pstate._baselineShoulderY = (pstate._baselineShoulderY * 0.95) + (avgShoulderY * 0.05);
-      }
-
-      // Push-up position: significant drop from baseline OR elbow angle threshold
-      const shoulderDrop = avgShoulderY - (pstate._baselineShoulderY || avgShoulderY);
-      const shoulderDropThreshold = pushupConfig.SHOULDER_DROP_THRESHOLD ?? 0.06; // normalized units
-      const pushupPosition = (avgElbowAngle <= downThreshold) || (shoulderDrop >= shoulderDropThreshold) || (avgShoulderY >= (1 - shoulderHeightThreshold));
-
-      // Standing position: elbows straight and shoulders high (not horizontal)
-      const standingPosition = (avgElbowAngle >= upThreshold) && isLikelyStanding;
-
-      // In-position gating: require user to assume a stable push-up start pose before starting counting
-      if (!pstate._inPositionCount) pstate._inPositionCount = 0;
-      const inStart = this.isPushupStartPose(landmarks);
-      if (inStart) {
-        pstate._inPositionCount += 1;
-      } else {
-        pstate._inPositionCount = 0;
-      }
-
-      const REQUIRED_STABLE_FRAMES = window.MediaPipeConfig?.PUSHUP_CONFIG?.START_STABLE_FRAMES ?? 6; // ~6 frames
-      pstate._isInStartPose = pstate._inPositionCount >= REQUIRED_STABLE_FRAMES;
-
-      // Debounce reps: minimum ms between consecutive counts
-      const MIN_REP_MS = window.MediaPipeConfig?.PUSHUP_CONFIG?.MIN_REP_MS ?? 400;
-      if (!pstate._lastRepAt) pstate._lastRepAt = 0;
-      const now = Date.now();
-
-      // Only count if posture is correct and user is in start pose
-      if (this.postureStatus !== 'correct' || !pstate._isInStartPose) {
-        return; // do not count
-      }
-
-      if (pstate.state === 'up') {
-        if (pushupPosition && (now - pstate._lastRepAt) > MIN_REP_MS) {
-          pstate.state = 'down';
-          pstate.count += 1; // Count on descent
-          pstate._lastRepAt = now;
-          this.playSuccessSound(); // Play success sound
-          if (this.onPushupCount) this.onPushupCount(pstate.count);
-          if (this.onFormFeedback) {
-            this.onFormFeedback({ message: `Narrow Push-up ${pstate.count}`, type: 'success', timestamp: now });
-          }
-        }
-      } else if (pstate.state === 'down') {
-        // return to up when standingPosition or full extension detected
-        if (standingPosition || (!pushupPosition && avgElbowAngle >= upThreshold)) {
-          pstate.state = 'up'; // Reset state for next rep
-        }
-      }
-    } catch (error) {
-      console.error('Error updating narrow push-up counter:', error);
-    }
+    this._processPushupRep(landmarks, 'narrowpushups', 'Narrow Push-up');
   }
 
-  // Diamond push-up counter: exact copy of push-up logic scoped to perModeState['diamondpushups']
+  // Diamond push-up counter: delegates to unified pushup repetition processor
   updateDiamondPushupCounter(landmarks) {
-    try {
-      const config = window.MediaPipeConfig?.POSE_LANDMARKS || {};
-      const pushupConfig = window.MediaPipeConfig?.PUSHUP_CONFIG || {};
-      const leftShoulder = landmarks[config.LEFT_SHOULDER || 11];
-      const leftElbow = landmarks[config.LEFT_ELBOW || 13];
-      const leftWrist = landmarks[config.LEFT_WRIST || 15];
-      const rightShoulder = landmarks[config.RIGHT_SHOULDER || 12];
-      const rightElbow = landmarks[config.RIGHT_ELBOW || 14];
-      const rightWrist = landmarks[config.RIGHT_WRIST || 16];
-      const leftHip = landmarks[config.LEFT_HIP || 23];
-      const rightHip = landmarks[config.RIGHT_HIP || 24];
-
-      if (!leftShoulder || !leftElbow || !leftWrist || !rightShoulder || !rightElbow || !rightWrist || !leftHip || !rightHip) {
-        return;
-      }
-
-      // Calculate elbow angles
-      const leftElbowAngle = this.calculateAngle(leftShoulder, leftElbow, leftWrist);
-      const rightElbowAngle = this.calculateAngle(rightShoulder, rightElbow, rightWrist);
-      const avgElbowAngle = this._averageFiniteAngles(leftElbowAngle, rightElbowAngle);
-
-      // Average shoulder position (for height detection)
-      const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
-
-      const downThreshold = pushupConfig.ELBOW_ANGLE_DOWN || 95;
-      const upThreshold = pushupConfig.ELBOW_ANGLE_UP || 155;
-      const shoulderHeightThreshold = pushupConfig.SHOULDER_HEIGHT_DOWN || 0.02;
-
-      // Push-up position: elbows bent OR shoulders close to ground
-      // Determine if user is likely standing: if shoulders are well above hips and torso vertical
-      const shoulderHipDy = Math.abs(((leftShoulder.y + rightShoulder.y) / 2) - ((leftHip.y + rightHip.y) / 2));
-      const torsoVerticalThreshold = pushupConfig.TORSO_VERTICAL_DY ?? 0.15; // if shoulders far above hips (normalized units)
-      const isLikelyStanding = shoulderHipDy < (pushupConfig.STANDING_DY_MIN ?? 0.05) ? false : ((leftShoulder.y + rightShoulder.y) / 2) < ((leftHip.y + rightHip.y) / 2) - (pushupConfig.STANDING_DY_MIN ?? 0.02);
-
-      // Baseline shoulder level (approx when 'up' state) — store per-mode baseline
-      const pstate = this.perModeState['diamondpushups'];
-      if (!pstate._baselineShoulderY) {
-        // initialize baseline to current shoulder Y when pose roughly horizontal
-        pstate._baselineShoulderY = avgShoulderY;
-      }
-
-      // If posture is not horizontal, don't update baseline; else slowly adapt baseline
-      if (Math.abs(((leftShoulder.y + rightShoulder.y) / 2) - ((leftHip.y + rightHip.y) / 2)) < 0.12) {
-        // adapt baseline slowly
-        pstate._baselineShoulderY = (pstate._baselineShoulderY * 0.95) + (avgShoulderY * 0.05);
-      }
-
-      // Push-up position: significant drop from baseline OR elbow angle threshold
-      const shoulderDrop = avgShoulderY - (pstate._baselineShoulderY || avgShoulderY);
-      const shoulderDropThreshold = pushupConfig.SHOULDER_DROP_THRESHOLD ?? 0.06; // normalized units
-      const pushupPosition = (avgElbowAngle <= downThreshold) || (shoulderDrop >= shoulderDropThreshold) || (avgShoulderY >= (1 - shoulderHeightThreshold));
-
-      // Standing position: elbows straight and shoulders high (not horizontal)
-      const standingPosition = (avgElbowAngle >= upThreshold) && isLikelyStanding;
-
-      // In-position gating: require user to assume a stable push-up start pose before starting counting
-      if (!pstate._inPositionCount) pstate._inPositionCount = 0;
-      const inStart = this.isPushupStartPose(landmarks);
-      if (inStart) {
-        pstate._inPositionCount += 1;
-      } else {
-        pstate._inPositionCount = 0;
-      }
-
-      const REQUIRED_STABLE_FRAMES = window.MediaPipeConfig?.PUSHUP_CONFIG?.START_STABLE_FRAMES ?? 6; // ~6 frames
-      pstate._isInStartPose = pstate._inPositionCount >= REQUIRED_STABLE_FRAMES;
-
-      // Debounce reps: minimum ms between consecutive counts
-      const MIN_REP_MS = window.MediaPipeConfig?.PUSHUP_CONFIG?.MIN_REP_MS ?? 400;
-      if (!pstate._lastRepAt) pstate._lastRepAt = 0;
-      const now = Date.now();
-
-      // Only count if posture is correct and user is in start pose
-      if (this.postureStatus !== 'correct' || !pstate._isInStartPose) {
-        return; // do not count
-      }
-
-      if (pstate.state === 'up') {
-        if (pushupPosition && (now - pstate._lastRepAt) > MIN_REP_MS) {
-          pstate.state = 'down';
-          pstate.count += 1; // Count on descent
-          pstate._lastRepAt = now;
-          this.playSuccessSound(); // Play success sound
-          if (this.onPushupCount) this.onPushupCount(pstate.count);
-          if (this.onFormFeedback) {
-            this.onFormFeedback({ message: `Diamond Push-up ${pstate.count}`, type: 'success', timestamp: now });
-          }
-        }
-      } else if (pstate.state === 'down') {
-        // return to up when standingPosition or full extension detected
-        if (standingPosition || (!pushupPosition && avgElbowAngle >= upThreshold)) {
-          pstate.state = 'up'; // Reset state for next rep
-        }
-      }
-    } catch (error) {
-      console.error('Error updating diamond push-up counter:', error);
-    }
+    this._processPushupRep(landmarks, 'diamondpushups', 'Diamond Push-up');
   }
 
   // Update squat counter
@@ -4819,6 +4440,8 @@ class PoseDetectionUtils {
     this.postureStatus = 'unknown';
     this.readinessMachine.reset();
     this.timelineMarkers.reset();
+    this.landmarkSmoother?.reset();
+    globalAudioFeedback?.reset();
     this.readinessStatus = this.readinessMachine.snapshot();
     this._lastReadinessFeedbackAt = 0;
     this._lastReadinessState = this.readinessStatus.state;

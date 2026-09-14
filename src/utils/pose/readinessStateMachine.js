@@ -1,5 +1,5 @@
-import { FalseAlarmSmoother } from './falseAlarmSmoothing';
-import { POSTURE_VALIDATION_CONFIG, READINESS_STATES } from './exerciseValidationRules';
+import { FalseAlarmSmoother } from './falseAlarmSmoothing.js';
+import { POSTURE_VALIDATION_CONFIG, READINESS_STATES } from './exerciseValidationRules.js';
 
 export class ReadinessStateMachine {
   constructor(config = {}) {
@@ -12,7 +12,7 @@ export class ReadinessStateMachine {
     this.state = READINESS_STATES.DETECTING_USER;
     this.hasStarted = false;
     this.paused = false;
-    this.lastFeedback = 'Move back so your full body is visible';
+    this.lastFeedback = 'Position yourself in front of camera';
     this.firstReadyTimestampSec = null;
     this.acceptedReps = 0;
     this.rejectedReps = 0;
@@ -22,15 +22,21 @@ export class ReadinessStateMachine {
 
   update(validation, timestampSec = null) {
     const previousState = this.state;
-    const smooth = this.smoother.update(validation);
+    const nowMs = timestampSec != null ? timestampSec * 1000 : Date.now();
+    const smooth = this.smoother.update(validation, nowMs);
+
     const hasPose = !!validation.hasPose;
     const bodyVisible = hasPose && validation.requiredVisible;
+    const isSearching = validation.reason === 'searching';
     const stableValid = smooth.stablePosture === 'correct';
     const stableInvalid = smooth.stablePosture === 'incorrect';
-    const readyStable = smooth.readyStable && stableValid;
+    const readyStable = smooth.readyStable && (smooth.stablePosture !== 'incorrect');
 
     if (!hasPose) {
       this.state = READINESS_STATES.DETECTING_USER;
+      this.paused = true;
+    } else if (isSearching) {
+      this.state = READINESS_STATES.SEARCHING;
       this.paused = true;
     } else if (!bodyVisible) {
       this.state = READINESS_STATES.BODY_VISIBLE;
@@ -64,13 +70,14 @@ export class ReadinessStateMachine {
   }
 
   getFeedback(validation) {
-    if (this.state === READINESS_STATES.DETECTING_USER) return 'Move back so your full body is visible';
-    if (this.state === READINESS_STATES.BODY_VISIBLE) return validation.feedback || 'Make sure the required joints are visible';
+    if (this.state === READINESS_STATES.DETECTING_USER) return 'Position yourself in front of camera';
+    if (this.state === READINESS_STATES.SEARCHING) return 'Searching for pose - keep upper body in frame';
+    if (this.state === READINESS_STATES.BODY_VISIBLE) return validation.feedback || 'Ensure required joints are visible';
     if (this.state === READINESS_STATES.POSITION_NOT_READY) return validation.feedback || 'Hold the correct starting position';
     if (this.state === READINESS_STATES.POSITION_READY) return 'Ready position detected';
-    if (this.state === READINESS_STATES.REP_COUNTING_PAUSED) return validation.feedback || 'Counting paused until position is corrected';
-    if (this.state === READINESS_STATES.RESUME_WHEN_VALID) return 'Counting resumed';
-    if (this.state === READINESS_STATES.FORM_WARNING) return validation.feedback || 'Rep not counted - invalid posture';
+    if (this.state === READINESS_STATES.REP_COUNTING_PAUSED) return validation.feedback || 'Counting paused - adjust posture';
+    if (this.state === READINESS_STATES.RESUME_WHEN_VALID) return 'Posture corrected - continue';
+    if (this.state === READINESS_STATES.FORM_WARNING) return validation.feedback || 'Keep posture aligned';
     return validation.feedback || 'Workout active';
   }
 
@@ -87,7 +94,7 @@ export class ReadinessStateMachine {
   }
 
   recordRejectedRep(timestampMs = Date.now()) {
-    if (timestampMs - this.lastRejectedAt < 1200) return false;
+    if (timestampMs - this.lastRejectedAt < 2000) return false;
     this.lastRejectedAt = timestampMs;
     this.rejectedReps += 1;
     return true;
@@ -98,18 +105,15 @@ export class ReadinessStateMachine {
     return {
       state: this.state,
       previousState,
-      postureStatus: smooth.stablePosture,
-      feedback: this.lastFeedback,
-      canCount: this.canCount,
+      hasStarted: this.hasStarted,
+      isReady: this.state === READINESS_STATES.POSITION_READY || this.state === READINESS_STATES.WORKOUT_ACTIVE,
       isPaused: this.paused,
-      isReady: this.hasStarted,
-      validFrames: smooth.validFrames,
-      invalidFrames: smooth.invalidFrames,
-      readyFrames: smooth.readyFrames,
-      lostFrames: smooth.lostFrames,
-      firstReadyTimestampSec: this.firstReadyTimestampSec,
+      canCount: this.canCount,
+      feedback: this.lastFeedback,
+      stablePosture: smooth.stablePosture,
       acceptedReps: this.acceptedReps,
-      rejectedReps: this.rejectedReps
+      rejectedReps: this.rejectedReps,
+      readyStable: smooth.readyStable
     };
   }
 }

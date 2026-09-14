@@ -513,36 +513,42 @@ const CameraFeed = ({
         </div>
       )}
 
-      {isActive && readinessStatus && (
-        <div className="absolute bottom-12 sm:bottom-16 left-2 sm:left-4 right-2 sm:right-auto sm:max-w-sm bg-black/75 text-white rounded-lg p-3">
-          <div className="flex items-center justify-between gap-3 mb-1">
-            <span className="text-xs uppercase text-gray-300">Pose Readiness</span>
-            <span className={`text-xs font-semibold ${readinessStatus.canCount ? 'text-green-300' : 'text-yellow-200'}`}>
-              {readinessStatus.state?.replaceAll('_', ' ')}
-            </span>
+      {/* Consolidated Unified HUD Status Card */}
+      {isActive && (readinessStatus || formFeedback) && (
+        <div className="absolute bottom-12 sm:bottom-16 left-1/2 transform -translate-x-1/2 w-11/12 max-w-md bg-black/80 backdrop-blur-md border border-white/10 text-white rounded-2xl p-3 sm:p-4 shadow-2xl transition-all duration-300 z-20 pointer-events-none">
+          <div className="flex items-center justify-between gap-3 mb-1.5">
+            <div className="flex items-center gap-2">
+              <span className={`w-2.5 h-2.5 rounded-full ${
+                formFeedback?.type === 'success' ? 'bg-emerald-400 animate-ping' :
+                readinessStatus?.canCount ? 'bg-emerald-400' :
+                readinessStatus?.state === 'SEARCHING' ? 'bg-amber-400 animate-pulse' :
+                readinessStatus?.isPaused ? 'bg-rose-500' : 'bg-cyan-400'
+              }`} />
+              <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">
+                {formFeedback?.type === 'success' ? 'Rep Completed' :
+                 readinessStatus?.canCount ? 'Workout Active' :
+                 readinessStatus?.state === 'SEARCHING' ? 'Searching Pose' :
+                 readinessStatus?.isPaused ? 'Adjust Posture' :
+                 readinessStatus?.state?.replaceAll('_', ' ') || 'Detecting...'}
+              </span>
+            </div>
+            {readinessStatus?.isPaused && (
+              <span className="text-[10px] sm:text-xs font-medium px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                Paused
+              </span>
+            )}
+            {readinessStatus?.canCount && (
+              <span className="text-[10px] sm:text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                Tracking
+              </span>
+            )}
           </div>
-          <p className="text-sm font-medium">{readinessStatus.feedback}</p>
-          {readinessStatus.isPaused && (
-            <p className="text-xs text-red-200 mt-1">Rep counting is paused until position is corrected.</p>
-          )}
-        </div>
-      )}
-
-      {/* Form Feedback Overlay */}
-      {formFeedback &&
-      <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-3 sm:px-4 py-2 rounded-lg text-white font-medium text-center max-w-xs text-sm sm:text-base animate-spring ${
-      formFeedback?.type === 'success' ? 'bg-success' :
-      formFeedback?.type === 'warning' ? 'bg-warning' : 'bg-primary'}`
-      }>
-          {formFeedback?.message}
-        </div>
-      }
-
-      {/* Posture Warning Overlay - Only for incorrect posture */}
-      {readinessStatus?.isPaused && readinessStatus?.isReady && (
-        <div className="absolute bottom-16 sm:bottom-20 left-1/2 transform -translate-x-1/2 bg-red-600/90 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-center animate-pulse">
-          <div className="font-bold text-base sm:text-lg">Fix Posture</div>
-          <div className="text-xs sm:text-sm">{readinessStatus.feedback || 'Counting paused until position is corrected'}</div>
+          <p className={`text-sm sm:text-base font-medium transition-colors ${
+            formFeedback?.type === 'success' ? 'text-emerald-300 font-semibold' :
+            readinessStatus?.isPaused ? 'text-amber-200' : 'text-gray-100'
+          }`}>
+            {formFeedback?.message || readinessStatus?.feedback || 'Adopt exercise position to start'}
+          </p>
         </div>
       )}
       {/* Camera Status Indicator */}
