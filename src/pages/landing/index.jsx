@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import InteractiveImage from '../../components/InteractiveImage';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { applyTheme, getSavedTheme } from '../../utils/theme';
+import '../../styles/bento-dashboard.css';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -109,8 +110,8 @@ const LandingPage = () => {
     start: 'Start Workout',
     starting: 'Starting...',
     badge: 'INTELLIGENT MOTION TRACKING',
-    form: 'Train with Precision.',
-    results: 'Master Every Rep.',
+    form: 'Train with Precision',
+    results: 'Master Every Rep',
     intro: 'turns your smartphone camera into a real-time biomechanics coach. Monitor joint angles, fix posture breakdowns before strain occurs, and count reps automatically — with 100% on-device privacy.',
     howItWorks: 'How It Works',
     categories: [
@@ -317,26 +318,44 @@ const LandingPage = () => {
     <div 
       dir={isAr ? 'rtl' : 'ltr'}
       className="min-h-screen bg-[#F7F8FA] dark:bg-[#08080A] text-[#08080A] dark:text-[#FFFFFF] font-sans relative overflow-x-hidden selection:bg-[#FAA802]/30 selection:text-white transition-colors duration-300"
+      style={{
+        background: theme === 'dark' 
+          ? `radial-gradient(ellipse at 50% 0%, rgba(250, 168, 2, 0.16) 0%, transparent 55rem),
+             radial-gradient(circle at 85% 45%, rgba(250, 168, 2, 0.08) 0%, transparent 40rem),
+             radial-gradient(circle at 15% 85%, rgba(192, 192, 192, 0.05) 0%, transparent 35rem),
+             radial-gradient(ellipse at top, #141416 0%, #08080A 40%, #050506 100%)`
+          : undefined
+      }}
     >
       {/* ============================================================ */}
-      {/* Precision Ambient Lighting & Architectural Grid               */}
+      {/* Dashboard Ambient Horizon & Creative Biomechanical Aura     */}
       {/* ============================================================ */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        {/* Subtle Ambient Horizon Light */}
-        <div 
-          className="absolute top-[-15%] left-1/2 -translate-x-1/2 w-[1200px] h-[500px] pointer-events-none opacity-40 dark:opacity-75"
-          style={{
-            background: 'radial-gradient(ellipse 70% 40% at 50% 0%, rgba(250, 168, 2, 0.12) 0%, rgba(192, 192, 192, 0.03) 60%, transparent 85%)',
-            filter: 'blur(50px)',
-          }}
-        />
+        {/* Animated Atmospheric Trails (Matching Bento Dashboard) */}
+        <div className="trail trail-coral" style={{ width: 600, height: 600, top: '-10%', right: '8%', opacity: 0.16 }} />
+        <div className="trail trail-olive" style={{ width: 480, height: 480, top: '40%', left: '-5%', opacity: 0.10 }} />
+        <div className="trail trail-coral" style={{ width: 550, height: 550, top: '75%', right: '12%', opacity: 0.12 }} />
 
-        {/* Subtle Precision Grid Lines */}
+        {/* Creative Biomechanical Motion Ring (Subtle, Slow-Spinning Telemetry) */}
+        <div className="absolute top-[6%] left-1/2 -translate-x-1/2 w-[850px] h-[850px] pointer-events-none opacity-20 dark:opacity-30">
+          <svg className="w-full h-full animate-[spin_200s_linear_infinite]" viewBox="0 0 850 850" fill="none">
+            <circle cx="425" cy="425" r="340" stroke="#FAA802" strokeWidth="1" strokeDasharray="6 14" opacity="0.4" />
+            <circle cx="425" cy="425" r="410" stroke="#C0C0C0" strokeWidth="0.75" strokeDasharray="3 18" opacity="0.25" />
+            <circle cx="425" cy="425" r="240" stroke="#FAA802" strokeWidth="1" strokeDasharray="8 20" opacity="0.3" />
+            {/* Precision Range-Of-Motion Calibration Markers */}
+            <line x1="425" y1="70" x2="425" y2="95" stroke="#FAA802" strokeWidth="1.5" opacity="0.6" />
+            <line x1="425" y1="755" x2="425" y2="780" stroke="#FAA802" strokeWidth="1.5" opacity="0.6" />
+            <line x1="70" y1="425" x2="95" y2="425" stroke="#FAA802" strokeWidth="1.5" opacity="0.6" />
+            <line x1="755" y1="425" x2="780" y2="425" stroke="#FAA802" strokeWidth="1.5" opacity="0.6" />
+          </svg>
+        </div>
+
+        {/* Fine Architectural Grid Texture */}
         <div 
-          className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] pointer-events-none"
+          className="absolute inset-0 opacity-[0.02] dark:opacity-[0.035] pointer-events-none"
           style={{
-            backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
+            backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.25) 1px, transparent 1px)',
+            backgroundSize: '36px 36px',
           }}
         />
       </div>
