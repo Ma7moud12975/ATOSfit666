@@ -32,7 +32,7 @@ const LandingPage = () => {
     const landingCopy = isAr ? {
     home: 'الرئيسية',
     howItWorksNav: 'كيف يعمل',
-    features: 'المميزات',
+    exercisesNav: 'التمارين',
     pricing: 'الأسعار',
     privacy: 'الخصوصية',
     about: 'من نحن',
@@ -101,7 +101,7 @@ const LandingPage = () => {
   } : {
     home: 'Home',
     howItWorksNav: 'How It Works',
-    features: 'Features',
+    exercisesNav: 'Exercises',
     pricing: 'Pricing',
     privacy: 'Privacy',
     about: 'About Us',
@@ -169,60 +169,7 @@ const LandingPage = () => {
     copyright: '© 2026 ATOS fit. All rights reserved.',
   };
 
-    const featureWidgets = [
-    {
-      id: "real_time_feedback",
-      tag: isAr ? 'الرؤية البيوميكانيكية' : 'BIOMECHANICS KINEMATICS',
-      heading: isAr ? 'تصحيح فوري للهيئة ومنع الإصابات' : 'Live Form Correction & Injury Prevention',
-      body: isAr 
-        ? 'متابعة مباشرة لـ 33 نقطة مفصلية وإرشادات صوتية ومرئية تنبهك لاختلال التوازن قبل حدوث إجهاد عضلي أو إصابة.'
-        : 'Direct 33-point skeletal landmark tracking with millisecond cues that alert you to posture breakdown before injury occurs.',
-      video: "/schools-header-vp9-chrome-1.webm",
-      className: "lg:col-span-12 xl:col-span-6 row-span-2 min-h-[420px]",
-      badgeText: isAr ? 'تتبع 33 نقطة • 60 إطار/ث' : '33 Skeletal Points • 60 FPS',
-    },
-    {
-      id: "ai_coach",
-      tag: isAr ? 'المساعد التدريبي' : 'TRAINING ADVISOR',
-      heading: isAr ? 'استشارات التمرين والتغذية' : 'Personal Training & Nutrition Coach',
-      body: isAr
-        ? 'استشر مدربك حول برامج التمرين، الحمل الدوري (Progressive Overload)، فترات الاستشفاء، وأوقات الوجبات.'
-        : 'Get actionable guidance on training splits, progressive overload, recovery scores, and meal timing.',
-      iconName: "MessageSquare",
-      accent: "amber",
-      className: "lg:col-span-6 xl:col-span-6",
-      interactivePreview: isAr
-        ? 'توجيه صوتي: "حافظ على استقامة الظهر وادفع بكعبيك أثناء الصعود"'
-        : 'Audio Cue: "Maintain neutral spine and drive firmly through heels"',
-    },
-    {
-      id: "food_scanner",
-      tag: isAr ? 'تحليل الوجبات' : 'NUTRITION LOGGING',
-      heading: isAr ? 'الماسح السريع للسعرات والماكروز' : 'Smart Plate & Macro Scanner',
-      body: isAr
-        ? 'التقط صورة لطبقك لتقدير السعرات والماكروز الأساسية (بروتين، كارب، دهون) لضمان تحقيق أهدافك البدنية.'
-        : 'Snap your plate to log estimated calories, protein, carbs, and fats to stay on track with your fitness goals.',
-      iconName: "Scan",
-      accent: "amber",
-      className: "lg:col-span-6 xl:col-span-6",
-      interactivePreview: isAr
-        ? 'سجل الوجبة: صدر دجاج مشوي مع أرز • 38g بروتين • 340 سعرة'
-        : 'Logged: Grilled Chicken Breast with Rice • 38g Protein • 340 kcal',
-    },
-    {
-      id: "rep_counting",
-      tag: isAr ? 'العد والإيقاع' : 'PRECISION CADENCE',
-      heading: isAr ? 'العد الآلي الذكي للتكرارات والإيقاع' : 'Automated Rep Counting & Cadence Engine',
-      body: isAr
-        ? 'ركّز كامل طاقتك على الأداء العضلي؛ خوارزمية التتبع تحسب كل تكرار، وتراقب سرعة النزول والصعود وعمق الحركة.'
-        : 'Focus completely on the contraction. Our vision engine counts valid reps, monitors tempo, and validates full range of motion.',
-      image: "/assets/images/rep-analysis.png",
-      className: "lg:col-span-12 xl:col-span-12 row-span-1 min-h-[320px]",
-      badgeText: isAr ? 'تحليل المدى الحركي والإيقاع' : 'Full Range of Motion & Tempo',
-    }
-  ];
-
-    const privacyCards = [
+  const privacyCards = [
     {
       icon: "ShieldCheck",
       tag: isAr ? 'معالجة على الجهاز' : 'ON-DEVICE PROCESSING',
@@ -378,7 +325,7 @@ const LandingPage = () => {
           <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
             <a href="#home" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.home}</a>
             <a href="#how-it-works" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.howItWorksNav}</a>
-            <a href="#features" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.features}</a>
+            <a href="#exercises" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.exercisesNav}</a>
             <a href="#privacy" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.privacy}</a>
             <button onClick={() => navigate('/pricing')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.pricing}</button>
             <button onClick={() => navigate('/about')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.about}</button>
@@ -451,11 +398,11 @@ const LandingPage = () => {
                 {landingCopy.home}
               </a>
               <a
-                href="#features"
+                href="#exercises"
                 className="block text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium text-sm py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                {landingCopy.features}
+                {landingCopy.exercisesNav}
               </a>
               <a
                 href="#privacy"
@@ -639,150 +586,9 @@ const LandingPage = () => {
       </section>
 
       {/* ============================================================ */}
-      {/* Features Bento Grid Section                                   */}
-      {/* ============================================================ */}
-      <section id="features" className="relative z-10 py-16 sm:py-24">
-        
-        <div className="max-w-[1720px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-20 2xl:px-24 relative z-10">
-          
-          {/* Section Header */}
-          <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-20">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAA802]/10 dark:bg-[#FAA802]/15 border border-[#FAA802]/25 text-xs font-bold text-[#FAA802] dark:text-[#FBB502] uppercase tracking-wider mb-4">
-              {landingCopy.featuresTag}
-            </div>
-            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0F1015] dark:text-white mb-4">
-              {landingCopy.featuresTitle}
-            </h2>
-            <p className="text-base sm:text-lg text-[#636779] dark:text-[#9DA4B2] leading-relaxed">
-              {landingCopy.featuresSubtitle}
-            </p>
-          </div>
-
-          {/* Bento Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
-            
-            {/* Widget 1: Real-Time Feedback Video Card (Large 6 cols / 2 rows) */}
-            <div className="lg:col-span-12 xl:col-span-6 relative rounded-[28px] overflow-hidden bg-[#0C0E17] border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/50 hover:shadow-[0_0_45px_rgba(250, 168, 2,0.2)] transition-all duration-300 min-h-[440px] flex flex-col justify-end group">
-              <video
-                src={featureWidgets[0].video}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#05060D] via-[#05060D]/60 to-transparent" />
-              
-              <div className="relative z-10 p-6 sm:p-8 space-y-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAA802]/20 border border-[#FAA802]/40 text-xs font-bold text-[#FAA802]">
-                  <Icon name="Activity" size={14} />
-                  <span>{featureWidgets[0].tag}</span>
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
-                  {featureWidgets[0].heading}
-                </h3>
-                <p className="text-sm sm:text-base text-[#C2C7D0] leading-relaxed max-w-xl">
-                  {featureWidgets[0].body}
-                </p>
-                <div className="pt-2 flex items-center gap-2 text-xs font-semibold text-emerald-400">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span>{featureWidgets[0].badgeText}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column Stack (AI Coach + Food Scanner) */}
-            <div className="lg:col-span-12 xl:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-              
-              {/* Widget 2: AI Coach Card */}
-              <div className="rounded-[28px] p-6 sm:p-8 bg-white dark:bg-[#0C0E17]/85 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/50 hover:shadow-[0_0_40px_rgba(250, 168, 2,0.18)] transition-all duration-300 flex flex-col justify-between group">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 flex items-center justify-center text-[#FAA802] shadow-[0_0_20px_rgba(250, 168, 2,0.25)] group-hover:scale-110 transition-transform">
-                      <Icon name="Bot" size={24} />
-                    </div>
-                    <span className="text-[11px] font-bold text-[#FAA802] dark:text-[#FBB502] uppercase tracking-wider bg-[#FAA802]/10 px-2.5 py-1 rounded-full">
-                      {featureWidgets[1].tag}
-                    </span>
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white">
-                    {featureWidgets[1].heading}
-                  </h3>
-                  <p className="text-sm text-[#525866] dark:text-[#A8A8A8] leading-relaxed">
-                    {featureWidgets[1].body}
-                  </p>
-                </div>
-
-                <div className="mt-6 p-3.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.05] dark:border-white/[0.06] text-xs font-medium text-[#FAA802] dark:text-[#A5B4FC]">
-                  {featureWidgets[1].interactivePreview}
-                </div>
-              </div>
-
-              {/* Widget 3: Food Scanner Card */}
-              <div className="rounded-[28px] p-6 sm:p-8 bg-white dark:bg-[#0C0E17]/85 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FFAE00]/50 hover:shadow-[0_0_40px_rgba(255,174,0,0.18)] transition-all duration-300 flex flex-col justify-between group">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 rounded-2xl bg-[#FFAE00]/15 border border-[#FFAE00]/30 flex items-center justify-center text-[#FFAE00] shadow-[0_0_20px_rgba(255,174,0,0.25)] group-hover:scale-110 transition-transform">
-                      <Icon name="Scan" size={24} />
-                    </div>
-                    <span className="text-[11px] font-bold text-[#FFAE00] uppercase tracking-wider bg-[#FFAE00]/10 px-2.5 py-1 rounded-full">
-                      {featureWidgets[2].tag}
-                    </span>
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white">
-                    {featureWidgets[2].heading}
-                  </h3>
-                  <p className="text-sm text-[#525866] dark:text-[#A8A8A8] leading-relaxed">
-                    {featureWidgets[2].body}
-                  </p>
-                </div>
-
-                <div className="mt-6 p-3.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.05] dark:border-white/[0.06] text-xs font-medium text-[#FFAE00]">
-                  {featureWidgets[2].interactivePreview}
-                </div>
-              </div>
-            </div>
-
-            {/* Widget 4: Rep Counting Card (Full-width spanning banner with precision mockup image) */}
-            <div className="lg:col-span-12 relative rounded-[28px] overflow-hidden bg-[#0C0E17] border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/50 transition-all duration-300 flex flex-col md:flex-row items-center justify-between group min-h-[300px]">
-              <div className="relative z-10 p-6 sm:p-10 md:max-w-xl space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAA802]/20 border border-[#FAA802]/40 text-xs font-bold text-[#FAA802]">
-                  <Icon name="Target" size={14} />
-                  <span>{featureWidgets[3].tag}</span>
-                </div>
-                <h3 className="text-2xl sm:text-4xl font-extrabold text-white">
-                  {featureWidgets[3].heading}
-                </h3>
-                <p className="text-sm sm:text-base text-[#C2C7D0] leading-relaxed">
-                  {featureWidgets[3].body}
-                </p>
-                <div className="flex items-center gap-3 pt-2">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>{featureWidgets[3].badgeText}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Visual image preview with dark gradient blend */}
-              <div className="relative w-full md:w-1/2 h-[260px] md:h-full flex items-center justify-center p-4">
-                <img 
-                  src={featureWidgets[3].image} 
-                  alt={featureWidgets[3].heading} 
-                  className="max-h-[260px] w-auto object-contain rounded-2xl drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-500" 
-                />
-                <div className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-[#0C0E17] via-transparent to-transparent pointer-events-none" />
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================ */}
       {/* Supported Exercises & Biomechanics Showcase                 */}
       {/* ============================================================ */}
-      <section className="relative z-10 py-16 sm:py-20 border-t border-black/[0.06] dark:border-white/[0.06]">
+      <section id="exercises" className="relative z-10 py-16 sm:py-20 border-t border-black/[0.06] dark:border-white/[0.06]">
         <div className="max-w-[1720px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-20 2xl:px-24">
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAA802]/10 border border-[#FAA802]/25 text-xs font-bold text-[#FAA802] dark:text-[#FBB502] uppercase tracking-wider mb-4">
@@ -924,7 +730,7 @@ const LandingPage = () => {
             <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-sm">
               <a href="#home" className="hover:text-[#0F1015] dark:hover:text-white transition-colors">{landingCopy.home}</a>
               <a href="#how-it-works" className="hover:text-[#0F1015] dark:hover:text-white transition-colors">{landingCopy.howItWorksNav}</a>
-              <a href="#features" className="hover:text-[#0F1015] dark:hover:text-white transition-colors">{landingCopy.features}</a>
+              <a href="#exercises" className="hover:text-[#0F1015] dark:hover:text-white transition-colors">{landingCopy.exercisesNav}</a>
               <a href="#privacy" className="hover:text-[#0F1015] dark:hover:text-white transition-colors">{landingCopy.privacy}</a>
               <button onClick={() => navigate('/pricing')} className="hover:text-[#0F1015] dark:hover:text-white transition-colors">{landingCopy.pricing}</button>
               <button onClick={() => navigate('/about')} className="hover:text-[#0F1015] dark:hover:text-white transition-colors">{landingCopy.about}</button>
