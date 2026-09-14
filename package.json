@@ -55,7 +55,6 @@
     "three": "^0.184.0"
   },
   "devDependencies": {
-    "@dhiwise/component-tagger": "^1.0.4",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",

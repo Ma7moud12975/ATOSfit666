@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
-import tagger from "@dhiwise/component-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -19,7 +18,7 @@ export default defineConfig({
       }
     }
   },
-  plugins: [tsconfigPaths(), react(), tagger()],
+  plugins: [tsconfigPaths(), react()],
   server: {
     // Allow overriding port via environment variables for local development.
     // Use VITE_PORT or PORT to change the dev server port without editing this file.
@@ -27,6 +26,6 @@ export default defineConfig({
     host: "localhost",
     // Allow falling back to another port if the requested one is busy.
     strictPort: false,
-    allowedHosts: ['.amazonaws.com', '.builtwithrocket.new', 'localhost']
+    allowedHosts: ['.amazonaws.com', 'localhost']
   }
 });

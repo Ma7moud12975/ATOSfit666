@@ -98,32 +98,32 @@ const InteractiveImage = () => {
             />
             
             {/* Athletic HUD: Top Live Biomechanics Pill */}
-            <div className="absolute top-4 left-4 right-4 flex items-center justify-between px-3 py-1.5 rounded-full bg-[#08080A]/80 backdrop-blur-md border border-[#C0C0C0]/20 text-[10px] sm:text-xs font-semibold text-white pointer-events-none">
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between px-3 py-1.5 rounded-full bg-[#08080A]/85 backdrop-blur-md border border-[#C0C0C0]/20 text-[10px] sm:text-xs font-semibold text-white pointer-events-none">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-[#FAA802] animate-pulse shadow-[0_0_8px_#FAA802]"></span>
-                <span className="tracking-wide text-white">{isAr ? 'تتبع حركي مباشر' : 'LIVE POSE AI'}</span>
+                <span className="tracking-wider uppercase text-white font-bold">{isAr ? 'تتبع حركي مباشر' : 'MOTION TRACKING'}</span>
               </div>
-              <span className="text-[#FAA802] font-bold" dir="ltr">60 FPS</span>
+              <span className="text-[#FAA802] font-mono font-bold" dir="ltr">60 FPS</span>
             </div>
 
             {/* Athletic HUD: Bottom Real-Time Telemetry Bar */}
-            <div className="absolute bottom-4 left-3 right-3 p-2.5 rounded-2xl bg-[#08080A]/85 backdrop-blur-md border border-[#C0C0C0]/20 shadow-lg pointer-events-none">
+            <div className="absolute bottom-4 left-3 right-3 p-2.5 rounded-2xl bg-[#08080A]/90 backdrop-blur-md border border-[#C0C0C0]/20 shadow-lg pointer-events-none">
               <div className="flex items-center justify-between text-[11px] sm:text-xs text-white">
-                <div className="flex items-center gap-1">
-                  <span className="text-[#FAA802] font-bold">🔥</span>
-                  <span className="font-bold text-white" dir="ltr">420</span>
+                <div className="flex items-center gap-1.5">
+                  <Icon name="Flame" size={13} className="text-[#FAA802]" />
+                  <span className="font-bold text-white font-mono" dir="ltr">420</span>
                   <span className="text-[10px] text-[#A8A8A8]">{isAr ? 'سعرة' : 'kcal'}</span>
                 </div>
                 <div className="h-3 w-[1px] bg-white/20"></div>
-                <div className="flex items-center gap-1">
-                  <span className="text-[#FAA802] font-bold">⚡</span>
-                  <span className="font-bold text-[#FAA802]" dir="ltr">8/12</span>
+                <div className="flex items-center gap-1.5">
+                  <Icon name="Zap" size={13} className="text-[#FAA802]" />
+                  <span className="font-bold text-[#FAA802] font-mono" dir="ltr">8/12</span>
                   <span className="text-[10px] text-[#A8A8A8]">{isAr ? 'تكرار' : 'reps'}</span>
                 </div>
                 <div className="h-3 w-[1px] bg-white/20"></div>
-                <div className="flex items-center gap-1">
-                  <span className="text-emerald-400 font-bold">🎯</span>
-                  <span className="font-bold text-emerald-300" dir="ltr">99%</span>
+                <div className="flex items-center gap-1.5">
+                  <Icon name="Target" size={13} className="text-emerald-400" />
+                  <span className="font-bold text-emerald-300 font-mono" dir="ltr">99%</span>
                   <span className="text-[10px] text-[#A8A8A8]">{isAr ? 'دقة' : 'form'}</span>
                 </div>
               </div>

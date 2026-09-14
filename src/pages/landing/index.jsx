@@ -28,7 +28,7 @@ const LandingPage = () => {
 
   const isAr = language === 'ar';
 
-  const landingCopy = isAr ? {
+    const landingCopy = isAr ? {
     home: 'الرئيسية',
     howItWorksNav: 'كيف يعمل',
     features: 'المميزات',
@@ -36,52 +36,52 @@ const LandingPage = () => {
     privacy: 'الخصوصية',
     about: 'من نحن',
     signIn: 'تسجيل الدخول',
-    signingIn: 'جار تسجيل الدخول...',
-    start: 'ابدأ تمرينك المجاني',
-    starting: 'جار البدء...',
-    badge: '⚡ الجيل القادم للياقة والرؤية الحاسوبية',
-    form: 'أداء حركي متقن.',
-    results: 'نتائج رياضية غير مسبوقة.',
-    intro: 'يحوّل كاميرا هاتفك إلى مدرب شخصي فائق الدقة. خوارزميات الرؤية الحاسوبية تحلل زوايا مفاصلك واستقامة عمودك الفقري لحظياً وتعد تكراراتك بدقة متناهية — بخصوصية كاملة 100% دون خروج أي فيديو من هاتفك.',
-    howItWorks: 'كيف يعمل التطبيق',
+    signingIn: 'جارٍ تسجيل الدخول...',
+    start: 'ابدأ تمرينك الآن',
+    starting: 'جارٍ البدء...',
+    badge: 'تتبع حركي متقدم بالرؤية الحاسوبية',
+    form: 'تدرّب بدقة احترافية.',
+    results: 'أتقن كل حركة.',
+    intro: 'يحوّل كاميرا هاتفك إلى أداة تحليل حركي فورية ترصد زوايا المفاصل واستقامة الظهر لحظة بلحظة، وتنبهك للأخطاء لتفادي الإصابات مع عد تلقائي للتكرارات وبخصوصية تامة داخل جهازك.',
+    howItWorks: 'طريقة العمل',
     categories: [
-      { icon: '🏋️', label: 'تمارين الحديد والقوة' },
-      { icon: '🤸', label: 'كاليسثينكس ووزن الجسم' },
-      { icon: '🔥', label: 'حرق الدهون وHIIT' },
-      { icon: '🧘', label: 'المرونة وتصحيح القوام' },
+      { iconName: 'Dumbbell', label: 'تمارين الحديد والقوة' },
+      { iconName: 'Activity', label: 'كاليسثينكس ووزن الجسم' },
+      { iconName: 'Flame', label: 'تمارين الكارديو وHIIT' },
+      { iconName: 'Shield', label: 'تصحيح القوام والمرونة' },
     ],
-    accuracyStat: 'دقة التحليل الحركي',
+    accuracyStat: 'دقة القياس البيوميكانيكي',
     latencyStat: 'زمن التوجيه الصوتي',
-    privacyStat: 'معالجة محلية بالكامل',
-    stepsTag: '⚡ ٣ خطوات للبدء',
-    stepsTitle: 'كيف تبدأ تمرينك مع ATOS fit؟',
-    stepsSubtitle: 'بدون أي ساعات ذكية، حساسات معقدة، أو تكاليف تدريب باهظة. هاتفك فقط يكفي لبدء التمرين الذكي.',
+    privacyStat: 'معالجة داخل الهاتف 100%',
+    stepsTag: 'طريقة الاستخدام',
+    stepsTitle: 'ابدأ تمرينك في ثوانٍ معدودة',
+    stepsSubtitle: 'بدون ساعات ذكية أو حساسات خارجية. هاتفك فقط كافٍ لبدء تدريب احترافي متكامل.',
     steps: [
       {
         num: '01',
         icon: 'Smartphone',
-        title: 'اسند هاتفك أمامك',
-        desc: 'ضع هاتفك على الأرض أو مسنوداً على زجاجة ماء أمام مساحة تمرينك، وتأكد من ظهور جسمك في الكاميرا.',
+        title: 'وجّه هاتفك أمامك',
+        desc: 'ضع هاتفك أمام مساحة التمرين مع وضوح كامل لجسمك دون الحاجة لأي حساسات أو معدات تثبيت معقدة.',
       },
       {
         num: '02',
         icon: 'Activity',
-        title: 'تدرّب بتوجيه ذكي لحظي',
-        desc: 'تتبع 33 نقطة مفصلية بسرعة 60 إطاراً بالثانية لمراقبة عمق السكوات، استقامة الظهر، وتفادي الإصابات الشائعة.',
+        title: 'تدرّب بحرية وثقة',
+        desc: 'ترصد الكاميرا 33 نقطة مفصلية لتقييم عمق الحركة واستقامة العمود الفقري بدقة 60 إطاراً في الثانية.',
       },
       {
         num: '03',
-        icon: 'Trophy',
-        title: 'إرشادات صوتية وعدّ آلي',
-        desc: 'استمع لتوجيهات فورية ("ارفع صدرك"، "ادفع بكعبيك") مع تسجيل آلي كامل لعدد التكرارات، الجولات، والسعرات.',
+        icon: 'Volume2',
+        title: 'توجيه صوتي وعدّ تلقائي',
+        desc: 'استمع لتنبيهات فورية أثناء التمرين لتصحيح وضعك، مع تسجيل تلقائي لعدد التكرارات ومعدل الإيقاع.',
       }
     ],
-    featuresTag: '⚡ ترسانة الرياضي المتكاملة',
-    featuresTitle: 'تكنولوجيا متطورة لأداء رياضي احترافي',
-    featuresSubtitle: 'صُممت خوارزمياتنا لمساعدتك على كسر أرقامك القياسية وبناء عضلاتك بأمان تام وحركة بيوميكانيكية صحيحة.',
-    supportedTag: '💪 تمارين مدعومة لحظياً',
+    featuresTag: 'القدرات والتقنيات',
+    featuresTitle: 'أدوات احترافية مصممة للرياضيين',
+    featuresSubtitle: 'حلول متطورة لمراقبة الهيئة الحركية، ومنع الإصابات، وضمان إتمام المدى الحركي الكامل لكل تمرين.',
+    supportedTag: 'التمارين المدعومة',
     supportedTitle: 'أكثر من 50 تمريناً تُتبع بدقة متناهية',
-    supportedSubtitle: 'يقوم الذكاء الاصطناعي بالتحقق من اكتمال المدى الحركي (Full ROM) لضمان تحقيق أقصى فائدة عضلية.',
+    supportedSubtitle: 'خوارزميات متقدمة تتحقق من عمق النزول واستقامة المفاصل لضمان أعلى فائدة عضلية.',
     exercises: [
       { name: 'سكوات', target: 'الأرجل والجلوتس', badge: 'عمق كامل' },
       { name: 'ضغط (Push-Ups)', target: 'الصدر والترايسبس', badge: 'استقامة الجذع' },
@@ -92,14 +92,10 @@ const LandingPage = () => {
       { name: 'ديدليفت', target: 'السلسلة الخلفية', badge: 'حماية الظهر' },
       { name: 'تسلق الجبال', target: 'كارديو وحرق', badge: 'سرعة وإيقاع' },
     ],
-    privacyTag: '🔒 بنية الخصوصية والأمان',
-    privacyTitle: 'جسمك وبياناتك ملكك وحدك دون أي تسريب',
-    privacySubtitle: 'تتم معالجة الفيديو بالكامل داخل معالج هاتفك العصبي. لا يتم تسجيل أو رفع أي لقطة تمرين للسيرفرات إطلاقاً.',
-    ctaTag: '🚀 ارتقِ بمستوى لياقتك',
-    ctaTitle: 'جاهز لتجاوز أرقامك القياسية؟',
-    ctaSubtitle: 'ابدأ تمرينك اليوم مجاناً بدون أي بطاقة بنكية. طوّر أداءك الحركي وتدرب بأحدث تقنيات الرياضة العالمية.',
-    ctaButton: 'ابدأ تمرينك المجاني الآن',
-    readPrivacy: 'اقرأ وثيقة الخصوصية بالكامل',
+    privacyTag: 'أمان وخصوصية البيانات',
+    privacyTitle: 'بيانات حركتك وفيديوهاتك لا تغادر جهازك',
+    privacySubtitle: 'تتم معالجة حركة جسمك لحظياً داخل معالج هاتفك، دون تسجيل أو رفع أي لقطات لسيرفرات خارجية.',
+    readPrivacy: 'وثيقة الخصوصية والأمان',
     copyright: '© 2026 ATOS fit. جميع الحقوق محفوظة.',
   } : {
     home: 'Home',
@@ -110,51 +106,51 @@ const LandingPage = () => {
     about: 'About Us',
     signIn: 'Sign In',
     signingIn: 'Signing in...',
-    start: 'Start Free Workout',
+    start: 'Start Workout',
     starting: 'Starting...',
-    badge: '⚡ NEXT-GEN COMPUTER VISION FITNESS',
-    form: 'PERFECT FORM.',
-    results: 'MAX RESULTS.',
-    intro: 'transforms your smartphone into an elite biomechanics personal trainer. Neural vision tracks your joint angles at 60 FPS, prevents injuries before they happen, and counts reps automatically — with 100% on-device privacy.',
+    badge: 'INTELLIGENT MOTION TRACKING',
+    form: 'Train with Precision.',
+    results: 'Master Every Rep.',
+    intro: 'turns your smartphone camera into a real-time biomechanics coach. Monitor joint angles, fix posture breakdowns before strain occurs, and count reps automatically — with 100% on-device privacy.',
     howItWorks: 'How It Works',
     categories: [
-      { icon: '🏋️', label: 'Strength & Gym' },
-      { icon: '🤸', label: 'Calisthenics' },
-      { icon: '🔥', label: 'HIIT & Burn' },
-      { icon: '🧘', label: 'Mobility & Posture' },
+      { iconName: 'Dumbbell', label: 'Strength & Lifting' },
+      { iconName: 'Activity', label: 'Bodyweight & Calisthenics' },
+      { iconName: 'Flame', label: 'High-Intensity Cardio' },
+      { iconName: 'Shield', label: 'Mobility & Posture' },
     ],
-    accuracyStat: 'Biomechanical Accuracy',
-    latencyStat: 'Real-Time Audio Guidance',
-    privacyStat: 'Zero Video Uploads',
-    stepsTag: '⚡ 3 SIMPLE STEPS',
-    stepsTitle: 'How ATOS fit Powers Your Workout',
-    stepsSubtitle: 'No wearables, no smart watches, no gym appointments. Just you and your smartphone.',
+    accuracyStat: 'Biomechanical Precision',
+    latencyStat: 'Voice Cue Latency',
+    privacyStat: 'On-Device Processing',
+    stepsTag: 'WORKOUT WORKFLOW',
+    stepsTitle: 'Start Training in Seconds',
+    stepsSubtitle: 'No wearables, no fitness bands, no gym appointments. Just you and your smartphone.',
     steps: [
       {
         num: '01',
         icon: 'Smartphone',
-        title: 'Prop Your Phone',
-        desc: 'Place your phone against a water bottle or wall facing your workout space. Make sure your full body is visible.',
+        title: 'Position Your Phone',
+        desc: 'Place your phone facing your workout space with your full body visible. No sensors or smart hardware required.',
       },
       {
         num: '02',
         icon: 'Activity',
-        title: 'Move with Real-Time AI',
-        desc: 'Our neural vision tracks 33 3D skeletal landmarks at 60 FPS, checking joint flexion, lumbar neutral, and movement path.',
+        title: 'Execute Your Set',
+        desc: 'On-device vision tracks 33 skeletal points at 60 FPS, evaluating joint flexion, lumbar neutral, and bar path.',
       },
       {
         num: '03',
-        icon: 'Trophy',
-        title: 'Instant Audio Cues & Gains',
-        desc: 'Hear instant voice coaching ("Drive through heels", "Chest up") while reps, sets, tempo, and calories log automatically.',
+        icon: 'Volume2',
+        title: 'Instant Audio Feedback',
+        desc: 'Hear actionable voice coaching during reps while sets, cadence, and rest intervals log automatically.',
       }
     ],
-    featuresTag: '⚡ THE ATHLETE\'S ARSENAL',
-    featuresTitle: 'Engineered for Serious Lifters & Athletes',
-    featuresSubtitle: 'From injury prevention to automated cadence analysis, experience the world\'s most advanced fitness computer vision.',
-    supportedTag: '💪 REAL-TIME MOVEMENTS',
-    supportedTitle: '50+ Supported Exercises Tracked Live',
-    supportedSubtitle: 'Our neural engine verifies full range of motion (ROM) and prevents shallow or cheated repetitions.',
+    featuresTag: 'PLATFORM CAPABILITIES',
+    featuresTitle: 'Engineered for Lifters & Athletes',
+    featuresSubtitle: 'From injury prevention to cadence tracking, experience high-accuracy motion analysis built for performance.',
+    supportedTag: 'MOVEMENT LIBRARY',
+    supportedTitle: '50+ Exercises Tracked in Real Time',
+    supportedSubtitle: 'Verified range of motion checks that eliminate shallow reps and enforce disciplined mechanics.',
     exercises: [
       { name: 'Squats', target: 'Quads & Glutes', badge: 'Full Depth' },
       { name: 'Push-Ups', target: 'Chest & Triceps', badge: 'Plank Form' },
@@ -165,78 +161,74 @@ const LandingPage = () => {
       { name: 'Deadlifts', target: 'Posterior Chain', badge: 'Spine Safe' },
       { name: 'Mountain Climbers', target: 'Cardio & Core', badge: 'Pace & Rhythm' },
     ],
-    privacyTag: '🔒 PRIVACY-FIRST ARCHITECTURE',
-    privacyTitle: 'Your Body & Workout Data Stay Yours',
-    privacySubtitle: 'Your camera feed is processed strictly inside your device neural processor. Zero video frames are ever recorded or uploaded.',
-    ctaTag: '🚀 ELEVATE YOUR PERFORMANCE',
-    ctaTitle: 'Ready to Crush Your Personal Best?',
-    ctaSubtitle: 'Start training with real-time AI biomechanics today. Completely free, no credit card required.',
-    ctaButton: 'Start Your Free Workout Now',
-    readPrivacy: 'Read Our Privacy Policy',
+    privacyTag: 'LOCAL ARCHITECTURE',
+    privacyTitle: 'Your Video Feed Never Leaves Your Device',
+    privacySubtitle: 'Kinematic models compute your skeleton on-device. Zero video frames are ever recorded or transmitted.',
+    readPrivacy: 'Read Security & Privacy Document',
     copyright: '© 2026 ATOS fit. All rights reserved.',
   };
 
-  const featureWidgets = [
+    const featureWidgets = [
     {
       id: "real_time_feedback",
-      tag: isAr ? 'رؤية بيوميكانيكية فائقة' : 'BIOMECHANICS VISION',
-      heading: isAr ? 'تصحيح لحظي للهيئة ومنع الإصابات' : 'Real-Time Form Correction & Injury Prevention',
+      tag: isAr ? 'الرؤية البيوميكانيكية' : 'BIOMECHANICS KINEMATICS',
+      heading: isAr ? 'تصحيح فوري للهيئة ومنع الإصابات' : 'Live Form Correction & Injury Prevention',
       body: isAr 
-        ? 'تحليل مباشر لـ 33 نقطة مفصلية وإرشادات صوتية ومرئية فورية تدفعك للأداء المثالي وتمنع إصابات المفاصل والعمود الفقري.'
-        : 'Live 33-point skeletal landmark tracking with millisecond audio cues that correct your posture before bad form causes injury.',
+        ? 'متابعة مباشرة لـ 33 نقطة مفصلية وإرشادات صوتية ومرئية تنبهك لاختلال التوازن قبل حدوث إجهاد عضلي أو إصابة.'
+        : 'Direct 33-point skeletal landmark tracking with millisecond cues that alert you to posture breakdown before injury occurs.',
       video: "/schools-header-vp9-chrome-1.webm",
       className: "lg:col-span-12 xl:col-span-6 row-span-2 min-h-[420px]",
-      badgeText: isAr ? 'تحليل 33 نقطة حركية • 60 إطار/ث' : '33 Skeletal Keypoints • 60 FPS',
+      badgeText: isAr ? 'تتبع 33 نقطة • 60 إطار/ث' : '33 Skeletal Points • 60 FPS',
     },
     {
       id: "ai_coach",
-      tag: isAr ? 'مدرب اللياقة الذكي' : 'CONVERSATIONAL COACH',
-      heading: isAr ? 'مدرب القوة والتغذية المخصص' : 'Personal AI Strength & Nutrition Coach',
+      tag: isAr ? 'المساعد التدريبي' : 'TRAINING ADVISOR',
+      heading: isAr ? 'استشارات التمرين والتغذية' : 'Personal Training & Nutrition Coach',
       body: isAr
-        ? 'اسأل مدربك الذكي عن خطط التمارين، التغذية، فترات الاستشفاء، وتطبيق الحمل الدوري (Progressive Overload).'
-        : 'Ask anything fitness-related: personalized training splits, progressive overload, recovery scores, and meal timing.',
-      iconName: "Bot",
-      accent: "indigo",
+        ? 'استشر مدربك حول برامج التمرين، الحمل الدوري (Progressive Overload)، فترات الاستشفاء، وأوقات الوجبات.'
+        : 'Get actionable guidance on training splits, progressive overload, recovery scores, and meal timing.',
+      iconName: "MessageSquare",
+      accent: "amber",
       className: "lg:col-span-6 xl:col-span-6",
       interactivePreview: isAr
-        ? '💡 "حافظ على استقامة العمود الفقري وادفع بكعبيك أثناء الصعود من السكوات"'
-        : '💡 "Maintain lumbar neutral and drive through heels on squat ascent"',
+        ? 'توجيه صوتي: "حافظ على استقامة الظهر وادفع بكعبيك أثناء الصعود"'
+        : 'Audio Cue: "Maintain neutral spine and drive firmly through heels"',
     },
     {
       id: "food_scanner",
-      tag: isAr ? 'تحليل ذكي للوجبات' : 'SMART NUTRITION VISION',
-      heading: isAr ? 'الماسح الضوئي الذكي للماكروز' : 'Smart Food & Macro Scanner',
+      tag: isAr ? 'تحليل الوجبات' : 'NUTRITION LOGGING',
+      heading: isAr ? 'الماسح السريع للسعرات والماكروز' : 'Smart Plate & Macro Scanner',
       body: isAr
-        ? 'وجّه كاميرا هاتفك للوجبة وتعرّف فوراً على السعرات والماكروز (بروتين، كارب، دهون) لضمان تحقيق هدفك البدني.'
-        : 'Snap your plate to instantly log calories, protein, carbs, and fats to hit your muscle-building or fat-loss targets.',
+        ? 'التقط صورة لطبقك لتقدير السعرات والماكروز الأساسية (بروتين، كارب، دهون) لضمان تحقيق أهدافك البدنية.'
+        : 'Snap your plate to log estimated calories, protein, carbs, and fats to stay on track with your fitness goals.',
       iconName: "Scan",
       accent: "amber",
       className: "lg:col-span-6 xl:col-span-6",
       interactivePreview: isAr
-        ? '🥗 صدر دجاج مشوي مع أرز • 38g بروتين • 340 سعرة'
-        : '🥗 Grilled Chicken & Rice • 38g Protein • 340 kcal',
+        ? 'سجل الوجبة: صدر دجاج مشوي مع أرز • 38g بروتين • 340 سعرة'
+        : 'Logged: Grilled Chicken Breast with Rice • 38g Protein • 340 kcal',
     },
     {
       id: "rep_counting",
-      tag: isAr ? 'خوارزمية العد الآلي' : 'PRECISION CADENCE',
+      tag: isAr ? 'العد والإيقاع' : 'PRECISION CADENCE',
       heading: isAr ? 'العد الآلي الذكي للتكرارات والإيقاع' : 'Automated Rep Counting & Cadence Engine',
       body: isAr
-        ? 'ركّز كامل طاقتك على الأداء العضلي؛ الذكاء الاصطناعي يحسب كل تكرار، سرعة النزول والصعود، ويضمن عمق الحركة الكامل.'
-        : 'Focus 100% on the mind-muscle burn. Our neural engine tracks every rep, tempo, and validates full range of motion.',
-      image: "/Gemini_Generated_Image_5ysnl85ysnl85ysn.png",
+        ? 'ركّز كامل طاقتك على الأداء العضلي؛ خوارزمية التتبع تحسب كل تكرار، وتراقب سرعة النزول والصعود وعمق الحركة.'
+        : 'Focus completely on the contraction. Our vision engine counts valid reps, monitors tempo, and validates full range of motion.',
+      image: "/assets/images/rep-analysis.png",
       className: "lg:col-span-12 xl:col-span-12 row-span-1 min-h-[320px]",
       badgeText: isAr ? 'تحليل المدى الحركي والإيقاع' : 'Full Range of Motion & Tempo',
     }
   ];
 
-  const privacyCards = [
+    const privacyCards = [
     {
-      icon: "Cpu",
-      tag: isAr ? 'أمان طرفي كامل' : 'EDGE COMPUTING',
-      title: isAr ? 'المعالجة المحلية بالذكاء الاصطناعي' : 'Local AI Processing',
+      icon: "ShieldCheck",
+      tag: isAr ? 'معالجة على الجهاز' : 'ON-DEVICE PROCESSING',
+      title: isAr ? 'معالجة محلية داخل هاتفك' : 'Local Computer Vision',
       desc: isAr
-        ? 'تُعالج فيديوهات تمارينك بالكامل داخل معالج هاتفك باستخدام MediaPipe دون إرسال أي صورة أو فيديو للسيرفرات.'
-        : 'Your workout camera feed is processed entirely on your device using MediaPipe neural models. No video ever leaves your phone.',
+        ? 'تُحلل حركات التمارين بالكامل داخل معالج هاتفك العصبي دون رفع أو حفظ أي لقطات مرئية خارج الجهاز.'
+        : 'Workout frames are analyzed entirely within your device neural engine without saving or transmitting any visual feed.',
       checks: isAr ? [
         'تحليل الهيكل الحركي محلياً 100%',
         'لا يتم نقل أي فيديو للسيرفرات إطلاقاً',
@@ -249,11 +241,11 @@ const LandingPage = () => {
     },
     {
       icon: "KeyRound",
-      tag: isAr ? 'هوية مشفرة' : 'CRYPTOGRAPHIC IDENTITY',
-      title: isAr ? 'تسجيل دخول مجهول وآمن' : 'Anonymous Authentication',
+      tag: isAr ? 'هوية مشفرة' : 'SECURE PASSKEY',
+      title: isAr ? 'تسجيل دخول آمن وخاص' : 'Cryptographic Sign-In',
       desc: isAr
-        ? 'سجّل دخولك دون إيميل أو أرقام هواتف عبر تقنية Internet Identity المشفرة للحفاظ على سرية هويتك التامة.'
-        : 'Internet Identity provides cryptographically secure, anonymous login without emails or personal phone numbers.',
+        ? 'تسجيل دخول موثق عبر Passkey وInternet Identity دون الحاجة لإدخال كلمات مرور مكررة أو أرقام هواتف.'
+        : 'Sign in securely using modern Passkey hardware authentication without sharing passwords or phone numbers.',
       checks: isAr ? [
         'لا حاجة لبريد إلكتروني أو بيانات شخصية',
         'مفاتيح تشفير متقدمة مقاومة للاختراق',
@@ -266,11 +258,11 @@ const LandingPage = () => {
     },
     {
       icon: "Database",
-      tag: isAr ? 'لامركزية تامة' : 'DECENTRALIZED',
-      title: isAr ? 'تخزين مشفر لا مركزي' : 'Decentralized Storage',
+      tag: isAr ? 'سجلات مشفرة' : 'PRIVATE RECORDS',
+      title: isAr ? 'تخزين مشفر لبياناتك' : 'Encrypted Performance Data',
       desc: isAr
-        ? 'تُحفظ سجلاتك الرياضية على بلوكتشين Internet Computer، مما يجعلها مقاومة للتلاعب وتحت سيطرتك فقط.'
-        : 'Your progress history is stored on the Internet Computer blockchain, making it tamper-proof and accessible only by you.',
+        ? 'تُحفظ أرقامك القياسية وسجلات تمرينك بشكل مشفر ومحمي، ولا يمكن لأي طرف ثالث الاطلاع عليها.'
+        : 'Your workout history and progress telemetry are encrypted, tamper-proof, and accessible strictly by you.',
       checks: isAr ? [
         'موزع عبر عقد بلوكتشين مشفرة',
         'سجلات غير قابلة للتعديل أو الحذف الخبيث',
@@ -327,68 +319,28 @@ const LandingPage = () => {
       className="min-h-screen bg-[#F7F8FA] dark:bg-[#08080A] text-[#08080A] dark:text-[#FFFFFF] font-sans relative overflow-x-hidden selection:bg-[#FAA802]/30 selection:text-white transition-colors duration-300"
     >
       {/* ============================================================ */}
-      {/* Atmospheric Violet/Electric Indigo Background Glows System   */}
+      {/* Precision Ambient Lighting & Architectural Grid               */}
       {/* ============================================================ */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        {/* Primary Top-Center Atmospheric Violet Light Pool (Dashboard Theme) */}
+        {/* Subtle Ambient Horizon Light */}
         <div 
-          className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[1100px] sm:w-[1300px] h-[650px] dark:opacity-100 opacity-60 pointer-events-none"
+          className="absolute top-[-15%] left-1/2 -translate-x-1/2 w-[1200px] h-[500px] pointer-events-none opacity-40 dark:opacity-75"
           style={{
-            background: 'radial-gradient(ellipse 75% 60% at 50% 0%, rgba(250, 168, 2, 0.22) 0%, rgba(192, 192, 192, 0.08) 45%, rgba(250, 168, 2, 0.02) 70%, transparent 90%)',
-            filter: 'blur(45px)',
+            background: 'radial-gradient(ellipse 70% 40% at 50% 0%, rgba(250, 168, 2, 0.12) 0%, rgba(192, 192, 192, 0.03) 60%, transparent 85%)',
+            filter: 'blur(50px)',
           }}
         />
 
-        {/* Secondary Right Ambient Glow */}
+        {/* Subtle Precision Grid Lines */}
         <div 
-          className="absolute top-[20%] -right-[10%] w-[750px] h-[750px] dark:opacity-75 opacity-35 pointer-events-none"
+          className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] pointer-events-none"
           style={{
-            background: 'radial-gradient(circle at 50% 50%, rgba(250, 168, 2, 0.12) 0%, rgba(192, 192, 192, 0.05) 50%, transparent 75%)',
-            filter: 'blur(70px)',
-          }}
-        />
-
-        {/* Subtle Solar Amber Accent Glow from Dashboard palette */}
-        <div 
-          className="absolute top-[18%] right-[12%] w-[400px] h-[400px] dark:opacity-70 opacity-30 pointer-events-none"
-          style={{
-            background: 'radial-gradient(circle at 50% 50%, rgba(250, 168, 2, 0.08) 0%, transparent 70%)',
-            filter: 'blur(70px)',
-          }}
-        />
-
-        {/* Mid-page Features Violet Glow */}
-        <div 
-          className="absolute top-[52%] -left-[10%] w-[750px] h-[750px] dark:opacity-70 opacity-35 pointer-events-none"
-          style={{
-            background: 'radial-gradient(circle at 50% 50%, rgba(250, 168, 2, 0.10) 0%, transparent 70%)',
-            filter: 'blur(80px)',
-          }}
-        />
-
-        {/* Bottom CTA Glow */}
-        <div 
-          className="absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[1000px] h-[600px] dark:opacity-85 opacity-40 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse at 50% 100%, rgba(250, 168, 2, 0.18) 0%, rgba(192, 192, 192, 0.06) 60%, transparent 80%)',
-            filter: 'blur(60px)',
-          }}
-        />
-
-        {/* Subtle Tech Precision Grid Lines */}
-        <div 
-          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
-          style={{
-            backgroundImage: `linear-gradient(to right, rgba(250, 168, 2, 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(250, 168, 2, 0.15) 1px, transparent 1px)`,
-            backgroundSize: '64px 64px',
-            maskImage: 'radial-gradient(ellipse 90% 70% at 50% 30%, black 30%, transparent 85%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 90% 70% at 50% 30%, black 30%, transparent 85%)',
+            backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px)',
+            backgroundSize: '32px 32px',
           }}
         />
       </div>
 
-      {/* ============================================================ */}
-      {/* Navigation Header                                            */}
       {/* ============================================================ */}
       <nav className="relative z-50 px-6 sm:px-8 py-4 border-b border-black/[0.06] dark:border-white/[0.06] bg-white/80 dark:bg-[#08080A]/85 backdrop-blur-xl transition-colors">
         <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto flex items-center justify-between">
@@ -563,9 +515,9 @@ const LandingPage = () => {
                 {landingCopy.categories.map((cat, i) => (
                   <span 
                     key={i} 
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] text-xs font-semibold text-[#525866] dark:text-[#A0A5B5] hover:border-[#FAA802]/40 transition-colors"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] text-xs font-semibold text-[#525866] dark:text-[#A0A5B5] hover:border-[#FAA802]/40 transition-colors"
                   >
-                    <span>{cat.icon}</span>
+                    <Icon name={cat.iconName} size={14} className="text-[#FAA802]" />
                     <span>{cat.label}</span>
                   </span>
                 ))}
@@ -627,7 +579,7 @@ const LandingPage = () => {
         <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
           {/* Section Header */}
           <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FF7A00]/10 border border-[#FF7A00]/30 text-xs font-bold text-[#FF7A00] uppercase tracking-wider mb-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAA802]/10 border border-[#FAA802]/25 text-xs font-bold text-[#FAA802] dark:text-[#FBB502] uppercase tracking-wider mb-4">
               {landingCopy.stepsTag}
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0F1015] dark:text-white mb-4">
@@ -671,14 +623,7 @@ const LandingPage = () => {
       {/* Features Bento Grid Section                                   */}
       {/* ============================================================ */}
       <section id="features" className="relative z-10 py-16 sm:py-24">
-        {/* Ambient Violet Atmospheric Glow behind Bento Grid (Dashboard Style) */}
-        <div 
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] sm:w-[1100px] h-[650px] dark:opacity-80 opacity-35 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(250, 168, 2, 0.22) 0%, rgba(94, 75, 255, 0.08) 50%, transparent 75%)',
-            filter: 'blur(75px)',
-          }}
-        />
+        
         <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
           
           {/* Section Header */}
@@ -821,7 +766,7 @@ const LandingPage = () => {
       <section className="relative z-10 py-16 sm:py-20 border-t border-black/[0.06] dark:border-white/[0.06]">
         <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-xs font-bold text-emerald-500 uppercase tracking-wider mb-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAA802]/10 border border-[#FAA802]/25 text-xs font-bold text-[#FAA802] dark:text-[#FBB502] uppercase tracking-wider mb-4">
               {landingCopy.supportedTag}
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0F1015] dark:text-white mb-4">
@@ -860,19 +805,12 @@ const LandingPage = () => {
       {/* Privacy Architecture Section (3 Pillars)                      */}
       {/* ============================================================ */}
       <section id="privacy" className="relative z-10 py-16 sm:py-24 border-t border-black/[0.06] dark:border-white/[0.06] bg-black/[0.01] dark:bg-white/[0.01]">
-        {/* Ambient Violet Atmospheric Glow behind Privacy Section */}
-        <div 
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] sm:w-[950px] h-[500px] dark:opacity-70 opacity-30 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse 65% 50% at 50% 50%, rgba(79, 70, 229, 0.18) 0%, rgba(255, 122, 0, 0.05) 45%, transparent 70%)',
-            filter: 'blur(75px)',
-          }}
-        />
+        
         <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
           
           {/* Section Header */}
           <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-xs font-bold text-emerald-500 uppercase tracking-wider mb-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAA802]/10 border border-[#FAA802]/25 text-xs font-bold text-[#FAA802] dark:text-[#FBB502] uppercase tracking-wider mb-4">
               {landingCopy.privacyTag}
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0F1015] dark:text-white mb-4">
