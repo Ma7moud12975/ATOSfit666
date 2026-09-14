@@ -336,8 +336,8 @@ const LandingPage = () => {
         <div className="trail trail-olive" style={{ width: 480, height: 480, top: '40%', left: '-5%', opacity: 0.10 }} />
         <div className="trail trail-coral" style={{ width: 550, height: 550, top: '75%', right: '12%', opacity: 0.12 }} />
 
-        {/* Creative Biomechanical Motion Ring (Subtle, Slow-Spinning Telemetry) */}
-        <div className="absolute top-[6%] left-1/2 -translate-x-1/2 w-[850px] h-[850px] pointer-events-none opacity-20 dark:opacity-30">
+        {/* Creative Biomechanical Motion Ring (Subtle, Slow-Spinning Telemetry - Expansive) */}
+        <div className="absolute top-[4%] left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] xl:w-[1250px] xl:h-[1250px] pointer-events-none opacity-20 dark:opacity-30">
           <svg className="w-full h-full animate-[spin_200s_linear_infinite]" viewBox="0 0 850 850" fill="none">
             <circle cx="425" cy="425" r="340" stroke="#FAA802" strokeWidth="1" strokeDasharray="6 14" opacity="0.4" />
             <circle cx="425" cy="425" r="410" stroke="#C0C0C0" strokeWidth="0.75" strokeDasharray="3 18" opacity="0.25" />
@@ -361,8 +361,8 @@ const LandingPage = () => {
       </div>
 
       {/* ============================================================ */}
-      <nav className="relative z-50 px-6 sm:px-8 py-4 border-b border-black/[0.06] dark:border-white/[0.06] bg-white/80 dark:bg-[#08080A]/85 backdrop-blur-xl transition-colors">
-        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto flex items-center justify-between">
+      <nav className="relative z-50 px-6 sm:px-10 lg:px-12 xl:px-16 2xl:px-20 py-4 border-b border-black/[0.06] dark:border-white/[0.06] bg-white/80 dark:bg-[#08080A]/85 backdrop-blur-xl transition-colors">
+        <div className="w-full max-w-[1840px] mx-auto flex items-center justify-between">
           {/* Brand Logo & Name */}
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
             <div className="relative flex items-center justify-center">
@@ -501,10 +501,10 @@ const LandingPage = () => {
       {/* Hero Section: Distributed, Creative, High-Impact             */}
       {/* ============================================================ */}
       <section id="home" className="relative z-10 pt-8 sm:pt-12 lg:pt-16 pb-12 sm:pb-20">
-        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 xl:gap-14 items-center">
-            {/* Left Column: Vision, Headline, Actions (Spans 6 cols, no center cramp) */}
-            <div className={`lg:col-span-6 xl:col-span-6 space-y-6 sm:space-y-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+        <div className="w-full max-w-[1840px] mx-auto px-6 sm:px-10 lg:px-12 xl:px-16 2xl:px-20">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-6 xl:gap-8 2xl:gap-12 items-center">
+            {/* Left Column: Vision, Headline, Actions (Spans 5 cols on desktop, spacious & expansive) */}
+            <div className={`lg:col-span-6 xl:col-span-5 2xl:col-span-5 space-y-6 sm:space-y-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
               
               {/* Pulsing Athletic Pill Badge */}
               <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#FAA802]/10 dark:bg-[#FAA802]/15 border border-[#FAA802]/25 dark:border-[#FAA802]/30 backdrop-blur-md shadow-[0_0_20px_rgba(250, 168, 2,0.15)]">
@@ -515,7 +515,7 @@ const LandingPage = () => {
               </div>
 
               {/* Bold Futuristic Typographic Headline with Athletic Accent */}
-              <h1 className="text-4xl sm:text-6xl xl:text-7xl font-extrabold tracking-tight leading-[1.08]">
+              <h1 className="text-4xl sm:text-6xl xl:text-7xl 2xl:text-[76px] font-extrabold tracking-tight leading-[1.08]">
                 <span className="block text-[#0F1015] dark:text-white">
                   {landingCopy.form}
                 </span>
@@ -525,18 +525,18 @@ const LandingPage = () => {
               </h1>
 
               {/* Rich Value Proposition Subtitle */}
-              <p className="text-base sm:text-lg lg:text-xl text-[#525866] dark:text-[#9DA4B2] leading-relaxed max-w-xl">
+              <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-[#525866] dark:text-[#9DA4B2] leading-relaxed max-w-2xl xl:max-w-3xl">
                 <span className="text-[#0F1015] dark:text-white font-bold">ATOS fit</span> {landingCopy.intro}
               </p>
 
               {/* Athletic Training Disciplines Chips */}
-              <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
+              <div className="flex flex-wrap items-center gap-2.5 pt-1 pb-1">
                 {landingCopy.categories.map((cat, i) => (
                   <span 
                     key={i} 
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] text-xs font-semibold text-[#525866] dark:text-[#A0A5B5] hover:border-[#FAA802]/40 transition-colors"
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] text-xs sm:text-sm font-semibold text-[#525866] dark:text-[#A0A5B5] hover:border-[#FAA802]/40 transition-colors"
                   >
-                    <Icon name={cat.iconName} size={14} className="text-[#FAA802]" />
+                    <Icon name={cat.iconName} size={15} className="text-[#FAA802]" />
                     <span>{cat.label}</span>
                   </span>
                 ))}
@@ -559,7 +559,7 @@ const LandingPage = () => {
 
                 <a
                   href="#how-it-works"
-                  className="inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl text-base font-semibold border border-black/10 dark:border-white/10 hover:border-[#FAA802]/50 text-[#08080A] dark:text-[#FFFFFF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all"
+                  className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-black/10 dark:border-white/10 hover:border-[#FAA802]/50 text-[#08080A] dark:text-[#FFFFFF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all"
                 >
                   <Icon name="Compass" size={18} className="text-[#FAA802]" />
                   <span>{landingCopy.howItWorks}</span>
@@ -567,24 +567,24 @@ const LandingPage = () => {
               </div>
 
               {/* Live Trust & Telemetry Strip */}
-              <div className="grid grid-cols-3 gap-4 pt-6 border-t border-black/[0.06] dark:border-white/[0.08] max-w-xl">
+              <div className="grid grid-cols-3 gap-6 pt-6 border-t border-black/[0.06] dark:border-white/[0.08] max-w-2xl xl:max-w-3xl">
                 <div className="flex flex-col">
-                  <span className="text-xl sm:text-2xl font-black text-[#0F1015] dark:text-white" dir="ltr">99.4%</span>
-                  <span className="text-xs text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.accuracyStat}</span>
+                  <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">99.4%</span>
+                  <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.accuracyStat}</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xl sm:text-2xl font-black text-[#0F1015] dark:text-white" dir="ltr">&lt; 20ms</span>
-                  <span className="text-xs text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.latencyStat}</span>
+                  <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">&lt; 20ms</span>
+                  <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.latencyStat}</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xl sm:text-2xl font-black text-[#0F1015] dark:text-white" dir="ltr">100%</span>
-                  <span className="text-xs text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.privacyStat}</span>
+                  <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">100%</span>
+                  <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.privacyStat}</span>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Interactive Phone Mockup with Floating Micro-Widgets (Spans 6 cols) */}
-            <div className="lg:col-span-6 xl:col-span-6 relative w-full flex items-center justify-center">
+            {/* Right Column: Interactive Phone Mockup with Distributed Floating Widgets */}
+            <div className="lg:col-span-6 xl:col-span-7 2xl:col-span-7 relative w-full flex items-center justify-center min-h-[580px] xl:min-h-[660px]">
               <InteractiveImage />
             </div>
           </div>
@@ -595,7 +595,7 @@ const LandingPage = () => {
       {/* How It Works: 3 Simple Athletic Steps                       */}
       {/* ============================================================ */}
       <section id="how-it-works" className="relative z-10 py-16 sm:py-20 border-t border-black/[0.06] dark:border-white/[0.06] bg-black/[0.01] dark:bg-white/[0.01]">
-        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="max-w-[1720px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-20 2xl:px-24">
           {/* Section Header */}
           <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAA802]/10 border border-[#FAA802]/25 text-xs font-bold text-[#FAA802] dark:text-[#FBB502] uppercase tracking-wider mb-4">
@@ -643,7 +643,7 @@ const LandingPage = () => {
       {/* ============================================================ */}
       <section id="features" className="relative z-10 py-16 sm:py-24">
         
-        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
+        <div className="max-w-[1720px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-20 2xl:px-24 relative z-10">
           
           {/* Section Header */}
           <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-20">
@@ -783,7 +783,7 @@ const LandingPage = () => {
       {/* Supported Exercises & Biomechanics Showcase                 */}
       {/* ============================================================ */}
       <section className="relative z-10 py-16 sm:py-20 border-t border-black/[0.06] dark:border-white/[0.06]">
-        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="max-w-[1720px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-20 2xl:px-24">
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAA802]/10 border border-[#FAA802]/25 text-xs font-bold text-[#FAA802] dark:text-[#FBB502] uppercase tracking-wider mb-4">
               {landingCopy.supportedTag}
@@ -825,7 +825,7 @@ const LandingPage = () => {
       {/* ============================================================ */}
       <section id="privacy" className="relative z-10 py-16 sm:py-24 border-t border-black/[0.06] dark:border-white/[0.06] bg-black/[0.01] dark:bg-white/[0.01]">
         
-        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
+        <div className="max-w-[1720px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-20 2xl:px-24 relative z-10">
           
           {/* Section Header */}
           <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
@@ -907,8 +907,8 @@ const LandingPage = () => {
       {/* ============================================================ */}
       {/* Footer                                                        */}
       {/* ============================================================ */}
-      <footer className="relative z-10 px-6 sm:px-8 py-12 border-t border-black/[0.08] dark:border-white/[0.06] bg-white/50 dark:bg-[#030408]/80 text-[#636779] dark:text-[#A8A8A8] backdrop-blur-md">
-        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto">
+      <footer className="relative z-10 px-6 sm:px-10 lg:px-14 xl:px-20 2xl:px-24 py-12 border-t border-black/[0.08] dark:border-white/[0.06] bg-white/50 dark:bg-[#030408]/80 text-[#636779] dark:text-[#A8A8A8] backdrop-blur-md">
+        <div className="max-w-[1720px] mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             
             {/* Logo and Brand */}
