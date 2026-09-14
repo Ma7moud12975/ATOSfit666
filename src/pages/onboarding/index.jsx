@@ -7,6 +7,8 @@ import Icon from '../../components/AppIcon';
 import { updateUserProfile } from '../../utils/db';
 import { calculateMetabolicTargets } from '../../utils/metabolism';
 import { generateMonthlyMesocycle, saveUserTrainingPlan, determineSplitStrategy } from '../../utils/trainingPlanEngine';
+import { getSavedGoogleUser } from '../../utils/googleAuth';
+import { saveCloudUserProfile } from '../../utils/cloudSync';
 import fullBodyImg from './full body.png';
 import shouldersImg from './shoulders.png';
 import bicepsImg from './biceps.png';
@@ -303,11 +305,21 @@ const OnboardingScreen = () => {
   }, []);
 
   useEffect(() => {
+    // Pre-fill from Google session if available
+    const googleUser = getSavedGoogleUser();
+    if (googleUser) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || googleUser.name || '',
+        email: prev.email || googleUser.email || '',
+      }));
+    }
+
     const userData = localStorage.getItem('user');
     if (userData) {
       try {
         const user = JSON.parse(userData);
-        if ((user.onboardingCompleted || (user.name && user.email)) && !user.skippedOnboarding) {
+        if (user.onboardingCompleted && !user.skippedOnboarding) {
           navigate('/dashboard', { replace: true });
           return;
         }
@@ -348,15 +360,18 @@ const OnboardingScreen = () => {
   };
 
   const saveAndExit = (skippedOnboarding = false) => {
-    const principalId = principal?.toString() || `local_user_${Date.now()}`;
+    const googleUser = getSavedGoogleUser();
+    const principalId = googleUser?.id || principal?.toString() || `user_${Date.now()}`;
     const now = new Date().toISOString();
     const calculatedMetabolic = calculateMetabolicTargets(formData);
     const userProfile = {
       ...formData,
       id: principalId,
       principalId,
-      name: formData.name || 'New User',
-      email: formData.email || '',
+      googleId: googleUser?.googleId || null,
+      name: formData.name || googleUser?.name || 'New User',
+      email: formData.email || googleUser?.email || '',
+      picture: googleUser?.picture || null,
       createdAt: now,
       updatedAt: now,
       onboardingCompleted: !skippedOnboarding,
@@ -376,8 +391,9 @@ const OnboardingScreen = () => {
       metabolicProfile: calculatedMetabolic,
     };
 
+    let mesocycle = null;
     try {
-      const mesocycle = generateMonthlyMesocycle(userProfile);
+      mesocycle = generateMonthlyMesocycle(userProfile);
       saveUserTrainingPlan(principalId, mesocycle);
       userProfile.trainingMesocycleId = mesocycle.id;
     } catch (planError) {
@@ -385,13 +401,22 @@ const OnboardingScreen = () => {
     }
 
     localStorage.setItem('user', JSON.stringify(userProfile));
-    return { principalId, userProfile };
+
+    // Save to cloud in background
+    saveCloudUserProfile(userProfile, mesocycle).catch((cloudErr) => {
+      console.warn('Background cloud save notice:', cloudErr);
+    });
+
+    return { principalId, userProfile, mesocycle };
   };
 
   const handleComplete = async () => {
     setIsLoading(true);
     try {
-      const { principalId, userProfile } = saveAndExit(false);
+      const { principalId, userProfile, mesocycle } = saveAndExit(false);
+      // Await cloud sync for robust cross-device completion
+      await saveCloudUserProfile(userProfile, mesocycle);
+
       if (principal?.toString()) {
         await updateUserProfile(principalId, userProfile);
       }

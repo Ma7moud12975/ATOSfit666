@@ -247,11 +247,13 @@ export default function Dashboard() {
     window.addEventListener(DASHBOARD_DATA_UPDATED, refreshDashboard);
     window.addEventListener('workoutCompleted', refreshDashboard);
     window.addEventListener('achievementEarned', refreshDashboard);
+    window.addEventListener('atos_user_profile_hydrated', refreshDashboard);
     window.addEventListener('storage', refreshDashboard);
     return () => {
       window.removeEventListener(DASHBOARD_DATA_UPDATED, refreshDashboard);
       window.removeEventListener('workoutCompleted', refreshDashboard);
       window.removeEventListener('achievementEarned', refreshDashboard);
+      window.removeEventListener('atos_user_profile_hydrated', refreshDashboard);
       window.removeEventListener('storage', refreshDashboard);
     };
   }, [user]);
