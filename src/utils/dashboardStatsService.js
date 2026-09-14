@@ -1,5 +1,5 @@
-import { getAccountId, getLocalFoodLogs } from './localAccountStorage';
-import { calculateMetabolicTargets } from './metabolism';
+import { getAccountId, getLocalFoodLogs } from './localAccountStorage.js';
+import { calculateMetabolicTargets } from './metabolism.js';
 
 export const DASHBOARD_DATA_UPDATED = 'dashboardDataUpdated';
 
@@ -200,6 +200,8 @@ export const getTodayWorkoutStats = (date = new Date()) => {
             duration: ex.durationSec ? `${Math.round(ex.durationSec / 60)} min` : `${ex.sets} sets`,
             sets: ex.sets,
             reps: ex.reps,
+            completedSets: ex.completedSets ?? (ex.completed ? ex.sets : 0),
+            completedReps: ex.completedReps ?? (ex.completed ? (Number(ex.reps) || 10) * (Number(ex.sets) || 1) : 0),
             completed: Boolean(ex.completed)
           }))
         };
@@ -209,8 +211,11 @@ export const getTodayWorkoutStats = (date = new Date()) => {
 
   const planItems = plan?.exercises || plan?.items || [];
   const completedPlanItems = planItems.filter(item => item.completed);
+  const totalSets = planItems.reduce((acc, item) => acc + (Number(item.sets) || 3), 0);
+  const completedSets = planItems.reduce((acc, item) => acc + (Number(item.completedSets) ?? (item.completed ? (Number(item.sets) || 3) : 0)), 0);
+  const setProgressPct = totalSets > 0 ? Math.min(100, Math.round((completedSets / totalSets) * 100)) : 0;
   const isRestDay = Boolean(plan?.isRestDay || mesocycleDay?.isRestDay);
-  const isPlanDone = planItems.length > 0 && completedPlanItems.length === planItems.length;
+  const isPlanDone = planItems.length > 0 && (completedPlanItems.length === planItems.length || completedSets >= totalSets);
   const isCompleted = (Number(progress.workoutsCompleted) || 0) > 0 || isPlanDone || Boolean(mesocycleDay?.completed);
 
   return {
@@ -222,6 +227,9 @@ export const getTodayWorkoutStats = (date = new Date()) => {
     completedPlanItems,
     completedPlanCount: completedPlanItems.length,
     totalPlanCount: planItems.length,
+    totalSets,
+    completedSets,
+    setProgressPct,
     workoutsCompleted: Number(progress.workoutsCompleted) || (isCompleted && !isRestDay ? 1 : 0),
     caloriesBurned: Number(progress.caloriesBurned) || (mesocycleDay?.actualCaloriesBurned || 0),
     totalWorkoutTime: Number(progress.totalWorkoutTime) || (mesocycleDay?.actualDurationSec || 0),

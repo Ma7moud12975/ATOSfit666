@@ -28,9 +28,14 @@ const TodayWorkoutCard = ({ workoutData, onCustomize }) => {
     difficulty: "Intermediate"
   };
 
-  const completedExercises = todayWorkout?.exercises?.filter(ex => ex?.completed)?.length;
-  const totalExercises = todayWorkout?.exercises?.length;
-  const progressPercentage = (completedExercises / totalExercises) * 100;
+  const completedExercises = todayWorkout?.exercises?.filter(ex => ex?.completed)?.length || 0;
+  const totalExercises = todayWorkout?.exercises?.length || 0;
+  const totalSets = todayWorkout?.exercises?.reduce((acc, ex) => acc + (Number(ex.sets) || 3), 0) || 1;
+  const completedSets = todayWorkout?.exercises?.reduce((acc, ex) => {
+    if (ex.completed) return acc + (Number(ex.sets) || 3);
+    return acc + (Number(ex.completedSets) || 0);
+  }, 0) || 0;
+  const progressPercentage = Math.min(100, Math.round((completedSets / totalSets) * 100));
 
   const handleStartWorkout = () => {
     // ensure persisted plan exists
@@ -62,16 +67,35 @@ const TodayWorkoutCard = ({ workoutData, onCustomize }) => {
 
   const handleCancelCustomize = () => setShowCustomizer(false);
 
-  // Load plan from storage on mount
+  // Load and subscribe to plan updates
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(PLAN_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed?.exercises?.length) setPlan(parsed);
-      }
-    } catch {}
-  }, []);
+    const reloadPlan = () => {
+      try {
+        const raw = localStorage.getItem(PLAN_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.exercises?.length) {
+            setPlan(parsed);
+            return;
+          }
+        }
+        if (workoutData?.exercises?.length) {
+          setPlan(workoutData);
+        }
+      } catch {}
+    };
+
+    reloadPlan();
+    const handleUpdate = () => reloadPlan();
+    window.addEventListener('dashboardDataUpdated', handleUpdate);
+    window.addEventListener('workoutCompleted', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('dashboardDataUpdated', handleUpdate);
+      window.removeEventListener('workoutCompleted', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, [workoutData]);
 
   return (
     <div className="bg-card border border-border rounded-xl p-6 mb-6 shadow-elevation-2">
@@ -100,8 +124,8 @@ const TodayWorkoutCard = ({ workoutData, onCustomize }) => {
       <div className="mb-4">
         <div className="flex items-center justify-between text-sm mb-2">
           <span className="font-medium text-card-foreground">{todayWorkout?.name}</span>
-          <span className="text-muted-foreground">
-            {completedExercises}/{totalExercises} exercises
+          <span className="text-muted-foreground text-xs sm:text-sm">
+            {completedSets}/{totalSets} sets • {completedExercises}/{totalExercises} exercises
           </span>
         </div>
         <div className="w-full bg-muted rounded-full h-2">
@@ -120,14 +144,37 @@ const TodayWorkoutCard = ({ workoutData, onCustomize }) => {
               {exercise?.completed && <Icon name="Check" size={12} color="white" />}
             </div>
             <div className="flex-1">
-              <span className={`text-sm font-medium ${
-                exercise?.completed ? 'text-muted-foreground line-through' : 'text-card-foreground'
-              }`}>
-                {exercise?.name}
-              </span>
-              <span className="text-xs text-muted-foreground ml-2">
-                {exercise?.sets} sets × {exercise?.reps || exercise?.duration}
-              </span>
+              <div className="flex items-center space-x-2">
+                <span className={`text-sm font-medium ${
+                  exercise?.completed ? 'text-muted-foreground line-through' : 'text-card-foreground'
+                }`}>
+                  {exercise?.name}
+                </span>
+                {exercise?.completedSets > 0 && !exercise?.completed && (
+                  <span className="text-[11px] px-1.5 py-0.5 rounded bg-primary/15 text-primary font-bold">
+                    Set {exercise.completedSets}/{exercise.sets}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center space-x-2.5 mt-0.5">
+                <span className="text-xs text-muted-foreground">
+                  {exercise?.sets} sets × {exercise?.reps || exercise?.duration}
+                </span>
+                {/* Visual set dots */}
+                <div className="flex items-center space-x-1" title={`${exercise?.completedSets || 0}/${exercise?.sets} sets completed`}>
+                  {Array.from({ length: Number(exercise?.sets) || 3 }).map((_, sIdx) => {
+                    const isDone = exercise?.completed || sIdx < (Number(exercise?.completedSets) || 0);
+                    return (
+                      <span
+                        key={sIdx}
+                        className={`w-2 h-2 rounded-full transition-colors ${
+                          isDone ? 'bg-success' : 'bg-muted-foreground/30'
+                        }`}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
             </div>
             {!exercise?.completed ? (
               <Button
@@ -135,10 +182,12 @@ const TodayWorkoutCard = ({ workoutData, onCustomize }) => {
                 variant="outline"
                 onClick={() => navigate('/exercise-workout-screen', { state: { selectedExercise: exercise, todayPlan: todayWorkout } })}
               >
-                Start
+                {exercise?.completedSets > 0 ? 'Resume' : 'Start'}
               </Button>
             ) : (
-              <span className="text-xs text-success font-medium">Done</span>
+              <span className="text-xs text-success font-semibold flex items-center gap-1">
+                <Icon name="Check" size={12} /> Done
+              </span>
             )}
           </div>
         ))}

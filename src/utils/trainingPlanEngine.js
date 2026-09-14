@@ -1,6 +1,6 @@
-import { getAccountId } from './localAccountStorage';
-import { exerciseData } from './exerciseData';
-import { DASHBOARD_DATA_UPDATED, emitDashboardDataUpdated } from './dashboardStatsService';
+import { getAccountId } from './localAccountStorage.js';
+import { exerciseData } from './exerciseData.js';
+import { DASHBOARD_DATA_UPDATED, emitDashboardDataUpdated } from './dashboardStatsService.js';
 
 export const TRAINING_MESOCYCLE_PREFIX = 'atos_training_mesocycle:';
 export const LEGACY_TODAY_PLAN_KEY = 'fitcoach_today_plan';
@@ -740,11 +740,14 @@ export const syncLegacyTodayPlan = (plan, date = new Date()) => {
     isRestDay: todayWorkout.isRestDay,
     exercises: (todayWorkout.exercises || []).map(ex => ({
       name: ex.name,
+      nameAr: ex.nameAr,
       category: ex.category,
       difficulty: todayWorkout.phase,
       duration: ex.durationSec ? `${Math.round(ex.durationSec / 60)} min` : `${ex.sets} sets`,
       sets: ex.sets,
       reps: ex.reps,
+      completedSets: ex.completedSets ?? (ex.completed ? ex.sets : 0),
+      completedReps: ex.completedReps ?? (ex.completed ? (Number(ex.reps) || 10) * (Number(ex.sets) || 1) : 0),
       completed: Boolean(ex.completed)
     }))
   };
@@ -775,11 +778,122 @@ export const completeScheduledWorkout = (userId, dayIndexOrDate, stats = {}) => 
   if (Array.isArray(day.exercises)) {
     day.exercises.forEach(ex => {
       ex.completed = true;
+      ex.completedSets = ex.sets;
+      ex.completedReps = (Number(ex.reps) || 10) * (Number(ex.sets) || 3);
     });
   }
 
   saveUserTrainingPlan(userId, plan);
   return day;
+};
+
+/**
+ * Updates set-level progress for an exercise in today's workout.
+ * Supports both Live workout auto-progression and Video upload analysis crediting.
+ */
+export const updateExerciseSetProgress = (userId, exerciseName, options = {}) => {
+  const plan = getUserTrainingPlan(userId);
+  if (!plan) return null;
+
+  const today = getTodayScheduledWorkout(plan, new Date());
+  if (!today || !Array.isArray(today.exercises)) return null;
+
+  const normTarget = String(exerciseName).toLowerCase().replace(/[^a-z0-9]+/g, '');
+  let exercise = today.exercises.find(e => e.name.toLowerCase().replace(/[^a-z0-9]+/g, '') === normTarget);
+
+  if (!exercise) {
+    exercise = today.exercises.find(e => 
+      normTarget.includes(e.name.toLowerCase().replace(/[^a-z0-9]+/g, '')) ||
+      e.name.toLowerCase().replace(/[^a-z0-9]+/g, '').includes(normTarget)
+    );
+  }
+
+  const {
+    completedSets = 1,
+    completedReps = 0,
+    caloriesBurned = 0,
+    durationSec = 0,
+    markFullExercise = false
+  } = options;
+
+  if (exercise) {
+    const targetSets = Number(exercise.sets) || 3;
+    const currentCompletedSets = Number(exercise.completedSets) || (exercise.completed ? targetSets : 0);
+    const newCompletedSets = markFullExercise 
+      ? targetSets 
+      : Math.min(targetSets, Math.max(currentCompletedSets, Number(completedSets)));
+
+    exercise.completedSets = newCompletedSets;
+    exercise.completedReps = (Number(exercise.completedReps) || 0) + Number(completedReps);
+    if (newCompletedSets >= targetSets || markFullExercise) {
+      exercise.completed = true;
+    }
+
+    if (caloriesBurned > 0) {
+      today.actualCaloriesBurned = (Number(today.actualCaloriesBurned) || 0) + Number(caloriesBurned);
+    }
+    if (durationSec > 0) {
+      today.actualDurationSec = (Number(today.actualDurationSec) || 0) + Number(durationSec);
+    }
+
+    const allCompleted = today.exercises.every(e => e.completed);
+    if (allCompleted) {
+      today.completed = true;
+      today.completedAt = new Date().toISOString();
+    }
+
+    saveUserTrainingPlan(userId, plan);
+  } else {
+    // Bonus exercise not originally in today's plan
+    const newEx = {
+      id: `bonus_${Date.now()}`,
+      name: exerciseName,
+      sets: 1,
+      reps: completedReps || 10,
+      completedSets: 1,
+      completedReps: completedReps || 10,
+      completed: true
+    };
+    today.exercises.push(newEx);
+    if (caloriesBurned > 0) {
+      today.actualCaloriesBurned = (Number(today.actualCaloriesBurned) || 0) + Number(caloriesBurned);
+    }
+    saveUserTrainingPlan(userId, plan);
+  }
+
+  // Also sync to legacy fitcoach_today_plan
+  try {
+    const stored = JSON.parse(localStorage.getItem(LEGACY_TODAY_PLAN_KEY) || '{}');
+    if (stored?.exercises) {
+      stored.exercises = stored.exercises.map(e => {
+        const eNorm = e.name.toLowerCase().replace(/[^a-z0-9]+/g, '');
+        if (eNorm === normTarget || normTarget.includes(eNorm) || eNorm.includes(normTarget)) {
+          const targetSets = Number(e.sets) || 3;
+          const currentCompletedSets = Number(e.completedSets) || (e.completed ? targetSets : 0);
+          const newCompletedSets = markFullExercise 
+            ? targetSets 
+            : Math.min(targetSets, Math.max(currentCompletedSets, Number(completedSets)));
+          return {
+            ...e,
+            completedSets: newCompletedSets,
+            completedReps: (Number(e.completedReps) || 0) + Number(completedReps),
+            completed: newCompletedSets >= targetSets || markFullExercise || e.completed
+          };
+        }
+        return e;
+      });
+      localStorage.setItem(LEGACY_TODAY_PLAN_KEY, JSON.stringify(stored));
+    }
+  } catch {}
+
+  emitDashboardDataUpdated({
+    type: 'EXERCISE_SET_PROGRESS_UPDATED',
+    exerciseName,
+    completedSets: exercise ? exercise.completedSets : 1,
+    completed: exercise ? exercise.completed : true
+  });
+
+  return today;
 };
 
 /**
@@ -797,12 +911,38 @@ export const markPlanExerciseCompleted = (userId, exerciseName) => {
 
   if (exercise) {
     exercise.completed = true;
+    exercise.completedSets = exercise.sets || 3;
+    exercise.completedReps = (Number(exercise.reps) || 10) * (Number(exercise.sets) || 3);
     const allCompleted = today.exercises.every(e => e.completed);
     if (allCompleted) {
       today.completed = true;
       today.completedAt = new Date().toISOString();
     }
     saveUserTrainingPlan(userId, plan);
+
+    try {
+      const stored = JSON.parse(localStorage.getItem(LEGACY_TODAY_PLAN_KEY) || '{}');
+      if (stored?.exercises) {
+        stored.exercises = stored.exercises.map(e => {
+          if (e.name.toLowerCase().replace(/[^a-z0-9]+/g, '') === normTarget) {
+            return {
+              ...e,
+              completed: true,
+              completedSets: e.sets || 3,
+              completedReps: (Number(e.reps) || 10) * (Number(e.sets) || 3)
+            };
+          }
+          return e;
+        });
+        localStorage.setItem(LEGACY_TODAY_PLAN_KEY, JSON.stringify(stored));
+      }
+    } catch {}
+
+    emitDashboardDataUpdated({
+      type: 'EXERCISE_COMPLETED',
+      exerciseName,
+      completed: true
+    });
   }
 
   return today;

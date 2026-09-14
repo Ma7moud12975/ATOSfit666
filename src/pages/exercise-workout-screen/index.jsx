@@ -16,6 +16,7 @@ import { recordCompletedWorkout } from '../../utils/workoutStorage';
 import {
   completeScheduledWorkout,
   markPlanExerciseCompleted,
+  updateExerciseSetProgress,
   getUserTrainingPlan,
   getTodayScheduledWorkout
 } from '../../utils/trainingPlanEngine';
@@ -114,6 +115,13 @@ const ExerciseWorkoutScreen = () => {
   const [readinessStatus, setReadinessStatus] = useState(null);
   const [postureCounts, setPostureCounts] = useState({ correct: 0, incorrect: 0 });
   const [formFeedbackHistory, setFormFeedbackHistory] = useState([]);
+  const [isResting, setIsResting] = useState(false);
+  const [restTimeLeft, setRestTimeLeft] = useState(0);
+  const [setBaselineReps, setSetBaselineReps] = useState(0);
+  const [targetReps, setTargetReps] = useState(12);
+  const [targetSets, setTargetSets] = useState(3);
+  const [restDuration, setRestDuration] = useState(60);
+  const [toastNotification, setToastNotification] = useState(null);
   const PLAN_KEY = 'fitcoach_today_plan';
 
   // Mock exercises data
@@ -175,6 +183,41 @@ const ExerciseWorkoutScreen = () => {
     e.name === currentExercise?.name || 
     e.name?.toLowerCase() === currentExercise?.name?.toLowerCase()
   );
+
+  useEffect(() => {
+    if (planExercise) {
+      if (planExercise.sets) setTargetSets(Number(planExercise.sets) || 3);
+      if (planExercise.reps) {
+        const parsed = parseInt(String(planExercise.reps).replace(/\D/g, ''), 10);
+        if (parsed > 0) setTargetReps(parsed);
+      }
+    }
+  }, [planExercise]);
+
+  // Rest Timer countdown
+  useEffect(() => {
+    let timer = null;
+    if (isResting && restTimeLeft > 0) {
+      timer = setInterval(() => {
+        setRestTimeLeft(prev => {
+          if (prev <= 1) {
+            setIsResting(false);
+            if ('speechSynthesis' in window) {
+              try {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance('Rest over! Get ready for your next set.');
+                utter.rate = 1.05;
+                window.speechSynthesis.speak(utter);
+              } catch {}
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isResting, restTimeLeft]);
   const coachRecap = createCoachRecap({
     currentExercise,
     repsCompleted,
@@ -205,9 +248,15 @@ const ExerciseWorkoutScreen = () => {
     if (isWorkoutActive && !isPaused) {
       const name = (currentExercise?.name || '').toLowerCase();
       if (name.includes('push') || name.includes('squat') || name.includes('lunge') || name.includes('burpee') || name.includes('jumping')) {
-        // For Push-Ups, Squats, Lunges, Burpees: use AI detection count provided by CameraFeed
-        setCurrentRep(aiPushupCount);
+        // For AI-detected movements, reps within the current set:
+        const repsInCurrentSet = Math.max(0, aiPushupCount - setBaselineReps);
+        setCurrentRep(repsInCurrentSet);
         setRepsCompleted(aiPushupCount);
+
+        // Auto-advance set when hitting target reps
+        if (repsInCurrentSet >= targetReps && !isResting) {
+          handleSetComplete({ setIndex: currentSet, reps: repsInCurrentSet });
+        }
       } else {
         // For other exercises, use mock counting
         const repInterval = setInterval(() => {
@@ -222,7 +271,139 @@ const ExerciseWorkoutScreen = () => {
         return () => clearInterval(repInterval);
       }
     }
-  }, [isWorkoutActive, isPaused, aiPushupCount, currentExercise]);
+  }, [isWorkoutActive, isPaused, aiPushupCount, currentExercise, setBaselineReps, targetReps, isResting, currentSet]);
+
+  const handleSetComplete = (options = {}) => {
+    const setIdx = options.setIndex || currentSet;
+    const repsInSet = options.reps || currentRep || targetReps;
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const accountId = user?.principal || user?.id || user?.email || user?.name;
+    const exerciseName = currentExercise?.name || 'Workout';
+    const caloriesForSet = Math.max(8, Math.round(repsInSet * 0.75));
+
+    // 1. Update trainingPlanEngine mesocycle & today's plan
+    updateExerciseSetProgress(accountId, exerciseName, {
+      completedSets: setIdx,
+      completedReps: repsInSet,
+      caloriesBurned: caloriesForSet,
+      durationSec: 45
+    });
+
+    // 2. Incremental centralized storage update
+    recordCompletedWorkout({
+      exerciseName,
+      name: exerciseName,
+      reps: repsInSet,
+      sets: 1,
+      durationSec: 45,
+      caloriesBurned: caloriesForSet,
+      sessionItems: [{
+        name: exerciseName,
+        reps: repsInSet,
+        sets: 1,
+        durationSec: 45,
+        caloriesBurned: caloriesForSet,
+        completed: setIdx >= targetSets
+      }]
+    });
+
+    // 3. Audio encouragement
+    if ('speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(
+          setIdx >= targetSets
+            ? `Awesome job! All ${targetSets} sets of ${exerciseName} are completed!`
+            : `Set ${setIdx} complete! Rest for ${restDuration} seconds.`
+        );
+        msg.rate = 1.05;
+        window.speechSynthesis.speak(msg);
+      } catch {}
+    }
+
+    // 4. If target sets reached, trigger exercise completion
+    if (setIdx >= targetSets) {
+      handleExerciseComplete();
+      return;
+    }
+
+    // 5. Advance set and trigger rest interval
+    setCurrentSet(prev => prev + 1);
+    setSetBaselineReps(aiPushupCount);
+    setCurrentRep(0);
+    setIsResting(true);
+    setRestTimeLeft(restDuration);
+    setToastNotification(`Set ${setIdx}/${targetSets} completed! Rest time started.`);
+    setTimeout(() => setToastNotification(null), 4000);
+  };
+
+  const handleSkipRest = () => {
+    setIsResting(false);
+    setRestTimeLeft(0);
+  };
+
+  const handleApplyVideoToPlan = async ({ exerciseName, reps, sets = 1, formScore, durationSec, caloriesBurned, markFullExercise }) => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const accountId = user?.principal || user?.id || user?.email || user?.name;
+
+      // 1. Update trainingPlanEngine with granular set & rep progress
+      updateExerciseSetProgress(accountId, exerciseName, {
+        completedSets: sets,
+        completedReps: reps,
+        caloriesBurned,
+        durationSec,
+        formScore,
+        markFullExercise
+      });
+
+      // 2. Record completed workout into centralized workout storage
+      await recordCompletedWorkout({
+        exerciseName,
+        name: exerciseName,
+        reps,
+        sets,
+        durationSec,
+        caloriesBurned,
+        formScore,
+        sessionItems: [{
+          name: exerciseName,
+          reps,
+          sets,
+          durationSec,
+          caloriesBurned,
+          formScore,
+          completed: true
+        }]
+      });
+
+      // 3. Update local todayPlan state so the current screen also reflects it
+      setTodayPlan(prev => {
+        if (!prev?.items) return prev;
+        return {
+          ...prev,
+          items: prev.items.map(ex => {
+            if (normalizeName(ex.name) === normalizeName(exerciseName)) {
+              const newCompletedSets = Math.min(Number(ex.sets) || 3, (Number(ex.completedSets) || 0) + sets);
+              return {
+                ...ex,
+                completedSets: newCompletedSets,
+                completedReps: (Number(ex.completedReps) || 0) + reps,
+                completed: markFullExercise || newCompletedSets >= (Number(ex.sets) || 3)
+              };
+            }
+            return ex;
+          })
+        };
+      });
+
+      // 4. Show success toast notification
+      setToastNotification(`🎉 ${exerciseName} (${reps} reps) successfully credited to Today's Plan and Dashboard!`);
+      setTimeout(() => setToastNotification(null), 5000);
+    } catch (err) {
+      console.error('Error applying video workout to plan:', err);
+    }
+  };
 
   const handleWorkoutStart = () => {
     if (!isCameraActive && activeTab === 'live') {
@@ -230,10 +411,12 @@ const ExerciseWorkoutScreen = () => {
     }
     setIsWorkoutActive(true);
     setIsPaused(false);
+    setIsResting(false);
     if (workoutTime === 0) {
       // Reset stats for new workout
       setCurrentSet(1);
       setCurrentRep(0);
+      setSetBaselineReps(aiPushupCount);
       setCaloriesBurned(0);
       setFormScore(0);
       setRepsCompleted(0);
@@ -386,6 +569,9 @@ const ExerciseWorkoutScreen = () => {
     setWorkoutTime(0);
     setCurrentSet(1);
     setCurrentRep(0);
+    setSetBaselineReps(aiPushupCount);
+    setIsResting(false);
+    setRestTimeLeft(0);
     setSelectedExercise(exercise);
     setPostureCounts({ correct: 0, incorrect: 0 });
     setFormFeedbackHistory([]);
@@ -743,7 +929,14 @@ const ExerciseWorkoutScreen = () => {
 
   try {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background relative">
+        {/* Floating Toast Notification */}
+        {toastNotification && (
+          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-card border border-primary/40 text-card-foreground px-4 py-3 rounded-xl shadow-elevation-3 flex items-center space-x-3 animate-bounce">
+            <div className="w-2.5 h-2.5 rounded-full bg-primary animate-ping" />
+            <p className="text-sm font-semibold">{toastNotification}</p>
+          </div>
+        )}
       {/* Header with Breadcrumb */}
       <div className="bg-card border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -843,12 +1036,24 @@ const ExerciseWorkoutScreen = () => {
             <div className="hidden lg:block space-y-6">
               <ExerciseControls
                 selectedExercise={currentExercise}
+                planExercise={planExercise}
                 onExerciseChange={handleExerciseChange}
                 onWorkoutStart={handleWorkoutStart}
                 onWorkoutPause={handleWorkoutPause}
                 onWorkoutStop={handleWorkoutStop}
                 onNextExercise={handleNextExercise}
                 onExerciseComplete={handleExerciseComplete}
+                onCompleteSetManual={() => handleSetComplete({ setIndex: currentSet, reps: currentRep || targetReps })}
+                isResting={isResting}
+                restTimeLeft={restTimeLeft}
+                onSkipRest={handleSkipRest}
+                targetReps={targetReps}
+                targetSets={targetSets}
+                onTargetConfigChange={({ targetReps: tr, targetSets: ts, restDuration: rd }) => {
+                  if (tr) setTargetReps(tr);
+                  if (ts) setTargetSets(ts);
+                  if (rd) setRestDuration(rd);
+                }}
                 hasNextExercise={Boolean(todayPlan?.items && (() => {
                   const currentIdx = todayPlan.items.findIndex((e) => 
                     normalizeName(e.name) === normalizeName(currentExercise?.name)
@@ -860,7 +1065,6 @@ const ExerciseWorkoutScreen = () => {
                 currentSet={currentSet}
                 currentRep={currentRep}
                 workoutTime={workoutTime}
-                planExercise={planExercise}
               />
               
               {/* Desktop Stats */}
@@ -879,12 +1083,24 @@ const ExerciseWorkoutScreen = () => {
             <div className="lg:hidden">
               <ExerciseControls
                 selectedExercise={currentExercise}
+                planExercise={planExercise}
                 onExerciseChange={handleExerciseChange}
                 onWorkoutStart={handleWorkoutStart}
                 onWorkoutPause={handleWorkoutPause}
                 onWorkoutStop={handleWorkoutStop}
                 onNextExercise={handleNextExercise}
                 onExerciseComplete={handleExerciseComplete}
+                onCompleteSetManual={() => handleSetComplete({ setIndex: currentSet, reps: currentRep || targetReps })}
+                isResting={isResting}
+                restTimeLeft={restTimeLeft}
+                onSkipRest={handleSkipRest}
+                targetReps={targetReps}
+                targetSets={targetSets}
+                onTargetConfigChange={({ targetReps: tr, targetSets: ts, restDuration: rd }) => {
+                  if (tr) setTargetReps(tr);
+                  if (ts) setTargetSets(ts);
+                  if (rd) setRestDuration(rd);
+                }}
                 hasNextExercise={Boolean(todayPlan?.items && (() => {
                   const currentIdx = todayPlan.items.findIndex((e) => 
                     normalizeName(e.name) === normalizeName(currentExercise?.name)
@@ -896,7 +1112,6 @@ const ExerciseWorkoutScreen = () => {
                 currentSet={currentSet}
                 currentRep={currentRep}
                 workoutTime={workoutTime}
-                planExercise={planExercise}
               />
             </div>
           </div>)
@@ -908,6 +1123,7 @@ const ExerciseWorkoutScreen = () => {
               isAnalyzing={isAnalyzing}
               selectedExercise={currentExercise}
               onPlankTimeUpdate={handlePlankTimeUpdate}
+              onApplyToPlan={handleApplyVideoToPlan}
             />
           </div>)
         )}

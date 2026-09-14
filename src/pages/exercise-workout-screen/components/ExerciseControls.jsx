@@ -5,6 +5,7 @@ import Input from '../../../components/ui/Input';
 
 const ExerciseControls = ({ 
   selectedExercise = null,
+  planExercise = null,
   onExerciseChange,
   onWorkoutStart,
   onWorkoutPause,
@@ -12,19 +13,49 @@ const ExerciseControls = ({
   onNextExercise,
   hasNextExercise = false,
   onExerciseComplete,
+  onCompleteSetManual,
   isWorkoutActive = false,
   isPaused = false,
   currentSet = 1,
   currentRep = 0,
-  workoutTime = 0
+  workoutTime = 0,
+  isResting = false,
+  restTimeLeft = 0,
+  onSkipRest,
+  targetReps: propTargetReps,
+  targetSets: propTargetSets,
+  onTargetConfigChange
 }) => {
-  const [targetReps, setTargetReps] = useState(15);
-  const [targetSets, setTargetSets] = useState(3);
+  const [targetReps, setTargetReps] = useState(propTargetReps || 12);
+  const [targetSets, setTargetSets] = useState(propTargetSets || 3);
   const [restDuration, setRestDuration] = useState(60);
   const [exerciseNotes, setExerciseNotes] = useState("");
   const [voiceGuidance, setVoiceGuidance] = useState(true);
   const [showSwitchModal, setShowSwitchModal] = useState(false);
   const [setDurationSeconds, setSetDurationSeconds] = useState(30);
+
+  // Sync with plan configuration
+  useEffect(() => {
+    if (planExercise) {
+      if (planExercise.sets) {
+        const s = Number(planExercise.sets);
+        if (s > 0) setTargetSets(s);
+      }
+      if (planExercise.reps) {
+        const parsedReps = parseInt(String(planExercise.reps).replace(/\D/g, ''), 10);
+        if (parsedReps > 0) setTargetReps(parsedReps);
+      }
+    } else if (propTargetReps || propTargetSets) {
+      if (propTargetReps) setTargetReps(propTargetReps);
+      if (propTargetSets) setTargetSets(propTargetSets);
+    }
+  }, [planExercise, propTargetReps, propTargetSets]);
+
+  useEffect(() => {
+    if (onTargetConfigChange) {
+      onTargetConfigChange({ targetReps, targetSets, restDuration });
+    }
+  }, [targetReps, targetSets, restDuration, onTargetConfigChange]);
 
   const exercises = [
     { id: 1, name: "Push-Ups", category: "Upper Body", difficulty: "Beginner", duration: "3-5 min" },
@@ -296,6 +327,25 @@ const ExerciseControls = ({
             <h3 className="text-base sm:text-lg font-semibold text-card-foreground">Workout Progress</h3>
             <span className="text-xs sm:text-sm text-muted-foreground">{formatTime(workoutTime)}</span>
           </div>
+
+          {/* Rest Interval Notification */}
+          {isResting && (
+            <div className="p-3 bg-warning/15 border border-warning/40 rounded-lg flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Icon name="Clock" size={18} className="text-warning animate-spin" />
+                <div>
+                  <p className="text-xs font-bold text-card-foreground">Rest Interval</p>
+                  <p className="text-[11px] text-muted-foreground">Catch your breath before Set {currentSet}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-lg font-bold text-warning font-mono">{restTimeLeft}s</span>
+                <Button size="xs" variant="outline" onClick={onSkipRest} className="h-7 text-xs">
+                  Skip
+                </Button>
+              </div>
+            </div>
+          )}
           
           {/* Current Set/Rep Display */}
           <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
@@ -311,6 +361,30 @@ const ExerciseControls = ({
               <p className="text-xl sm:text-2xl font-bold text-card-foreground">{targetSets}</p>
               <p className="text-xs text-muted-foreground">Total Sets</p>
             </div>
+          </div>
+
+          {/* Set Status Pills */}
+          <div className="flex items-center justify-center flex-wrap gap-1.5 pt-1">
+            {Array.from({ length: targetSets }).map((_, idx) => {
+              const setNum = idx + 1;
+              const isCompleted = setNum < currentSet;
+              const isCurrent = setNum === currentSet;
+              return (
+                <span
+                  key={idx}
+                  className={`px-2 py-0.5 rounded text-xs font-semibold flex items-center gap-1 ${
+                    isCompleted
+                      ? 'bg-success/20 text-success border border-success/30'
+                      : isCurrent
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-muted text-muted-foreground border border-border'
+                  }`}
+                >
+                  {isCompleted && <Icon name="Check" size={11} />}
+                  Set {setNum}
+                </span>
+              );
+            })}
           </div>
 
           {/* Progress Bar */}
@@ -330,6 +404,17 @@ const ExerciseControls = ({
       )}
       {/* Control Buttons */}
       <div className="space-y-2 sm:space-y-3">
+        {isWorkoutActive && !isResting && (
+          <Button
+            onClick={onCompleteSetManual}
+            variant="outline"
+            size="sm"
+            className="w-full text-xs sm:text-sm font-medium border-primary/40 text-primary hover:bg-primary/10 transition-colors"
+          >
+            <Icon name="CheckCircle" size={15} className="mr-1.5" />
+            Complete Set {currentSet} ({currentRep}/{targetReps} reps)
+          </Button>
+        )}
         {!isWorkoutActive ? (
           <Button
             onClick={onWorkoutStart}

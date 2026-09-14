@@ -57,8 +57,9 @@ const getFormScoreFromStats = (stats) => {
 
 const formatPercent = (value) => `${Math.round(value * 100)}%`;
 
-const VideoUpload = ({ onVideoAnalysis, isAnalyzing = false, selectedExercise, onPlankTimeUpdate }) => {
+const VideoUpload = ({ onVideoAnalysis, isAnalyzing = false, selectedExercise, onPlankTimeUpdate, onApplyToPlan }) => {
   const [dragActive, setDragActive] = useState(false);
+  const [isLoggedToPlan, setIsLoggedToPlan] = useState(false);
   const [uploadedVideo, setUploadedVideo] = useState(null);
   const [analysisResults, setAnalysisResults] = useState(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
@@ -520,6 +521,7 @@ const VideoUpload = ({ onVideoAnalysis, isAnalyzing = false, selectedExercise, o
     setPostureStatus('unknown');
     setReadinessStatus(null);
     setPoseResults(null);
+    setIsLoggedToPlan(false);
     resetAnalysisStats();
     
     // Reset pose detection timer if it exists
@@ -591,6 +593,85 @@ const VideoUpload = ({ onVideoAnalysis, isAnalyzing = false, selectedExercise, o
     
     if (fileInputRef?.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const handleVideoEnded = () => {
+    handleVideoPause();
+    if (analysisStatsRef.current.processedFrames > 0) {
+      publishAnalysisStats(true);
+      const liveResults = buildRealAnalysisReport();
+      setAnalysisResults(liveResults);
+      if (onVideoAnalysis) {
+        onVideoAnalysis(liveResults);
+      }
+    }
+  };
+
+  const handleApplyToPlan = (markFullExercise = false) => {
+    if (!analysisResults) return;
+    const exerciseName = analysisResults.exerciseDetected || selectedExercise?.name || 'Push-ups';
+    const reps = Number(analysisResults.totalReps) || (analysisResults.metrics?.acceptedReps || 10);
+    const formScore = Number(analysisResults.formScore) || 85;
+    const durationSec = videoRef.current ? Math.round(videoRef.current.duration || videoRef.current.currentTime || 45) : 45;
+    const caloriesBurned = Math.max(12, Math.round((reps * 0.75) + (durationSec * 0.08)));
+
+    if (onApplyToPlan) {
+      onApplyToPlan({
+        exerciseName,
+        reps,
+        sets: 1,
+        formScore,
+        durationSec,
+        caloriesBurned,
+        markFullExercise
+      });
+      setIsLoggedToPlan(true);
+    }
+  };
+
+  const handleSaveReport = () => {
+    if (!analysisResults) return;
+    const reportData = {
+      title: `${analysisResults.exerciseDetected} AI Biomechanical Form Report`,
+      generatedAt: new Date().toLocaleString(),
+      exercise: analysisResults.exerciseDetected,
+      totalReps: analysisResults.totalReps,
+      formScore: `${analysisResults.formScore}%`,
+      metrics: analysisResults.metrics,
+      improvements: analysisResults.improvements,
+      strengths: analysisResults.strengths,
+      timelineFeedback: analysisResults.feedback
+    };
+    
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ATOS_${analysisResults.exerciseDetected.replace(/\s+/g, '_')}_Report_${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleShareResults = async () => {
+    if (!analysisResults) return;
+    const shareText = `🏋️ ATOS Fit AI Workout Analysis:\nExercise: ${analysisResults.exerciseDetected}\nReps: ${analysisResults.totalReps}\nForm Accuracy: ${analysisResults.formScore}%\nAnalyzed via ATOS AI Fitness Platform!`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'ATOS Workout Analysis',
+          text: shareText
+        });
+      } catch {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        alert('Results copied to clipboard!');
+      } catch {
+        alert(shareText);
+      }
     }
   };
 
@@ -676,7 +757,7 @@ const VideoUpload = ({ onVideoAnalysis, isAnalyzing = false, selectedExercise, o
                     className="w-full h-full object-contain"
                     onPlay={handleVideoPlay}
                     onPause={handleVideoPause}
-                    onEnded={handleVideoPause}
+                    onEnded={handleVideoEnded}
                   />
                   
                   {/* Pose Overlay Canvas */}
@@ -960,13 +1041,59 @@ const VideoUpload = ({ onVideoAnalysis, isAnalyzing = false, selectedExercise, o
                 </div>
               </div>
 
+              {/* Log to Today's Plan Banner */}
+              <div className="p-4 bg-primary/10 border border-primary/30 rounded-xl space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
+                      <h4 className="text-base font-bold text-card-foreground">
+                        {analysisResults.exerciseDetected}: {analysisResults.totalReps} Reps Recorded
+                      </h4>
+                    </div>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                      Credit this video set to your daily training plan and sync calories & streak with the Dashboard.
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs px-2.5 py-1 rounded-full bg-success/20 text-success font-medium">
+                      Form: {analysisResults.formScore}%
+                    </span>
+                    <span className="text-xs px-2.5 py-1 rounded-full bg-primary/20 text-primary font-medium">
+                      ~{Math.max(10, Math.round((Number(analysisResults.totalReps) || 10) * 0.8))} kcal
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  <Button
+                    variant="default"
+                    onClick={() => handleApplyToPlan(false)}
+                    disabled={isLoggedToPlan}
+                    className="flex-1"
+                  >
+                    <Icon name={isLoggedToPlan ? "Check" : "PlusCircle"} size={16} className="mr-2" />
+                    {isLoggedToPlan ? "Logged to Today's Plan!" : "Log Set to Today's Plan (+1 Set)"}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleApplyToPlan(true)}
+                    disabled={isLoggedToPlan}
+                    className="flex-1"
+                  >
+                    <Icon name="CheckCircle" size={16} className="mr-2 text-success" />
+                    Mark Exercise Completed
+                  </Button>
+                </div>
+              </div>
+
               {/* Action Buttons */}
               <div className="flex space-x-3">
-                <Button variant="default" className="flex-1">
+                <Button variant="default" className="flex-1" onClick={handleSaveReport}>
                   <Icon name="Download" size={16} className="mr-2" />
                   Save Report
                 </Button>
-                <Button variant="outline" className="flex-1">
+                <Button variant="outline" className="flex-1" onClick={handleShareResults}>
                   <Icon name="Share" size={16} className="mr-2" />
                   Share Results
                 </Button>
