@@ -80,7 +80,7 @@ const ChatInput = ({ onSendMessage, disabled = false }) => {
             disabled={disabled}
             className="chat-input-mic-btn"
             style={{
-              color: isRecording ? '#4353FF' : undefined
+              color: isRecording ? '#FFD700' : undefined
             }}
           >
             <Icon name="Mic" size={20} />

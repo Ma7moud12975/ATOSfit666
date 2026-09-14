@@ -51,8 +51,8 @@ const PaymentSuccess = () => {
   if (isVerifying) {
     return (
       <div className="min-h-screen bg-[#F4F8FA] text-[#1A202C] flex items-center justify-center p-4">
-        <div className="text-center p-8 bg-white border border-[#E6EFF3] rounded-[32px] shadow-[0px_10px_35px_rgba(67, 83, 245,0.08)] max-w-md w-full">
-          <div className="w-16 h-16 border-4 border-[#4353FF] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <div className="text-center p-8 bg-white border border-[#E6EFF3] rounded-[32px] shadow-[0px_10px_35px_rgba(255, 215, 0,0.08)] max-w-md w-full">
+          <div className="w-16 h-16 border-4 border-[#FFD700] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <h2 className="text-2xl font-bold text-[#1A202C] mb-2">Verifying Payment</h2>
           <p className="text-[#64748B]">Please wait while we confirm your subscription...</p>
         </div>
@@ -63,7 +63,7 @@ const PaymentSuccess = () => {
   if (verificationStatus === 'error') {
     return (
       <div className="min-h-screen bg-[#F4F8FA] text-[#1A202C] flex items-center justify-center p-4">
-        <div className="max-w-md w-full mx-auto text-center p-8 bg-white border border-[#E6EFF3] rounded-[32px] shadow-[0px_10px_35px_rgba(67, 83, 245,0.08)]">
+        <div className="max-w-md w-full mx-auto text-center p-8 bg-white border border-[#E6EFF3] rounded-[32px] shadow-[0px_10px_35px_rgba(255, 215, 0,0.08)]">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -76,13 +76,13 @@ const PaymentSuccess = () => {
           <div className="space-y-4">
             <button
               onClick={() => navigate('/pricing')}
-              className="w-full py-3 bg-[#4353FF] hover:bg-[#5668FF] text-white font-bold rounded-xl transition-all duration-300 shadow-[0px_4px_18px_rgba(67, 83, 245,0.3)]"
+              className="w-full py-3 bg-[#FFD700] hover:bg-[#FFE033] text-white font-bold rounded-xl transition-all duration-300 shadow-[0px_4px_18px_rgba(255, 215, 0,0.3)]"
             >
               Try Again
             </button>
             <button
               onClick={() => navigate('/dashboard')}
-              className="w-full py-3 bg-transparent border border-[#9DA8FF] text-[#4353FF] hover:bg-[#4353FF] hover:text-white font-bold rounded-xl transition-all duration-300"
+              className="w-full py-3 bg-transparent border border-[#9DA8FF] text-[#FFD700] hover:bg-[#FFD700] hover:text-white font-bold rounded-xl transition-all duration-300"
             >
               Go to Dashboard
             </button>
@@ -94,10 +94,10 @@ const PaymentSuccess = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F8FA] text-[#1A202C] flex items-center justify-center p-4">
-      <div className="max-w-md w-full mx-auto text-center p-8 bg-white border border-[#E6EFF3] rounded-[32px] shadow-[0px_10px_35px_rgba(67, 83, 245,0.08)]">
+      <div className="max-w-md w-full mx-auto text-center p-8 bg-white border border-[#E6EFF3] rounded-[32px] shadow-[0px_10px_35px_rgba(255, 215, 0,0.08)]">
         {/* Success Icon */}
         <div className="w-20 h-20 bg-[#E6EFF3] rounded-full flex items-center justify-center mx-auto mb-6">
-          <Icon name="CheckCircle" className="w-12 h-12 text-[#4353FF]" />
+          <Icon name="CheckCircle" className="w-12 h-12 text-[#FFD700]" />
         </div>
 
         {/* Success Message */}
@@ -117,7 +117,7 @@ const PaymentSuccess = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-[#64748B]">Status:</span>
-                <span className="text-[#4353FF] font-semibold capitalize">{subscriptionDetails.status}</span>
+                <span className="text-[#FFD700] font-semibold capitalize">{subscriptionDetails.status}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[#64748B]">Started:</span>
@@ -133,13 +133,13 @@ const PaymentSuccess = () => {
         <div className="space-y-4">
           <button
             onClick={handleContinue}
-            className="w-full py-4 bg-[#4353FF] hover:bg-[#5668FF] text-white font-bold rounded-xl transition-all duration-300 shadow-[0px_4px_18px_rgba(67, 83, 245,0.3)]"
+            className="w-full py-4 bg-[#FFD700] hover:bg-[#FFE033] text-white font-bold rounded-xl transition-all duration-300 shadow-[0px_4px_18px_rgba(255, 215, 0,0.3)]"
           >
             Continue to Dashboard
           </button>
           <button
             onClick={() => navigate('/user-profile')}
-            className="w-full py-3 bg-transparent border border-[#9DA8FF] text-[#4353FF] hover:bg-[#4353FF] hover:text-white font-bold rounded-xl transition-all duration-300"
+            className="w-full py-3 bg-transparent border border-[#9DA8FF] text-[#FFD700] hover:bg-[#FFD700] hover:text-white font-bold rounded-xl transition-all duration-300"
           >
             View Profile
           </button>
@@ -147,7 +147,7 @@ const PaymentSuccess = () => {
 
         {/* Additional Info */}
         <div className="mt-8 p-4 bg-[#E6EFF3] border border-[#9DA8FF]/40 rounded-xl">
-          <p className="text-sm text-[#4353FF] font-medium">
+          <p className="text-sm text-[#FFD700] font-medium">
             🎉 You now have access to all premium features including unlimited tracking, 
             advanced analytics, and personalized workout plans!
           </p>

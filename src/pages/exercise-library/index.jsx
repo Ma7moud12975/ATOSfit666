@@ -129,9 +129,9 @@ const ExerciseLibrary = () => {
                   flex: 1, minWidth: '140px', padding: '0.75rem 1.5rem', borderRadius: '20px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                   fontSize: '0.9rem', fontWeight: 700, transition: 'all 0.3s ease',
-                  backgroundColor: activeTab === tab.id ? 'rgba(67, 83, 245,0.15)' : 'transparent',
-                  color: activeTab === tab.id ? '#4353FF' : 'var(--bento-muted)',
-                  border: `1px solid ${activeTab === tab.id ? 'rgba(67, 83, 245,0.3)' : 'transparent'}`
+                  backgroundColor: activeTab === tab.id ? 'rgba(255, 215, 0,0.15)' : 'transparent',
+                  color: activeTab === tab.id ? '#FFD700' : 'var(--bento-muted)',
+                  border: `1px solid ${activeTab === tab.id ? 'rgba(255, 215, 0,0.3)' : 'transparent'}`
                 }}
               >
                 <Icon name={tab.icon} size={18} />
@@ -158,7 +158,7 @@ const ExerciseLibrary = () => {
                       borderRadius: '16px', color: 'var(--bento-text)', fontSize: '0.95rem',
                       outline: 'none', transition: 'border-color 0.2s'
                     }}
-                    onFocus={e => e.target.style.borderColor = '#4353FF'}
+                    onFocus={e => e.target.style.borderColor = '#FFD700'}
                     onBlur={e => e.target.style.borderColor = 'var(--bento-border)'}
                   />
                 </div>
@@ -228,14 +228,14 @@ const ExerciseLibrary = () => {
                         <button
                           onClick={() => handleDeletePlan(plan.id)}
                           style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: 'var(--bento-soft-text)', cursor: 'pointer' }}
-                          onMouseOver={e => e.currentTarget.style.color = '#4353FF'}
+                          onMouseOver={e => e.currentTarget.style.color = '#FFD700'}
                           onMouseOut={e => e.currentTarget.style.color = 'var(--bento-soft-text)'}
                         >
                           <Icon name="Trash2" size={18} />
                         </button>
                         
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#4353FF', boxShadow: '0 0 8px #4353FF' }}></div>
+                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#FFD700', boxShadow: '0 0 8px #FFD700' }}></div>
                           <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--bento-text)', margin: 0, paddingRight: '2rem' }}>{plan.name}</h4>
                         </div>
                         

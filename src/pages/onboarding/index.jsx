@@ -200,7 +200,7 @@ const ImageChoice = ({ selected, image, title, subtitle, icon, onClick }) => (
   </button>
 );
 
-const RangeControl = ({ label, value, unit, min, max, minLabel, maxLabel, middleLabel, gradient = 'linear-gradient(90deg, #4353FF 0%, #7082FF 100%)', onChange }) => {
+const RangeControl = ({ label, value, unit, min, max, minLabel, maxLabel, middleLabel, gradient = 'linear-gradient(90deg, #FFD700 0%, #FFD700 100%)', onChange }) => {
   const percentage = ((value - min) / (max - min)) * 100;
 
   return (
@@ -452,7 +452,7 @@ const OnboardingScreen = () => {
                 minLabel="30 kg"
                 middleLabel="115 kg"
                 maxLabel="200 kg"
-                gradient="linear-gradient(90deg, #4353FF 0%, #7082FF 100%)"
+                gradient="linear-gradient(90deg, #FFD700 0%, #FFD700 100%)"
                 onChange={(value) => handleInputChange('bodyWeight', value)}
               />
               <InsightStrip
@@ -534,7 +534,7 @@ const OnboardingScreen = () => {
                 minLabel="140 cm"
                 middleLabel="180 cm"
                 maxLabel="220 cm"
-                gradient="linear-gradient(90deg, #4353FF 0%, #7082FF 100%)"
+                gradient="linear-gradient(90deg, #FFD700 0%, #FFD700 100%)"
                 onChange={(value) => handleInputChange('height', value)}
               />
               <RangeControl
@@ -546,7 +546,7 @@ const OnboardingScreen = () => {
                 minLabel="15"
                 middleLabel="48"
                 maxLabel="80"
-                gradient="linear-gradient(90deg, #4353FF 0%, #7082FF 100%)"
+                gradient="linear-gradient(90deg, #FFD700 0%, #FFD700 100%)"
                 onChange={(value) => handleInputChange('age', value)}
               />
               <RangeControl
@@ -558,7 +558,7 @@ const OnboardingScreen = () => {
                 minLabel="30 kg"
                 middleLabel="115 kg"
                 maxLabel="200 kg"
-                gradient="linear-gradient(90deg, #4353FF 0%, #7082FF 100%)"
+                gradient="linear-gradient(90deg, #FFD700 0%, #FFD700 100%)"
                 onChange={(value) => handleInputChange('weight', value)}
               />
             </div>
@@ -805,7 +805,7 @@ const OnboardingScreen = () => {
           className="pointer-events-none absolute inset-0 opacity-90"
           style={{
             background:
-              'linear-gradient(135deg, rgba(67, 83, 255, 0.16) 0%, rgba(112, 130, 255, 0.05) 34%, transparent 60%), linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 42%)',
+              'linear-gradient(135deg, rgba(255, 215, 0, 0.16) 0%, rgba(112, 130, 255, 0.05) 34%, transparent 60%), linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 42%)',
           }}
         />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.08)_1px,transparent_0)] [background-size:28px_28px] opacity-25" />

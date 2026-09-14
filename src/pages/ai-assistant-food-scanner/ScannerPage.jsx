@@ -250,7 +250,7 @@ const ScannerPage = () => {
               <div className="food-scanner-toolbar">
                 <div className="food-scanner-toolbar-title">
                   <div className="food-scanner-toolbar-icon">
-                    <Icon name="Camera" size={19} color="#4353FF" />
+                    <Icon name="Camera" size={19} color="#FFD700" />
                   </div>
                   <div>
                     <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--bento-text)', margin: 0 }}>{t('scanner.frame')}</h2>
@@ -272,7 +272,7 @@ const ScannerPage = () => {
                 ) : (
                   <div className="food-scanner-empty">
                     <div className="food-scan-core">
-                      <Icon name="ScanLine" size={30} color="#4353FF" />
+                      <Icon name="ScanLine" size={30} color="#FFD700" />
                     </div>
                     <strong>{t('scanner.emptyTitle')}</strong>
                     <span>{t('scanner.emptyCopy')}</span>
@@ -285,7 +285,7 @@ const ScannerPage = () => {
                       <span />
                     </div>
                     <div className="food-image-scan-loader">
-                      <Icon name="ScanSearch" size={16} color="#4353FF" />
+                      <Icon name="ScanSearch" size={16} color="#FFD700" />
                       {t('scanner.reading')}
                     </div>
                   </div>
@@ -307,47 +307,47 @@ const ScannerPage = () => {
               <div className="bento-card food-analysis-card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--bento-text)', margin: 0 }}>{t('scanner.result')}</h3>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', color: scanResult ? '#4353FF' : 'var(--bento-muted)', background: scanResult ? 'rgba(67, 83, 245, 0.1)' : 'var(--bento-chip)', padding: '4px 10px', borderRadius: '999px', fontWeight: 700 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', color: scanResult ? '#FFD700' : 'var(--bento-muted)', background: scanResult ? 'rgba(255, 215, 0, 0.1)' : 'var(--bento-chip)', padding: '4px 10px', borderRadius: '999px', fontWeight: 700 }}>
                     <Icon name={scanResult?.errorMessage ? "AlertTriangle" : scanResult ? "Check" : "CameraOff"} size={12} /> {scanResult ? scanResult.name : t('scanner.noData')}
                   </span>
                 </div>
 
                 {scanResult?.errorMessage && (
-                  <div style={{ marginBottom: '1rem', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid rgba(67, 83, 245, .3)', background: 'rgba(67, 83, 245, .08)', color: 'var(--bento-soft-text)', fontSize: '0.78rem', lineHeight: 1.45, fontWeight: 700 }}>
+                  <div style={{ marginBottom: '1rem', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid rgba(255, 215, 0, .3)', background: 'rgba(255, 215, 0, .08)', color: 'var(--bento-soft-text)', fontSize: '0.78rem', lineHeight: 1.45, fontWeight: 700 }}>
                     {scanResult.errorMessage}
                   </div>
                 )}
 
                 <div className="food-calorie-row">
-                  <strong className="tabular-nums" style={{ color: scanResult ? '#4353FF' : 'var(--bento-muted)', fontFamily: 'JetBrains Mono, monospace' }}>{scanResult ? scanResult.calories : '--'}</strong>
+                  <strong className="tabular-nums" style={{ color: scanResult ? '#FFD700' : 'var(--bento-muted)', fontFamily: 'JetBrains Mono, monospace' }}>{scanResult ? scanResult.calories : '--'}</strong>
                   <span>kcal</span>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                   <div className="food-macro-tile">
                     <div style={{ fontSize: '0.7rem', color: 'var(--bento-muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.5rem' }}>{t('scanner.protein')}</div>
-                    <div className="tabular-nums" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--bento-soft-text)', fontFamily: 'JetBrains Mono, monospace' }}>{scanResult ? scanResult.protein : '--'}<span style={{ fontSize: '0.8rem', color: scanResult ? '#4353FF' : 'var(--bento-muted)' }}>g</span></div>
+                    <div className="tabular-nums" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--bento-soft-text)', fontFamily: 'JetBrains Mono, monospace' }}>{scanResult ? scanResult.protein : '--'}<span style={{ fontSize: '0.8rem', color: scanResult ? '#FFD700' : 'var(--bento-muted)' }}>g</span></div>
                   </div>
                   <div className="food-macro-tile">
                     <div style={{ fontSize: '0.7rem', color: 'var(--bento-muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.5rem' }}>{t('scanner.carbs')}</div>
-                    <div className="tabular-nums" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--bento-soft-text)', fontFamily: 'JetBrains Mono, monospace' }}>{scanResult ? scanResult.carbs : '--'}<span style={{ fontSize: '0.8rem', color: scanResult ? '#4353FF' : 'var(--bento-muted)' }}>g</span></div>
+                    <div className="tabular-nums" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--bento-soft-text)', fontFamily: 'JetBrains Mono, monospace' }}>{scanResult ? scanResult.carbs : '--'}<span style={{ fontSize: '0.8rem', color: scanResult ? '#FFD700' : 'var(--bento-muted)' }}>g</span></div>
                   </div>
                   <div className="food-macro-tile">
                     <div style={{ fontSize: '0.7rem', color: 'var(--bento-muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.5rem' }}>{t('scanner.fats')}</div>
-                    <div className="tabular-nums" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--bento-soft-text)', fontFamily: 'JetBrains Mono, monospace' }}>{scanResult ? scanResult.fats : '--'}<span style={{ fontSize: '0.8rem', color: scanResult ? '#4353FF' : 'var(--bento-muted)' }}>g</span></div>
+                    <div className="tabular-nums" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--bento-soft-text)', fontFamily: 'JetBrains Mono, monospace' }}>{scanResult ? scanResult.fats : '--'}<span style={{ fontSize: '0.8rem', color: scanResult ? '#FFD700' : 'var(--bento-muted)' }}>g</span></div>
                   </div>
                 </div>
 
-                <div style={{ width: '100%', marginTop: '1.5rem', padding: '0.85rem 1rem', borderRadius: '18px', border: '1px solid var(--bento-border)', background: scanResult?.saved ? 'rgba(67, 83, 245, 0.12)' : 'var(--bento-chip)', color: scanResult?.saved ? '#4353FF' : 'var(--bento-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 800, fontSize: '0.85rem' }}>
+                <div style={{ width: '100%', marginTop: '1.5rem', padding: '0.85rem 1rem', borderRadius: '18px', border: '1px solid var(--bento-border)', background: scanResult?.saved ? 'rgba(255, 215, 0, 0.12)' : 'var(--bento-chip)', color: scanResult?.saved ? '#FFD700' : 'var(--bento-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 800, fontSize: '0.85rem' }}>
                   <Icon name={scanResult?.errorMessage ? "AlertTriangle" : scanResult?.saved ? "CheckCircle" : "History"} size={16} />
                   {scanResult?.errorMessage ? 'Not saved' : scanResult?.saved ? t('scanner.saved') : t('scanner.autoSave')}
                 </div>
 
                 {recoveryMatch && (
-                  <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '18px', border: '1px solid rgba(67, 83, 245, .28)', background: 'linear-gradient(135deg, rgba(67, 83, 245, .12), var(--bento-chip))' }}>
+                  <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '18px', border: '1px solid rgba(255, 215, 0, .28)', background: 'linear-gradient(135deg, rgba(255, 215, 0, .12), var(--bento-chip))' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'flex-start', marginBottom: '0.9rem' }}>
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#4353FF', fontSize: '0.78rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.35rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#FFD700', fontSize: '0.78rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.35rem' }}>
                           <Icon name="Activity" size={14} />
                           Recovery Match
                         </div>
@@ -355,7 +355,7 @@ const ScannerPage = () => {
                         <span style={{ color: 'var(--bento-muted)', fontSize: '0.78rem' }}>after {recoveryMatch.focus}</span>
                       </div>
                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        <strong style={{ display: 'block', color: '#4353FF', fontSize: '2rem', lineHeight: 1 }}>{recoveryMatch.score}%</strong>
+                        <strong style={{ display: 'block', color: '#FFD700', fontSize: '2rem', lineHeight: 1 }}>{recoveryMatch.score}%</strong>
                         <span style={{ color: 'var(--bento-muted)', fontSize: '0.68rem', fontWeight: 800 }}>FIT SCORE</span>
                       </div>
                     </div>
@@ -371,7 +371,7 @@ const ScannerPage = () => {
                             <span>{value}%</span>
                           </div>
                           <div style={{ height: 6, borderRadius: 999, background: 'var(--bento-field)', overflow: 'hidden' }}>
-                            <div style={{ width: `${value}%`, height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #4353FF, #828FFF)' }} />
+                            <div style={{ width: `${value}%`, height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #FFD700, #FFE033)' }} />
                           </div>
                         </div>
                       ))}
@@ -401,7 +401,7 @@ const ScannerPage = () => {
                         <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--bento-soft-text)', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</h4>
                         <span style={{ fontSize: '0.7rem', color: 'var(--bento-muted)' }}>{item.time}</span>
                       </div>
-                      <div style={{ fontWeight: 800, color: '#4353FF', fontSize: '0.9rem', flexShrink: 0 }}>
+                      <div style={{ fontWeight: 800, color: '#FFD700', fontSize: '0.9rem', flexShrink: 0 }}>
                         {item.calories} <span style={{ fontSize: '0.65rem', color: 'var(--bento-muted)' }}>kcal</span>
                       </div>
                       <button type="button" title={t('scanner.deleteScan')} onClick={(event) => { event.stopPropagation(); handleDeleteHistoryItem(item.id); }} style={{ width: 30, height: 30, borderRadius: '999px', border: '1px solid var(--bento-border)', background: 'transparent', color: 'var(--bento-muted)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>

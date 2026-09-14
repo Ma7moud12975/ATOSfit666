@@ -25,8 +25,8 @@ const ExerciseCard = ({ exercise }) => {
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
       case 'Beginner': return { bg: 'rgba(167,162,137,0.15)', text: 'var(--bento-muted)', border: 'rgba(167,162,137,0.3)' };
-      case 'Intermediate': return { bg: 'rgba(67, 83, 245,0.1)', text: '#4353FF', border: 'rgba(67, 83, 245,0.25)' };
-      case 'Advanced': return { bg: 'rgba(67, 83, 245,0.2)', text: '#4353FF', border: 'rgba(67, 83, 245,0.4)' };
+      case 'Intermediate': return { bg: 'rgba(255, 215, 0,0.1)', text: '#FFD700', border: 'rgba(255, 215, 0,0.25)' };
+      case 'Advanced': return { bg: 'rgba(255, 215, 0,0.2)', text: '#FFD700', border: 'rgba(255, 215, 0,0.4)' };
       default: return { bg: 'rgba(167,162,137,0.1)', text: 'var(--bento-muted)', border: 'rgba(167,162,137,0.2)' };
     }
   };

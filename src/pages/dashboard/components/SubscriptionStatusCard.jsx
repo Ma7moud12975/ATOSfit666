@@ -17,7 +17,7 @@ const SubscriptionStatusCard = ({ subscription, isLoading }) => {
     return (
       <div className="bg-card rounded-xl p-6 border border-border">
         <div className="flex items-center justify-center py-8">
-          <div className="w-6 h-6 border-4 border-[#4353FF] border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-6 h-6 border-4 border-[#FFD700] border-t-transparent rounded-full animate-spin"></div>
           <span className="ml-3 text-muted-foreground">Loading subscription...</span>
         </div>
       </div>
@@ -28,7 +28,7 @@ const SubscriptionStatusCard = ({ subscription, isLoading }) => {
     <div className="bg-card rounded-xl p-6 border border-border">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-foreground">Subscription Status</h3>
-        <Icon name="CreditCard" className="w-5 h-5 text-[#4353FF]" />
+        <Icon name="CreditCard" className="w-5 h-5 text-[#FFD700]" />
       </div>
 
       {subscription ? (
@@ -43,7 +43,7 @@ const SubscriptionStatusCard = ({ subscription, isLoading }) => {
               </p>
             </div>
             <div className="text-right">
-              <div className="text-xl font-bold text-[#4353FF]">
+              <div className="text-xl font-bold text-[#FFD700]">
                 ${subscription.plan === 'Premium' ? '19.99' : '29.99'}/mo
               </div>
             </div>
@@ -52,7 +52,7 @@ const SubscriptionStatusCard = ({ subscription, isLoading }) => {
           <div className="pt-4 border-t border-border">
             <button
               onClick={handleManageSubscription}
-              className="w-full py-2.5 px-4 bg-[#4353FF] hover:bg-[#5668FF] text-white font-bold rounded-xl transition-all duration-300 shadow-[0px_4px_18px_rgba(67,83,255,0.3)]"
+              className="w-full py-2.5 px-4 bg-[#FFD700] hover:bg-[#FFE033] text-white font-bold rounded-xl transition-all duration-300 shadow-[0px_4px_18px_rgba(255, 215, 0,0.3)]"
             >
               Manage Subscription
             </button>
@@ -69,7 +69,7 @@ const SubscriptionStatusCard = ({ subscription, isLoading }) => {
           </p>
           <button
             onClick={handleUpgrade}
-            className="w-full py-2.5 px-4 bg-[#4353FF] hover:bg-[#5668FF] text-white font-bold rounded-xl transition-all duration-300 shadow-[0px_4px_18px_rgba(67,83,255,0.3)]"
+            className="w-full py-2.5 px-4 bg-[#FFD700] hover:bg-[#FFE033] text-white font-bold rounded-xl transition-all duration-300 shadow-[0px_4px_18px_rgba(255, 215, 0,0.3)]"
           >
             Upgrade Now
           </button>

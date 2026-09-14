@@ -33,21 +33,21 @@ const ChatMessage = ({ message, isUser, timestamp, isTyping = false }) => {
     }}>
       {/* Avatar */}
       <div className="chat-message-avatar" style={{ 
-        background: isUser ? 'rgba(67, 83, 255, 0.15)' : 'rgba(167,162,137,0.1)',
-        border: `1px solid ${isUser ? 'rgba(67, 83, 255, 0.3)' : 'rgba(167,162,137,0.2)'}`,
-        boxShadow: isUser ? '0 0 10px rgba(67, 83, 255, 0.2)' : 'none'
+        background: isUser ? 'rgba(255, 215, 0, 0.15)' : 'rgba(167,162,137,0.1)',
+        border: `1px solid ${isUser ? 'rgba(255, 215, 0, 0.3)' : 'rgba(167,162,137,0.2)'}`,
+        boxShadow: isUser ? '0 0 10px rgba(255, 215, 0, 0.2)' : 'none'
       }}>
-        <Icon name={isUser ? 'User' : 'Bot'} size={18} color={isUser ? '#4353FF' : 'var(--bento-muted)'} />
+        <Icon name={isUser ? 'User' : 'Bot'} size={18} color={isUser ? '#FFD700' : 'var(--bento-muted)'} />
       </div>
       
       {/* Message Bubble */}
       <div className="chat-message-bubble-wrapper">
         <div className="chat-message-bubble" style={{ 
           borderRadius: isUser ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
-          background: isUser ? 'linear-gradient(135deg, rgba(67, 83, 255, 0.15) 0%, rgba(67, 83, 255, 0.05) 100%)' : 'rgba(167,162,137,0.08)',
-          border: `1px solid ${isUser ? 'rgba(67, 83, 255, 0.25)' : 'rgba(167,162,137,0.15)'}`,
+          background: isUser ? 'linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%)' : 'rgba(167,162,137,0.08)',
+          border: `1px solid ${isUser ? 'rgba(255, 215, 0, 0.25)' : 'rgba(167,162,137,0.15)'}`,
           color: isUser ? 'var(--bento-text)' : 'var(--bento-soft-text)',
-          boxShadow: isUser ? '0 4px 20px rgba(67, 83, 255, 0.05)' : 'none'
+          boxShadow: isUser ? '0 4px 20px rgba(255, 215, 0, 0.05)' : 'none'
         }}>
           <div 
             className="prose prose-invert max-w-none"

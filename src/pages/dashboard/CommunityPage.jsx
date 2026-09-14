@@ -75,19 +75,19 @@ const CommunityPage = () => {
             
             {/* Hero / Banner Widget */}
             <div className="bento-card community-card community-hero col-span-1 md:col-span-2 lg:col-span-4" style={{ padding: 'clamp(1.75rem, 3vw, 2.5rem)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', background: 'radial-gradient(circle, rgba(67, 83, 255, 0.15) 0%, transparent 70%)', borderRadius: '50%' }}></div>
+              <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', background: 'radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%)', borderRadius: '50%' }}></div>
               <div style={{ position: 'absolute', bottom: '-30px', left: '10%', width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(255, 174, 0, 0.1) 0%, transparent 70%)', borderRadius: '50%' }}></div>
               
               <div style={{ relative: 'relative', zIndex: 2 }}>
-                <div style={{ width: 80, height: 80, margin: '0 auto 1.5rem', background: 'rgba(67, 83, 255, 0.15)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(67, 83, 255, 0.3)', boxShadow: '0 0 20px rgba(67, 83, 255, 0.15)' }}>
-                  <Icon name="Users" size={36} color="#4353FF" />
+                <div style={{ width: 80, height: 80, margin: '0 auto 1.5rem', background: 'rgba(255, 215, 0, 0.15)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255, 215, 0, 0.3)', boxShadow: '0 0 20px rgba(255, 215, 0, 0.15)' }}>
+                  <Icon name="Users" size={36} color="#FFD700" />
                 </div>
                 <h2 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--bento-text)', marginBottom: '1rem' }}>{t('community.hero')}</h2>
                 <p style={{ fontSize: '1.05rem', color: 'var(--bento-soft-text)', maxWidth: '600px', margin: '0 auto 1.5rem', lineHeight: '1.6' }}>
                   {t('community.heroCopy')}
                 </p>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '0.6rem 1.5rem', background: 'rgba(67, 83, 255, 0.15)', border: '1px solid rgba(67, 83, 255, 0.3)', borderRadius: '999px', color: '#4353FF', fontWeight: 800, fontSize: '0.9rem' }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#4353FF', animation: 'badgePing 1.5s infinite' }}></span>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '0.6rem 1.5rem', background: 'rgba(255, 215, 0, 0.15)', border: '1px solid rgba(255, 215, 0, 0.3)', borderRadius: '999px', color: '#FFD700', fontWeight: 800, fontSize: '0.9rem' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FFD700', animation: 'badgePing 1.5s infinite' }}></span>
                   {t('community.launching')}
                 </div>
               </div>
@@ -96,10 +96,10 @@ const CommunityPage = () => {
             {/* Features Grid */}
             {features.map((feature, idx) => (
               <div key={idx} className="bento-card community-card col-span-1" style={{ padding: '1.5rem', minHeight: '100%' }}>
-                <div style={{ width: 48, height: 48, borderRadius: '16px', background: feature.highlight ? 'rgba(67, 83, 255, 0.15)' : 'rgba(167,162,137,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: `1px solid ${feature.highlight ? 'rgba(67, 83, 255, 0.3)' : 'rgba(167,162,137,0.2)'}` }}>
-                  <Icon name={feature.icon} size={24} color={feature.highlight ? '#4353FF' : 'var(--bento-muted)'} />
+                <div style={{ width: 48, height: 48, borderRadius: '16px', background: feature.highlight ? 'rgba(255, 215, 0, 0.15)' : 'rgba(167,162,137,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: `1px solid ${feature.highlight ? 'rgba(255, 215, 0, 0.3)' : 'rgba(167,162,137,0.2)'}` }}>
+                  <Icon name={feature.icon} size={24} color={feature.highlight ? '#FFD700' : 'var(--bento-muted)'} />
                 </div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: feature.highlight ? '#4353FF' : 'var(--bento-text)', marginBottom: '0.75rem' }}>{feature.title}</h3>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: feature.highlight ? '#FFD700' : 'var(--bento-text)', marginBottom: '0.75rem' }}>{feature.title}</h3>
                 <p style={{ color: 'var(--bento-soft-text)', fontSize: '0.9rem', lineHeight: '1.55' }}>{feature.description}</p>
               </div>
             ))}

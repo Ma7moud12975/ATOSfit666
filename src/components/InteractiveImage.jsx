@@ -71,11 +71,11 @@ const InteractiveImage = () => {
       ref={containerRef}
       className="relative w-full py-4 sm:py-6 lg:py-8 flex items-center justify-center select-none"
     >
-      {/* Radiant Violet & Solar Amber Aura (from 3D Logo colors) directly behind mockup */}
+      {/* Radiant Gold & Metallic Titanium Aura directly behind mockup */}
       <div 
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[440px] md:w-[500px] h-[340px] sm:h-[440px] md:h-[500px] rounded-full pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, rgba(79, 70, 229, 0.38) 0%, rgba(255, 122, 0, 0.14) 42%, transparent 72%)',
+          background: 'radial-gradient(circle, rgba(255, 215, 0, 0.28) 0%, rgba(192, 192, 192, 0.12) 42%, transparent 72%)',
           filter: 'blur(55px)',
         }}
       />
@@ -88,7 +88,7 @@ const InteractiveImage = () => {
       >
         {/* Phone Mockup with exercise GIF */}
         <div className="relative group cursor-pointer">
-          <div className="relative rounded-[42px] p-1.5 bg-gradient-to-b from-white/30 via-white/10 to-[#4F46E5]/30 shadow-[0_25px_60px_-15px_rgba(79,70,229,0.5)] overflow-hidden">
+          <div className="relative rounded-[42px] p-1.5 bg-gradient-to-b from-[#C0C0C0]/40 via-[#222227]/40 to-[#FFD700]/30 shadow-[0_25px_60px_-15px_rgba(255,215,0,0.35)] overflow-hidden">
             <img 
               src="/assets/images/weekly_tasks.gif" 
               alt="ATOS fit Exercise AI Motion Tracking" 
@@ -98,33 +98,33 @@ const InteractiveImage = () => {
             />
             
             {/* Athletic HUD: Top Live Biomechanics Pill */}
-            <div className="absolute top-4 left-4 right-4 flex items-center justify-between px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-[10px] sm:text-xs font-semibold text-white pointer-events-none">
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between px-3 py-1.5 rounded-full bg-[#08080A]/80 backdrop-blur-md border border-[#C0C0C0]/20 text-[10px] sm:text-xs font-semibold text-white pointer-events-none">
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span className="tracking-wide">{isAr ? 'تتبع حركي مباشر' : 'LIVE POSE AI'}</span>
+                <span className="w-2 h-2 rounded-full bg-[#FFD700] animate-pulse shadow-[0_0_8px_#FFD700]"></span>
+                <span className="tracking-wide text-white">{isAr ? 'تتبع حركي مباشر' : 'LIVE POSE AI'}</span>
               </div>
-              <span className="text-emerald-400 font-bold" dir="ltr">60 FPS</span>
+              <span className="text-[#FFD700] font-bold" dir="ltr">60 FPS</span>
             </div>
 
             {/* Athletic HUD: Bottom Real-Time Telemetry Bar */}
-            <div className="absolute bottom-4 left-3 right-3 p-2.5 rounded-2xl bg-black/75 backdrop-blur-md border border-white/15 shadow-lg pointer-events-none">
+            <div className="absolute bottom-4 left-3 right-3 p-2.5 rounded-2xl bg-[#08080A]/85 backdrop-blur-md border border-[#C0C0C0]/20 shadow-lg pointer-events-none">
               <div className="flex items-center justify-between text-[11px] sm:text-xs text-white">
                 <div className="flex items-center gap-1">
-                  <span className="text-orange-400 font-bold">🔥</span>
-                  <span className="font-bold" dir="ltr">420</span>
-                  <span className="text-[10px] text-gray-400">{isAr ? 'سعرة' : 'kcal'}</span>
+                  <span className="text-[#FFD700] font-bold">🔥</span>
+                  <span className="font-bold text-white" dir="ltr">420</span>
+                  <span className="text-[10px] text-[#A8A8A8]">{isAr ? 'سعرة' : 'kcal'}</span>
                 </div>
                 <div className="h-3 w-[1px] bg-white/20"></div>
                 <div className="flex items-center gap-1">
-                  <span className="text-indigo-400 font-bold">⚡</span>
-                  <span className="font-bold text-indigo-300" dir="ltr">8/12</span>
-                  <span className="text-[10px] text-gray-400">{isAr ? 'تكرار' : 'reps'}</span>
+                  <span className="text-[#FFD700] font-bold">⚡</span>
+                  <span className="font-bold text-[#FFD700]" dir="ltr">8/12</span>
+                  <span className="text-[10px] text-[#A8A8A8]">{isAr ? 'تكرار' : 'reps'}</span>
                 </div>
                 <div className="h-3 w-[1px] bg-white/20"></div>
                 <div className="flex items-center gap-1">
                   <span className="text-emerald-400 font-bold">🎯</span>
                   <span className="font-bold text-emerald-300" dir="ltr">99%</span>
-                  <span className="text-[10px] text-gray-400">{isAr ? 'دقة' : 'form'}</span>
+                  <span className="text-[10px] text-[#A8A8A8]">{isAr ? 'دقة' : 'form'}</span>
                 </div>
               </div>
             </div>

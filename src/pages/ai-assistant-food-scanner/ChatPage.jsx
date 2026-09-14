@@ -239,8 +239,8 @@ User message: ${message}`
               {/* Chat Header */}
               <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--bento-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'var(--bento-chip)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(67, 83, 245, 0.12)', border: '1px solid rgba(67, 83, 245, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(67, 83, 245, 0.15)' }}>
-                    <Icon name="Bot" size={20} color="#4353FF" />
+                  <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(255, 215, 0, 0.12)', border: '1px solid rgba(255, 215, 0, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(255, 215, 0, 0.15)' }}>
+                    <Icon name="Bot" size={20} color="#FFD700" />
                   </div>
                   <div>
                     <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--bento-text)', margin: 0 }}>{t('chat.coach')}</h3>
