@@ -945,49 +945,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* ============================================================ */}
-      {/* High-Impact Final Athletic CTA Section                        */}
-      {/* ============================================================ */}
-      <section className="relative z-10 py-16 sm:py-24">
-        <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="relative rounded-[36px] overflow-hidden p-8 sm:p-14 lg:p-16 bg-[#0C0E18] border border-white/12 shadow-[0_20px_70px_rgba(79,70,229,0.3)] text-center">
-            
-            {/* Inner Atmospheric Glow */}
-            <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full pointer-events-none"
-              style={{
-                background: 'radial-gradient(circle, rgba(79, 70, 229, 0.45) 0%, rgba(255, 122, 0, 0.15) 50%, transparent 75%)',
-                filter: 'blur(60px)',
-              }}
-            />
 
-            <div className="relative z-10 max-w-3xl mx-auto space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FF7A00]/15 border border-[#FF7A00]/30 text-xs font-bold text-[#FF7A00] uppercase tracking-wider">
-                {landingCopy.ctaTag}
-              </div>
-
-              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]">
-                {landingCopy.ctaTitle}
-              </h2>
-
-              <p className="text-base sm:text-lg text-[#9DA4B2] leading-relaxed max-w-2xl mx-auto">
-                {landingCopy.ctaSubtitle}
-              </p>
-
-              <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button
-                  onClick={handleGetStarted}
-                  disabled={authLoading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-10 py-4 rounded-2xl text-base sm:text-lg shadow-[0_0_35px_rgba(250, 168, 2,0.55)] hover:shadow-[0_0_55px_rgba(250, 168, 2,0.75)] hover:scale-[1.02] border border-[#FAA802]/40 transition-all"
-                >
-                  <span>{authLoading ? landingCopy.starting : landingCopy.ctaButton}</span>
-                  <Icon name="ArrowRight" size={20} className={isAr ? 'rotate-180' : ''} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ============================================================ */}
       {/* Footer                                                        */}
