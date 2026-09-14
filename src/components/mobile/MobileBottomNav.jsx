@@ -6,18 +6,18 @@ const NavItem = ({ label, icon, path, isActive, onClick }) => (
   <button
     onClick={() => onClick(path)}
     className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all duration-300 ${
-      isActive ? 'text-[#FFD700]' : 'text-[#A8A8A8]'
+      isActive ? 'text-[#FAA802]' : 'text-[#A8A8A8]'
     }`}
   >
     <div className={`relative flex items-center justify-center p-2 rounded-xl transition-all ${
-      isActive ? 'bg-[rgba(255,215,0,0.14)]' : 'bg-transparent'
+      isActive ? 'bg-[rgba(250, 168, 2,0.14)]' : 'bg-transparent'
     }`}>
       <Icon name={icon} size={22} strokeWidth={isActive ? 2.5 : 2} />
       {isActive && (
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-[#FFD700] rounded-full blur-[1px] shadow-[0_0_6px_#FFD700]" />
+        <div className="absolute -top-1 -right-1 w-2 h-2 bg-[#FAA802] rounded-full blur-[1px] shadow-[0_0_6px_#FAA802]" />
       )}
     </div>
-    <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'opacity-100 font-extrabold text-[#FFD700]' : 'opacity-70'}`}>
+    <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'opacity-100 font-extrabold text-[#FAA802]' : 'opacity-70'}`}>
       {label}
     </span>
   </button>

@@ -9,7 +9,7 @@ const slides = [
     title: "AI Workout Analysis",
     description: "Use your camera to detect posture, count reps, and improve form in real-time.",
     icon: "Activity",
-    color: "#FFD700",
+    color: "#FAA802",
     image: "https://media.craiyon.com/2025-04-08/ZNEwVZXCQWWnQsrUfh71tA.webp"
   },
   {

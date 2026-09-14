@@ -48,7 +48,7 @@ const WorkoutPlanBuilder = ({ exercises, onSavePlan, onClose }) => {
       duration: `${selectedExercises.length * 8} mins`,
       targetMuscles: 'Custom',
       calories: selectedExercises.length * 40,
-      color: '#FFD700'
+      color: '#FAA802'
     };
 
     onSavePlan(plan);
@@ -58,8 +58,8 @@ const WorkoutPlanBuilder = ({ exercises, onSavePlan, onClose }) => {
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
       case 'Beginner': return { bg: 'rgba(167,162,137,0.15)', text: 'var(--bento-muted)', border: 'rgba(167,162,137,0.3)' };
-      case 'Intermediate': return { bg: 'rgba(255, 215, 0, 0.1)', text: '#FFD700', border: 'rgba(255, 215, 0, 0.25)' };
-      case 'Advanced': return { bg: 'rgba(255, 215, 0, 0.2)', text: '#FFD700', border: 'rgba(255, 215, 0, 0.4)' };
+      case 'Intermediate': return { bg: 'rgba(250, 168, 2, 0.1)', text: '#FAA802', border: 'rgba(250, 168, 2, 0.25)' };
+      case 'Advanced': return { bg: 'rgba(250, 168, 2, 0.2)', text: '#FAA802', border: 'rgba(250, 168, 2, 0.4)' };
       default: return { bg: 'rgba(167,162,137,0.1)', text: 'var(--bento-muted)', border: 'rgba(167,162,137,0.2)' };
     }
   };
@@ -78,8 +78,8 @@ const WorkoutPlanBuilder = ({ exercises, onSavePlan, onClose }) => {
   };
 
   const inputFocusStyles = (e) => {
-    e.target.style.borderColor = '#FFD700';
-    e.target.style.boxShadow = '0 0 0 2px rgba(255, 215, 0, 0.1)';
+    e.target.style.borderColor = '#FAA802';
+    e.target.style.boxShadow = '0 0 0 2px rgba(250, 168, 2, 0.1)';
   };
 
   const inputBlurStyles = (e) => {
@@ -163,7 +163,7 @@ const WorkoutPlanBuilder = ({ exercises, onSavePlan, onClose }) => {
 
             <div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--bento-text)', marginBottom: '1rem' }}>
-                Selected Exercises <span style={{ color: '#FFD700' }}>({selectedExercises.length})</span>
+                Selected Exercises <span style={{ color: '#FAA802' }}>({selectedExercises.length})</span>
               </h3>
               
               {selectedExercises.length === 0 ? (
@@ -179,9 +179,9 @@ const WorkoutPlanBuilder = ({ exercises, onSavePlan, onClose }) => {
                         <h4 style={{ color: 'var(--bento-text)', fontSize: '0.95rem', fontWeight: 700, margin: 0 }}>{exercise.name}</h4>
                         <button 
                           onClick={() => removeExercise(exercise.id)}
-                          style={{ background: 'transparent', border: 'none', color: 'rgba(255, 215, 0, 0.7)', cursor: 'pointer', padding: '4px' }}
-                          onMouseOver={e => e.currentTarget.style.color = '#FFD700'}
-                          onMouseOut={e => e.currentTarget.style.color = 'rgba(255, 215, 0, 0.7)'}
+                          style={{ background: 'transparent', border: 'none', color: 'rgba(250, 168, 2, 0.7)', cursor: 'pointer', padding: '4px' }}
+                          onMouseOver={e => e.currentTarget.style.color = '#FAA802'}
+                          onMouseOut={e => e.currentTarget.style.color = 'rgba(250, 168, 2, 0.7)'}
                         >
                           <Icon name="X" size={16} />
                         </button>
@@ -241,9 +241,9 @@ const WorkoutPlanBuilder = ({ exercises, onSavePlan, onClose }) => {
                     key={f}
                     onClick={() => setFilter(f)}
                     style={{
-                      background: filter === f ? 'rgba(255, 215, 0, 0.15)' : 'transparent',
-                      color: filter === f ? '#FFD700' : 'var(--bento-soft-text)',
-                      border: `1px solid ${filter === f ? '#FFD700' : 'rgba(167,162,137,0.3)'}`,
+                      background: filter === f ? 'rgba(250, 168, 2, 0.15)' : 'transparent',
+                      color: filter === f ? '#FAA802' : 'var(--bento-soft-text)',
+                      border: `1px solid ${filter === f ? '#FAA802' : 'rgba(167,162,137,0.3)'}`,
                       padding: '4px 12px',
                       borderRadius: '999px',
                       fontSize: '0.75rem',
@@ -268,8 +268,8 @@ const WorkoutPlanBuilder = ({ exercises, onSavePlan, onClose }) => {
                   <div key={exercise.id} style={{ 
                     padding: '1rem', 
                     borderRadius: '12px', 
-                    backgroundColor: isSelected ? 'rgba(255, 215, 0, 0.08)' : 'var(--bento-chip)',
-                    border: `1px solid ${isSelected ? 'rgba(255, 215, 0, 0.2)' : 'var(--bento-border)'}`,
+                    backgroundColor: isSelected ? 'rgba(250, 168, 2, 0.08)' : 'var(--bento-chip)',
+                    border: `1px solid ${isSelected ? 'rgba(250, 168, 2, 0.2)' : 'var(--bento-border)'}`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between'
@@ -289,17 +289,17 @@ const WorkoutPlanBuilder = ({ exercises, onSavePlan, onClose }) => {
                       onClick={() => !isSelected && addExercise(exercise)}
                       disabled={isSelected}
                       style={{
-                        background: isSelected ? 'transparent' : 'rgba(255, 215, 0, 0.1)',
-                        color: isSelected ? 'var(--bento-soft-text)' : '#FFD700',
-                        border: `1px solid ${isSelected ? 'transparent' : 'rgba(255, 215, 0, 0.3)'}`,
+                        background: isSelected ? 'transparent' : 'rgba(250, 168, 2, 0.1)',
+                        color: isSelected ? 'var(--bento-soft-text)' : '#FAA802',
+                        border: `1px solid ${isSelected ? 'transparent' : 'rgba(250, 168, 2, 0.3)'}`,
                         borderRadius: '8px',
                         padding: '8px',
                         cursor: isSelected ? 'default' : 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         transition: 'all 0.2s'
                       }}
-                      onMouseOver={e => !isSelected && (e.currentTarget.style.backgroundColor = 'rgba(255, 215, 0, 0.2)')}
-                      onMouseOut={e => !isSelected && (e.currentTarget.style.backgroundColor = 'rgba(255, 215, 0, 0.1)')}
+                      onMouseOver={e => !isSelected && (e.currentTarget.style.backgroundColor = 'rgba(250, 168, 2, 0.2)')}
+                      onMouseOut={e => !isSelected && (e.currentTarget.style.backgroundColor = 'rgba(250, 168, 2, 0.1)')}
                     >
                       {isSelected ? <Icon name="Check" size={16} /> : <Icon name="Plus" size={16} />}
                     </button>

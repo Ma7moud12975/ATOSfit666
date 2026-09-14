@@ -74,7 +74,7 @@ const AppHeader = ({ onSidebarToggle, isSidebarOpen, user, onLogout }) => {
           <button
             onClick={() => navigate('/pricing')}
             style={{
-              background: '#FFD700',
+              background: '#FAA802',
               color: '#08080A',
               border: 'none',
               padding: '0.4rem 1rem',
@@ -82,13 +82,13 @@ const AppHeader = ({ onSidebarToggle, isSidebarOpen, user, onLogout }) => {
               fontSize: '0.75rem',
               fontWeight: 800,
               cursor: 'pointer',
-              boxShadow: '0 0 0 1px rgba(255, 215, 0, 0.5), 0 4px 14px rgba(255, 215, 0, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.35)',
+              boxShadow: '0 0 0 1px rgba(250, 168, 2, 0.5), 0 4px 14px rgba(250, 168, 2, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.35)',
               transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
               textTransform: 'uppercase',
               letterSpacing: '0.05em'
             }}
-            onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.background = '#FFE033'; }}
-            onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#FFD700'; }}
+            onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.background = '#FBB502'; }}
+            onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#FAA802'; }}
             className="hidden sm:block"
           >
             {t('header.premium')}
@@ -99,7 +99,7 @@ const AppHeader = ({ onSidebarToggle, isSidebarOpen, user, onLogout }) => {
         <div className="hidden md:block text-center absolute left-1/2 transform -translate-x-1/2">
           <p style={{ fontSize: '0.7rem', color: 'var(--bento-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>{greeting()}</p>
           <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--bento-text)', margin: 0, letterSpacing: '-0.02em' }}>
-            {user?.name?.split(' ')[0] || 'Mahmoud'} <span style={{ color: '#FFD700' }}>{user?.name?.split(' ').slice(1).join(' ') || 'Ayman'}</span>
+            {user?.name?.split(' ')[0] || 'Mahmoud'} <span style={{ color: '#FAA802' }}>{user?.name?.split(' ').slice(1).join(' ') || 'Ayman'}</span>
           </h2>
         </div>
 
@@ -148,7 +148,7 @@ const AppHeader = ({ onSidebarToggle, isSidebarOpen, user, onLogout }) => {
               onMouseOut={e => { e.currentTarget.style.background = 'var(--bento-chip)'; e.currentTarget.style.color = 'var(--bento-soft-text)'; }}
             >
               <Icon name="Bell" size={17} />
-              <div style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: '50%', background: '#FFD700', boxShadow: '0 0 10px rgba(255, 215, 0, 0.6)', animation: 'badgePing 1.8s infinite' }}></div>
+              <div style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: '50%', background: '#FAA802', boxShadow: '0 0 10px rgba(250, 168, 2, 0.6)', animation: 'badgePing 1.8s infinite' }}></div>
             </button>
 
             {showNotifications && (
@@ -166,12 +166,12 @@ const AppHeader = ({ onSidebarToggle, isSidebarOpen, user, onLogout }) => {
           <div style={{ position: 'relative' }}>
             <button
               onClick={() => { setShowProfileMenu(!showProfileMenu); setShowNotifications(false); }}
-              style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(255, 215, 0, 0.15)', border: '2px solid rgba(255, 215, 0, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', boxShadow: '0 0 14px rgba(255, 215, 0, 0.25)' }}
+              style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(250, 168, 2, 0.15)', border: '2px solid rgba(250, 168, 2, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', boxShadow: '0 0 14px rgba(250, 168, 2, 0.25)' }}
             >
               {user?.profilePicture ? (
                 <img src={user.profilePicture} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <Icon name="User" size={20} color="#FFD700" />
+                <Icon name="User" size={20} color="#FAA802" />
               )}
             </button>
 
@@ -185,7 +185,7 @@ const AppHeader = ({ onSidebarToggle, isSidebarOpen, user, onLogout }) => {
                   <button onClick={() => { navigate('/user-profile'); setShowProfileMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: 'var(--bento-soft-text)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', borderRadius: '12px', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'var(--bento-chip)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                     <Icon name="User" size={16} /> {t('header.profile')}
                   </button>
-                  <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#FFD700', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', borderRadius: '12px', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(255, 215, 0, 0.12)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#FAA802', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', borderRadius: '12px', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(250, 168, 2, 0.12)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                     <Icon name="LogOut" size={16} /> {t('header.signOut')}
                   </button>
                 </div>

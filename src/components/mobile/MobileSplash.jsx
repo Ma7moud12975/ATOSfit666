@@ -6,7 +6,7 @@ const MobileSplash = ({ statusText = "Preparing your AI coach..." }) => {
   return (
     <div className="fixed inset-0 bg-[#181818] z-[200] flex flex-col items-center justify-center overflow-hidden">
       {/* Ambient Glows */}
-      <div className="absolute top-[-10%] right-[-10%] w-[80vw] h-[80vw] bg-[#FFD700] opacity-10 blur-[120px] rounded-full animate-pulse" />
+      <div className="absolute top-[-10%] right-[-10%] w-[80vw] h-[80vw] bg-[#FAA802] opacity-10 blur-[120px] rounded-full animate-pulse" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[80vw] h-[80vw] bg-[#00E5FF] opacity-10 blur-[120px] rounded-full animate-pulse delay-1000" />
 
       <motion.div
@@ -20,13 +20,13 @@ const MobileSplash = ({ statusText = "Preparing your AI coach..." }) => {
           <motion.div
             animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="absolute inset-[-10%] border-2 border-[#FFD700] rounded-3xl blur-[2px]"
+            className="absolute inset-[-10%] border-2 border-[#FAA802] rounded-3xl blur-[2px]"
           />
           <img src={logoImage} alt="ATOS Fit Logo" className="w-full h-full object-contain rounded-2xl" />
         </div>
 
         <h1 className="text-3xl font-black text-[#fffef5] tracking-tight mb-2">
-          ATOS <span className="text-[#FFD700]">Fit</span>
+          ATOS <span className="text-[#FAA802]">Fit</span>
         </h1>
 
         <div className="flex flex-col items-center gap-3">
@@ -44,7 +44,7 @@ const MobileSplash = ({ statusText = "Preparing your AI coach..." }) => {
               initial={{ x: "-100%" }}
               animate={{ x: "100%" }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              className="w-full h-full bg-gradient-to-r from-transparent via-[#FFD700] to-transparent"
+              className="w-full h-full bg-gradient-to-r from-transparent via-[#FAA802] to-transparent"
             />
           </div>
         </div>

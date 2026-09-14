@@ -80,7 +80,7 @@ const ExerciseProgressCards = () => {
     if (sessions === 0) return { level: 'Beginner', color: 'text-gray-500', bgColor: 'bg-gray-100' };
     if (sessions < 5) return { level: 'Novice', color: 'text-blue-500', bgColor: 'bg-blue-100' };
     if (sessions < 15) return { level: 'Intermediate', color: 'text-green-500', bgColor: 'bg-green-100' };
-    if (sessions < 30) return { level: 'Advanced', color: 'text-[#FFE033]', bgColor: 'bg-[#FFE033]/15' };
+    if (sessions < 30) return { level: 'Advanced', color: 'text-[#FBB502]', bgColor: 'bg-[#FBB502]/15' };
     return { level: 'Expert', color: 'text-purple-500', bgColor: 'bg-purple-100' };
   };
 

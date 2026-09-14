@@ -87,15 +87,15 @@ const SidebarNavigation = ({ isOpen = false, onClose }) => {
                     display: 'flex', alignItems: 'center', gap: '12px', padding: '0.85rem 1rem',
                     borderRadius: '14px', border: 'none', cursor: 'pointer', textAlign: 'left',
                     transition: 'all 0.2s ease',
-                    background: active ? 'rgba(255, 215, 0, 0.12)' : 'transparent',
+                    background: active ? 'rgba(250, 168, 2, 0.12)' : 'transparent',
                     color: active ? 'var(--bento-text)' : 'var(--bento-muted)',
-                    borderInlineStart: active ? '3px solid #FFD700' : '3px solid transparent',
-                    boxShadow: active ? '0 0 15px rgba(255, 215, 0, 0.2)' : 'none'
+                    borderInlineStart: active ? '3px solid #FAA802' : '3px solid transparent',
+                    boxShadow: active ? '0 0 15px rgba(250, 168, 2, 0.2)' : 'none'
                   }}
                   onMouseOver={e => { if (!active) { e.currentTarget.style.backgroundColor = 'var(--bento-chip)'; e.currentTarget.style.color = 'var(--bento-text)'; } }}
                   onMouseOut={e => { if (!active) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--bento-muted)'; } }}
                 >
-                  <Icon name={it.icon} size={20} color={active ? '#FFD700' : 'var(--bento-muted)'} />
+                  <Icon name={it.icon} size={20} color={active ? '#FAA802' : 'var(--bento-muted)'} />
                   <span style={{ fontSize: '0.9rem', fontWeight: active ? 600 : 500 }}>{it.label}</span>
                 </button>
               );
@@ -105,9 +105,9 @@ const SidebarNavigation = ({ isOpen = false, onClose }) => {
 
         {/* Footer Badge */}
         <div style={{ padding: '1.25rem', borderTop: '1px solid var(--bento-border)' }}>
-          <div style={{ background: 'rgba(255, 215, 0, 0.10)', border: '1px solid rgba(255, 215, 0, 0.25)', borderRadius: '14px', padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Icon name="Crown" size={16} color="#FFD700" />
-            <span style={{ fontSize: '0.78rem', color: '#FFD700', fontWeight: 600 }}>{t('nav.freePlan')}</span>
+          <div style={{ background: 'rgba(250, 168, 2, 0.10)', border: '1px solid rgba(250, 168, 2, 0.25)', borderRadius: '14px', padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Icon name="Crown" size={16} color="#FAA802" />
+            <span style={{ fontSize: '0.78rem', color: '#FAA802', fontWeight: 600 }}>{t('nav.freePlan')}</span>
           </div>
         </div>
       </aside>

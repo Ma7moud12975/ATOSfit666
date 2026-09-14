@@ -203,7 +203,7 @@ const WorkoutStorageDemo = () => {
             </button>
             <button
               onClick={handleCleanupOldData}
-              className="px-3 py-1 bg-[#FFD700] text-white rounded text-sm hover:bg-[#FFE033] transition-colors"
+              className="px-3 py-1 bg-[#FAA802] text-white rounded text-sm hover:bg-[#FBB502] transition-colors"
             >
               Cleanup Old Data
             </button>

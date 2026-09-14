@@ -19,7 +19,7 @@
     --color-muted: rgba(0, 0, 0, 0.04);
     --color-muted-foreground: #6B7280;
     --color-primary: #08080A;
-    --color-primary-foreground: #FFD700;
+    --color-primary-foreground: #FAA802;
     --color-secondary: #F0F1F3;
     --color-secondary-foreground: #08080A;
     --color-accent: #D4AF37;
@@ -56,22 +56,22 @@
     --color-foreground: #FFFFFF;
     --color-border: rgba(192, 192, 192, 0.12);
     --color-input: #141416;
-    --color-ring: #FFD700;
+    --color-ring: #FAA802;
     --color-card: #141416;
     --color-card-foreground: #FFFFFF;
     --color-popover: #141416;
     --color-popover-foreground: #FFFFFF;
     --color-muted: rgba(255, 255, 255, 0.05);
     --color-muted-foreground: #A8A8A8;
-    --color-primary: #FFD700;
+    --color-primary: #FAA802;
     --color-primary-foreground: #08080A;
     --color-secondary: #222227;
     --color-secondary-foreground: #FFFFFF;
-    --color-accent: #FFD700;
+    --color-accent: #FAA802;
     --color-accent-foreground: #08080A;
     --color-success: #10B981;
     --color-success-foreground: #FFFFFF;
-    --color-warning: #FFD700;
+    --color-warning: #FAA802;
     --color-warning-foreground: #08080A;
     --color-error: #EF4444;
     --color-error-foreground: #FFFFFF;
@@ -90,7 +90,7 @@
     --bento-muted: #A8A8A8;
     --bento-border: rgba(192, 192, 192, 0.12);
     --bento-chip: #222227;
-    --bento-chip-hover: rgba(255, 215, 0, 0.15);
+    --bento-chip-hover: rgba(250, 168, 2, 0.15);
     --bento-field: #141416;
     --bento-shadow: 0 12px 48px rgba(0, 0, 0, 0.8);
   }
@@ -206,21 +206,21 @@
     box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.25), 0 8px 24px rgba(212, 175, 55, 0.08);
   }
   .dark .linear-card:hover {
-    border-color: rgba(255, 215, 0, 0.35);
-    box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.25), 0 10px 32px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.12);
+    border-color: rgba(250, 168, 2, 0.35);
+    box-shadow: 0 0 0 1px rgba(250, 168, 2, 0.25), 0 10px 32px rgba(0, 0, 0, 0.7), 0 0 30px rgba(250, 168, 2, 0.12);
   }
 
   .linear-btn-primary {
-    background: #FFD700;
+    background: #FAA802;
     color: #08080A;
     font-weight: 700;
-    box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.5), 0 4px 14px rgba(255, 215, 0, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 0 1px rgba(250, 168, 2, 0.5), 0 4px 14px rgba(250, 168, 2, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.35);
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .linear-btn-primary:hover {
-    background: #FFE033;
-    box-shadow: 0 0 0 1px rgba(255, 224, 51, 0.7), 0 6px 20px rgba(255, 215, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.45);
+    background: #FBB502;
+    box-shadow: 0 0 0 1px rgba(251, 181, 2, 0.7), 0 6px 20px rgba(250, 168, 2, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.45);
     transform: translateY(-1px);
   }
 
@@ -247,9 +247,9 @@
     transform: translateY(-1px);
   }
   .dark .linear-btn-secondary:hover {
-    background: rgba(255, 215, 0, 0.12);
-    border-color: rgba(255, 215, 0, 0.4);
-    color: #FFD700;
+    background: rgba(250, 168, 2, 0.12);
+    border-color: rgba(250, 168, 2, 0.4);
+    color: #FAA802;
     transform: translateY(-1px);
   }
 
@@ -270,9 +270,9 @@
     color: #B8860B;
   }
   .dark .linear-pill-badge {
-    background: rgba(255, 215, 0, 0.12);
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    color: #FFD700;
+    background: rgba(250, 168, 2, 0.12);
+    border: 1px solid rgba(250, 168, 2, 0.3);
+    color: #FAA802;
   }
 }
 

@@ -87,7 +87,7 @@ const ProgressOverview = () => {
     if (streak === 0) return 'text-gray-500';
     if (streak < 3) return 'text-blue-500';
     if (streak < 7) return 'text-green-500';
-    if (streak < 14) return 'text-[#FFE033]';
+    if (streak < 14) return 'text-[#FBB502]';
     return 'text-red-500';
   };
 
@@ -95,7 +95,7 @@ const ProgressOverview = () => {
     if (percentage === 0) return 'text-gray-500';
     if (percentage < 25) return 'text-blue-500';
     if (percentage < 50) return 'text-green-500';
-    if (percentage < 75) return 'text-[#FFE033]';
+    if (percentage < 75) return 'text-[#FBB502]';
     return 'text-purple-500';
   };
 

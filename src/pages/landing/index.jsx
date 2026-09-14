@@ -324,7 +324,7 @@ const LandingPage = () => {
   return (
     <div 
       dir={isAr ? 'rtl' : 'ltr'}
-      className="min-h-screen bg-[#F7F8FA] dark:bg-[#08080A] text-[#08080A] dark:text-[#FFFFFF] font-sans relative overflow-x-hidden selection:bg-[#FFD700]/30 selection:text-white transition-colors duration-300"
+      className="min-h-screen bg-[#F7F8FA] dark:bg-[#08080A] text-[#08080A] dark:text-[#FFFFFF] font-sans relative overflow-x-hidden selection:bg-[#FAA802]/30 selection:text-white transition-colors duration-300"
     >
       {/* ============================================================ */}
       {/* Atmospheric Violet/Electric Indigo Background Glows System   */}
@@ -334,7 +334,7 @@ const LandingPage = () => {
         <div 
           className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[1100px] sm:w-[1300px] h-[650px] dark:opacity-100 opacity-60 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse 75% 60% at 50% 0%, rgba(255, 215, 0, 0.22) 0%, rgba(192, 192, 192, 0.08) 45%, rgba(255, 215, 0, 0.02) 70%, transparent 90%)',
+            background: 'radial-gradient(ellipse 75% 60% at 50% 0%, rgba(250, 168, 2, 0.22) 0%, rgba(192, 192, 192, 0.08) 45%, rgba(250, 168, 2, 0.02) 70%, transparent 90%)',
             filter: 'blur(45px)',
           }}
         />
@@ -343,7 +343,7 @@ const LandingPage = () => {
         <div 
           className="absolute top-[20%] -right-[10%] w-[750px] h-[750px] dark:opacity-75 opacity-35 pointer-events-none"
           style={{
-            background: 'radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.12) 0%, rgba(192, 192, 192, 0.05) 50%, transparent 75%)',
+            background: 'radial-gradient(circle at 50% 50%, rgba(250, 168, 2, 0.12) 0%, rgba(192, 192, 192, 0.05) 50%, transparent 75%)',
             filter: 'blur(70px)',
           }}
         />
@@ -352,7 +352,7 @@ const LandingPage = () => {
         <div 
           className="absolute top-[18%] right-[12%] w-[400px] h-[400px] dark:opacity-70 opacity-30 pointer-events-none"
           style={{
-            background: 'radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.08) 0%, transparent 70%)',
+            background: 'radial-gradient(circle at 50% 50%, rgba(250, 168, 2, 0.08) 0%, transparent 70%)',
             filter: 'blur(70px)',
           }}
         />
@@ -361,7 +361,7 @@ const LandingPage = () => {
         <div 
           className="absolute top-[52%] -left-[10%] w-[750px] h-[750px] dark:opacity-70 opacity-35 pointer-events-none"
           style={{
-            background: 'radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.10) 0%, transparent 70%)',
+            background: 'radial-gradient(circle at 50% 50%, rgba(250, 168, 2, 0.10) 0%, transparent 70%)',
             filter: 'blur(80px)',
           }}
         />
@@ -370,7 +370,7 @@ const LandingPage = () => {
         <div 
           className="absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[1000px] h-[600px] dark:opacity-85 opacity-40 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse at 50% 100%, rgba(255, 215, 0, 0.18) 0%, rgba(192, 192, 192, 0.06) 60%, transparent 80%)',
+            background: 'radial-gradient(ellipse at 50% 100%, rgba(250, 168, 2, 0.18) 0%, rgba(192, 192, 192, 0.06) 60%, transparent 80%)',
             filter: 'blur(60px)',
           }}
         />
@@ -379,7 +379,7 @@ const LandingPage = () => {
         <div 
           className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
           style={{
-            backgroundImage: `linear-gradient(to right, rgba(255, 215, 0, 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 215, 0, 0.15) 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(to right, rgba(250, 168, 2, 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(250, 168, 2, 0.15) 1px, transparent 1px)`,
             backgroundSize: '64px 64px',
             maskImage: 'radial-gradient(ellipse 90% 70% at 50% 30%, black 30%, transparent 85%)',
             WebkitMaskImage: 'radial-gradient(ellipse 90% 70% at 50% 30%, black 30%, transparent 85%)',
@@ -399,7 +399,7 @@ const LandingPage = () => {
             </div>
             <div className="flex items-baseline gap-1.5" dir="ltr">
               <span className="text-2xl font-black text-[#0F1015] dark:text-white tracking-tight">ATOS</span>
-              <span className="text-2xl font-black bg-gradient-to-r from-[#FFD700] via-[#FFAE00] to-[#E5E7EB] bg-clip-text text-transparent tracking-tight">fit</span>
+              <span className="text-2xl font-black bg-gradient-to-r from-[#FAA802] via-[#FFAE00] to-[#E5E7EB] bg-clip-text text-transparent tracking-tight">fit</span>
             </div>
           </div>
 
@@ -435,7 +435,7 @@ const LandingPage = () => {
             <button
               onClick={handleLogin}
               disabled={authLoading}
-              className="inline-flex items-center justify-center bg-gradient-to-r from-[#FFD700] to-[#F5C400] hover:from-[#E5C000] hover:to-[#FFD700] text-[#08080A] px-6 py-2.5 rounded-full text-sm font-extrabold shadow-[0_0_20px_rgba(255,215,0,0.35)] hover:shadow-[0_0_25px_rgba(255,215,0,0.5)] transition-all"
+              className="inline-flex items-center justify-center bg-gradient-to-r from-[#FAA802] to-[#FB9202] hover:from-[#FBB502] hover:to-[#FAA802] text-[#08080A] px-6 py-2.5 rounded-full text-sm font-extrabold shadow-[0_0_20px_rgba(250, 168, 2,0.35)] hover:shadow-[0_0_25px_rgba(250, 168, 2,0.5)] transition-all"
             >
               {authLoading ? landingCopy.signingIn : landingCopy.signIn}
             </button>
@@ -517,7 +517,7 @@ const LandingPage = () => {
                   setIsMobileMenuOpen(false);
                 }}
                 disabled={authLoading}
-                className="w-full bg-[#FFD700] text-[#08080A] py-3 rounded-xl text-sm font-extrabold shadow-[0_0_20px_rgba(255,215,0,0.35)] mt-4"
+                className="w-full bg-[#FAA802] text-[#08080A] py-3 rounded-xl text-sm font-extrabold shadow-[0_0_20px_rgba(250, 168, 2,0.35)] mt-4"
               >
                 {authLoading ? landingCopy.signingIn : landingCopy.signIn}
               </button>
@@ -536,9 +536,9 @@ const LandingPage = () => {
             <div className={`lg:col-span-6 xl:col-span-6 space-y-6 sm:space-y-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
               
               {/* Pulsing Athletic Pill Badge */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#FFD700]/10 dark:bg-[#FFD700]/15 border border-[#FFD700]/25 dark:border-[#FFD700]/30 backdrop-blur-md shadow-[0_0_20px_rgba(255,215,0,0.15)]">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#FFD700] animate-pulse shadow-[0_0_10px_#FFD700]"></span>
-                <span className="text-xs sm:text-sm font-bold text-[#B8860B] dark:text-[#FFD700] tracking-wider uppercase">
+              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#FAA802]/10 dark:bg-[#FAA802]/15 border border-[#FAA802]/25 dark:border-[#FAA802]/30 backdrop-blur-md shadow-[0_0_20px_rgba(250, 168, 2,0.15)]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FAA802] animate-pulse shadow-[0_0_10px_#FAA802]"></span>
+                <span className="text-xs sm:text-sm font-bold text-[#B8860B] dark:text-[#FAA802] tracking-wider uppercase">
                   {landingCopy.badge}
                 </span>
               </div>
@@ -548,7 +548,7 @@ const LandingPage = () => {
                 <span className="block text-[#0F1015] dark:text-white">
                   {landingCopy.form}
                 </span>
-                <span className="block bg-gradient-to-r from-[#FFD700] via-[#FFAE00] to-[#E5E7EB] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(255,215,0,0.3)]">
+                <span className="block bg-gradient-to-r from-[#FAA802] via-[#FFAE00] to-[#E5E7EB] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(250, 168, 2,0.3)]">
                   {landingCopy.results}
                 </span>
               </h1>
@@ -563,7 +563,7 @@ const LandingPage = () => {
                 {landingCopy.categories.map((cat, i) => (
                   <span 
                     key={i} 
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] text-xs font-semibold text-[#525866] dark:text-[#A0A5B5] hover:border-[#FFD700]/40 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] text-xs font-semibold text-[#525866] dark:text-[#A0A5B5] hover:border-[#FAA802]/40 transition-colors"
                   >
                     <span>{cat.icon}</span>
                     <span>{cat.label}</span>
@@ -576,7 +576,7 @@ const LandingPage = () => {
                 <button
                   onClick={handleGetStarted}
                   disabled={authLoading}
-                  className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FFD700] via-[#F5C400] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FFD700] text-[#08080A] font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(255,215,0,0.45)] hover:shadow-[0_0_50px_rgba(255,215,0,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-[#FFD700]/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(250, 168, 2,0.45)] hover:shadow-[0_0_50px_rgba(250, 168, 2,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-[#FAA802]/40 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span>{authLoading ? landingCopy.starting : landingCopy.start}</span>
                   <Icon 
@@ -588,9 +588,9 @@ const LandingPage = () => {
 
                 <a
                   href="#how-it-works"
-                  className="inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl text-base font-semibold border border-black/10 dark:border-white/10 hover:border-[#FFD700]/50 text-[#08080A] dark:text-[#FFFFFF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all"
+                  className="inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl text-base font-semibold border border-black/10 dark:border-white/10 hover:border-[#FAA802]/50 text-[#08080A] dark:text-[#FFFFFF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all"
                 >
-                  <Icon name="Compass" size={18} className="text-[#FFD700]" />
+                  <Icon name="Compass" size={18} className="text-[#FAA802]" />
                   <span>{landingCopy.howItWorks}</span>
                 </a>
               </div>
@@ -643,13 +643,13 @@ const LandingPage = () => {
             {landingCopy.steps.map((step, idx) => (
               <div 
                 key={idx}
-                className="relative rounded-[28px] p-8 bg-white dark:bg-[#141416]/85 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FFD700]/40 hover:shadow-[0_0_35px_rgba(255,215,0,0.15)] transition-all duration-300 flex flex-col justify-between group"
+                className="relative rounded-[28px] p-8 bg-white dark:bg-[#141416]/85 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/40 hover:shadow-[0_0_35px_rgba(250, 168, 2,0.15)] transition-all duration-300 flex flex-col justify-between group"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <div className="w-14 h-14 rounded-2xl bg-[#FFD700]/15 border border-[#FFD700]/30 flex items-center justify-center text-[#FFD700] group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 flex items-center justify-center text-[#FAA802] group-hover:scale-110 transition-transform">
                     <Icon name={step.icon} size={26} />
                   </div>
-                  <span className="text-3xl font-black text-black/15 dark:text-white/10 group-hover:text-[#FFD700]/30 transition-colors" dir="ltr">
+                  <span className="text-3xl font-black text-black/15 dark:text-white/10 group-hover:text-[#FAA802]/30 transition-colors" dir="ltr">
                     {step.num}
                   </span>
                 </div>
@@ -675,7 +675,7 @@ const LandingPage = () => {
         <div 
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] sm:w-[1100px] h-[650px] dark:opacity-80 opacity-35 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(255, 215, 0, 0.22) 0%, rgba(94, 75, 255, 0.08) 50%, transparent 75%)',
+            background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(250, 168, 2, 0.22) 0%, rgba(94, 75, 255, 0.08) 50%, transparent 75%)',
             filter: 'blur(75px)',
           }}
         />
@@ -683,7 +683,7 @@ const LandingPage = () => {
           
           {/* Section Header */}
           <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-20">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFD700]/10 dark:bg-[#FFD700]/15 border border-[#FFD700]/25 text-xs font-bold text-[#FFD700] dark:text-[#FFE033] uppercase tracking-wider mb-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAA802]/10 dark:bg-[#FAA802]/15 border border-[#FAA802]/25 text-xs font-bold text-[#FAA802] dark:text-[#FBB502] uppercase tracking-wider mb-4">
               {landingCopy.featuresTag}
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0F1015] dark:text-white mb-4">
@@ -698,7 +698,7 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
             
             {/* Widget 1: Real-Time Feedback Video Card (Large 6 cols / 2 rows) */}
-            <div className="lg:col-span-12 xl:col-span-6 relative rounded-[28px] overflow-hidden bg-[#0C0E17] border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FFD700]/50 hover:shadow-[0_0_45px_rgba(255, 215, 0,0.2)] transition-all duration-300 min-h-[440px] flex flex-col justify-end group">
+            <div className="lg:col-span-12 xl:col-span-6 relative rounded-[28px] overflow-hidden bg-[#0C0E17] border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/50 hover:shadow-[0_0_45px_rgba(250, 168, 2,0.2)] transition-all duration-300 min-h-[440px] flex flex-col justify-end group">
               <video
                 src={featureWidgets[0].video}
                 autoPlay
@@ -710,7 +710,7 @@ const LandingPage = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-[#05060D] via-[#05060D]/60 to-transparent" />
               
               <div className="relative z-10 p-6 sm:p-8 space-y-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFD700]/20 border border-[#FFD700]/40 text-xs font-bold text-[#FFD700]">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAA802]/20 border border-[#FAA802]/40 text-xs font-bold text-[#FAA802]">
                   <Icon name="Activity" size={14} />
                   <span>{featureWidgets[0].tag}</span>
                 </div>
@@ -731,13 +731,13 @@ const LandingPage = () => {
             <div className="lg:col-span-12 xl:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
               
               {/* Widget 2: AI Coach Card */}
-              <div className="rounded-[28px] p-6 sm:p-8 bg-white dark:bg-[#0C0E17]/85 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FFD700]/50 hover:shadow-[0_0_40px_rgba(255, 215, 0,0.18)] transition-all duration-300 flex flex-col justify-between group">
+              <div className="rounded-[28px] p-6 sm:p-8 bg-white dark:bg-[#0C0E17]/85 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/50 hover:shadow-[0_0_40px_rgba(250, 168, 2,0.18)] transition-all duration-300 flex flex-col justify-between group">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 rounded-2xl bg-[#FFD700]/15 border border-[#FFD700]/30 flex items-center justify-center text-[#FFD700] shadow-[0_0_20px_rgba(255, 215, 0,0.25)] group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 flex items-center justify-center text-[#FAA802] shadow-[0_0_20px_rgba(250, 168, 2,0.25)] group-hover:scale-110 transition-transform">
                       <Icon name="Bot" size={24} />
                     </div>
-                    <span className="text-[11px] font-bold text-[#FFD700] dark:text-[#FFE033] uppercase tracking-wider bg-[#FFD700]/10 px-2.5 py-1 rounded-full">
+                    <span className="text-[11px] font-bold text-[#FAA802] dark:text-[#FBB502] uppercase tracking-wider bg-[#FAA802]/10 px-2.5 py-1 rounded-full">
                       {featureWidgets[1].tag}
                     </span>
                   </div>
@@ -749,7 +749,7 @@ const LandingPage = () => {
                   </p>
                 </div>
 
-                <div className="mt-6 p-3.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.05] dark:border-white/[0.06] text-xs font-medium text-[#FFD700] dark:text-[#A5B4FC]">
+                <div className="mt-6 p-3.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.05] dark:border-white/[0.06] text-xs font-medium text-[#FAA802] dark:text-[#A5B4FC]">
                   {featureWidgets[1].interactivePreview}
                 </div>
               </div>
@@ -780,9 +780,9 @@ const LandingPage = () => {
             </div>
 
             {/* Widget 4: Rep Counting Card (Full-width spanning banner with precision mockup image) */}
-            <div className="lg:col-span-12 relative rounded-[28px] overflow-hidden bg-[#0C0E17] border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FFD700]/50 transition-all duration-300 flex flex-col md:flex-row items-center justify-between group min-h-[300px]">
+            <div className="lg:col-span-12 relative rounded-[28px] overflow-hidden bg-[#0C0E17] border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/50 transition-all duration-300 flex flex-col md:flex-row items-center justify-between group min-h-[300px]">
               <div className="relative z-10 p-6 sm:p-10 md:max-w-xl space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFD700]/20 border border-[#FFD700]/40 text-xs font-bold text-[#FFD700]">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAA802]/20 border border-[#FAA802]/40 text-xs font-bold text-[#FAA802]">
                   <Icon name="Target" size={14} />
                   <span>{featureWidgets[3].tag}</span>
                 </div>
@@ -837,13 +837,13 @@ const LandingPage = () => {
             {landingCopy.exercises.map((ex, idx) => (
               <div 
                 key={idx}
-                className="p-5 rounded-2xl bg-white dark:bg-[#141416]/85 border border-black/[0.08] dark:border-white/[0.08] hover:border-[#FFD700]/50 hover:shadow-[0_0_25px_rgba(255,215,0,0.15)] hover:scale-[1.02] transition-all flex flex-col justify-between group"
+                className="p-5 rounded-2xl bg-white dark:bg-[#141416]/85 border border-black/[0.08] dark:border-white/[0.08] hover:border-[#FAA802]/50 hover:shadow-[0_0_25px_rgba(250, 168, 2,0.15)] hover:scale-[1.02] transition-all flex flex-col justify-between group"
               >
                 <div>
                   <span className="text-[11px] font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-wider block mb-1">
                     {ex.badge}
                   </span>
-                  <h4 className="text-base sm:text-lg font-bold text-[#0F1015] dark:text-white group-hover:text-[#FFD700] dark:group-hover:text-[#FFD700] transition-colors">
+                  <h4 className="text-base sm:text-lg font-bold text-[#0F1015] dark:text-white group-hover:text-[#FAA802] dark:group-hover:text-[#FAA802] transition-colors">
                     {ex.name}
                   </h4>
                 </div>
@@ -888,13 +888,13 @@ const LandingPage = () => {
             {privacyCards.map((card, idx) => (
               <div 
                 key={idx}
-                className="rounded-[28px] p-8 bg-white dark:bg-[#141416]/80 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FFD700]/50 hover:shadow-[0_0_45px_rgba(255,215,0,0.16)] transition-all duration-300 flex flex-col justify-between group"
+                className="rounded-[28px] p-8 bg-white dark:bg-[#141416]/80 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/50 hover:shadow-[0_0_45px_rgba(250, 168, 2,0.16)] transition-all duration-300 flex flex-col justify-between group"
               >
                 <div>
-                  <div className="w-14 h-14 rounded-2xl bg-[#FFD700]/15 border border-[#FFD700]/30 flex items-center justify-center text-[#FFD700] mb-6 shadow-[0_0_20px_rgba(255,215,0,0.2)] group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 flex items-center justify-center text-[#FAA802] mb-6 shadow-[0_0_20px_rgba(250, 168, 2,0.2)] group-hover:scale-110 transition-transform">
                     <Icon name={card.icon} size={28} />
                   </div>
-                  <span className="text-[11px] font-bold text-[#B8860B] dark:text-[#FFD700] uppercase tracking-wider block mb-2">
+                  <span className="text-[11px] font-bold text-[#B8860B] dark:text-[#FAA802] uppercase tracking-wider block mb-2">
                     {card.tag}
                   </span>
                   <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white mb-3">
@@ -923,7 +923,7 @@ const LandingPage = () => {
 
           {/* Privacy Transparency CTA Banner */}
           <div className="mt-16 sm:mt-20">
-            <div className="rounded-[32px] p-8 sm:p-12 bg-gradient-to-r from-[#FFD700]/10 via-[#FFD700]/5 to-transparent border border-[#FFD700]/30 backdrop-blur-xl max-w-4xl mx-auto text-center space-y-6">
+            <div className="rounded-[32px] p-8 sm:p-12 bg-gradient-to-r from-[#FAA802]/10 via-[#FAA802]/5 to-transparent border border-[#FAA802]/30 backdrop-blur-xl max-w-4xl mx-auto text-center space-y-6">
               <h3 className="text-2xl sm:text-3xl font-bold text-[#0F1015] dark:text-white">
                 {isAr ? 'شفافية وأمان لا مثيل لهما' : 'Complete Privacy Transparency'}
               </h3>
@@ -934,7 +934,7 @@ const LandingPage = () => {
               </p>
               <button
                 onClick={() => navigate('/privacy')}
-                className="inline-flex items-center justify-center gap-2 bg-[#FFD700] hover:bg-[#FFE033] text-[#08080A] px-8 py-3.5 rounded-full text-sm font-extrabold shadow-[0_0_25px_rgba(255,215,0,0.4)] transition-all"
+                className="inline-flex items-center justify-center gap-2 bg-[#FAA802] hover:bg-[#FBB502] text-[#08080A] px-8 py-3.5 rounded-full text-sm font-extrabold shadow-[0_0_25px_rgba(250, 168, 2,0.4)] transition-all"
               >
                 <span>{landingCopy.readPrivacy}</span>
                 <Icon name="ArrowRight" size={16} className={isAr ? 'rotate-180' : ''} />
@@ -978,7 +978,7 @@ const LandingPage = () => {
                 <button
                   onClick={handleGetStarted}
                   disabled={authLoading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FFD700] via-[#F5C400] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FFD700] text-[#08080A] font-black px-10 py-4 rounded-2xl text-base sm:text-lg shadow-[0_0_35px_rgba(255,215,0,0.55)] hover:shadow-[0_0_55px_rgba(255,215,0,0.75)] hover:scale-[1.02] border border-[#FFD700]/40 transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-10 py-4 rounded-2xl text-base sm:text-lg shadow-[0_0_35px_rgba(250, 168, 2,0.55)] hover:shadow-[0_0_55px_rgba(250, 168, 2,0.75)] hover:scale-[1.02] border border-[#FAA802]/40 transition-all"
                 >
                   <span>{authLoading ? landingCopy.starting : landingCopy.ctaButton}</span>
                   <Icon name="ArrowRight" size={20} className={isAr ? 'rotate-180' : ''} />
@@ -1001,7 +1001,7 @@ const LandingPage = () => {
               <img src="/assets/images/atosfit.png" alt="ATOS fit Logo" className="w-10 h-10 object-contain drop-shadow-[0_2px_12px_rgba(79,70,229,0.35)]" />
               <div className="flex items-baseline gap-1" dir="ltr">
                 <span className="text-xl font-bold text-[#0F1015] dark:text-white">ATOS</span>
-                <span className="text-xl font-bold bg-gradient-to-r from-[#FFD700] to-[#FFAE00] bg-clip-text text-transparent">fit</span>
+                <span className="text-xl font-bold bg-gradient-to-r from-[#FAA802] to-[#FFAE00] bg-clip-text text-transparent">fit</span>
               </div>
             </div>
 
@@ -1021,7 +1021,7 @@ const LandingPage = () => {
                 href="https://www.linkedin.com/company/atos-fit"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[#FFD700] transition-colors p-1"
+                className="hover:text-[#FAA802] transition-colors p-1"
                 aria-label="LinkedIn"
               >
                 <Icon name="Linkedin" size={20} />
@@ -1030,7 +1030,7 @@ const LandingPage = () => {
                 href="https://twitter.com/AtosFit"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[#FFD700] transition-colors p-1"
+                className="hover:text-[#FAA802] transition-colors p-1"
                 aria-label="Twitter/X"
               >
                 <Icon name="Twitter" size={20} />
@@ -1039,7 +1039,7 @@ const LandingPage = () => {
                 href="https://www.producthunt.com/posts/atos-fit"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[#FFD700] transition-colors p-1"
+                className="hover:text-[#FAA802] transition-colors p-1"
                 aria-label="Product Hunt"
               >
                 <Icon name="ExternalLink" size={20} />

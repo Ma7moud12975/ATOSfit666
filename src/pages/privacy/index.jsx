@@ -53,12 +53,12 @@ const PrivacyPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] dark:bg-[#08080A] text-[#0F1015] dark:text-[#FFFFFF] font-sans relative overflow-x-hidden selection:bg-[#FFD700]/30 selection:text-white">
+    <div className="min-h-screen bg-[#F7F8FA] dark:bg-[#08080A] text-[#0F1015] dark:text-[#FFFFFF] font-sans relative overflow-x-hidden selection:bg-[#FAA802]/30 selection:text-white">
       {/* Background accent glows */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[rgba(255, 215, 0,0.12)] dark:bg-[rgba(255, 215, 0,0.15)] rounded-full blur-3xl" />
-        <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-[rgba(255, 215, 0,0.08)] dark:bg-[rgba(255, 215, 0,0.1)] rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 w-[700px] h-[700px] bg-[rgba(255, 215, 0,0.06)] dark:bg-[rgba(255, 215, 0,0.08)] rounded-full blur-3xl" />
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[rgba(250, 168, 2,0.12)] dark:bg-[rgba(250, 168, 2,0.15)] rounded-full blur-3xl" />
+        <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-[rgba(250, 168, 2,0.08)] dark:bg-[rgba(250, 168, 2,0.1)] rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/2 w-[700px] h-[700px] bg-[rgba(250, 168, 2,0.06)] dark:bg-[rgba(250, 168, 2,0.08)] rounded-full blur-3xl" />
       </div>
 
       {/* Navigation */}
@@ -73,7 +73,7 @@ const PrivacyPage = () => {
           <div className="hidden md:flex items-center space-x-8">
             <button onClick={() => navigate('/')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-[#0F1015] dark:text-[#FFFFFF] font-medium transition-colors text-sm">Home</button>
             <button onClick={() => navigate('/pricing')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-[#0F1015] dark:text-[#FFFFFF] font-medium transition-colors text-sm">Pricing</button>
-            <span className="text-[#FFD700] font-semibold text-sm">Privacy</span>
+            <span className="text-[#FAA802] font-semibold text-sm">Privacy</span>
             <button onClick={() => navigate('/about')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-[#0F1015] dark:text-[#FFFFFF] font-medium transition-colors text-sm">About Us</button>
           </div>
 
@@ -153,7 +153,7 @@ const PrivacyPage = () => {
               >
                 Pricing
               </button>
-              <span className="block text-[#FFD700] font-semibold py-2">
+              <span className="block text-[#FAA802] font-semibold py-2">
                 Privacy
               </span>
               <button 
@@ -183,7 +183,7 @@ const PrivacyPage = () => {
       <section className="relative z-10 px-6 py-20">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold linear-gradient-text mb-4 tracking-tight">
-            Your Privacy is <span className="text-[#FFD700]">Our Priority</span>
+            Your Privacy is <span className="text-[#FAA802]">Our Priority</span>
           </h1>
           <p className="text-xl text-sm text-[#8A8F98] leading-relaxed mb-12">
             ATOS fit is built from the ground up with privacy-first architecture. 
@@ -198,7 +198,7 @@ const PrivacyPage = () => {
             {privacyFeatures.map((feature, index) => (
               <div
                 key={index}
-                className="linear-card rounded-3xl p-8 hover:border-white/[0.15] hover:shadow-[0_0_25px_rgba(255, 215, 0,0.15)] transition-all duration-300"
+                className="linear-card rounded-3xl p-8 hover:border-white/[0.15] hover:shadow-[0_0_25px_rgba(250, 168, 2,0.15)] transition-all duration-300"
               >
                 <div className="w-16 h-16 bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl flex items-center justify-center mb-6">
                   <img 
@@ -212,7 +212,7 @@ const PrivacyPage = () => {
                 <ul className="space-y-3">
                   {feature.details.map((detail, detailIndex) => (
                     <li key={detailIndex} className="flex items-start space-x-3">
-                      <Icon name="Check" size={16} className="text-[#FFD700] mt-1 flex-shrink-0" />
+                      <Icon name="Check" size={16} className="text-[#FAA802] mt-1 flex-shrink-0" />
                       <span className="text-[#8A8F98] text-xs">{detail}</span>
                     </li>
                   ))}
@@ -222,7 +222,7 @@ const PrivacyPage = () => {
           </div>
 
           {/* Detailed Privacy Policy */}
-          <div className="linear-card rounded-3xl p-10 hover:border-white/[0.15] hover:shadow-[0_0_25px_rgba(255, 215, 0,0.15)] transition-all duration-300">
+          <div className="linear-card rounded-3xl p-10 hover:border-white/[0.15] hover:shadow-[0_0_25px_rgba(250, 168, 2,0.15)] transition-all duration-300">
             <h2 className="text-3xl md:text-4xl font-semibold linear-gradient-text mb-8 text-center">
               Complete Privacy Policy
             </h2>
@@ -231,7 +231,7 @@ const PrivacyPage = () => {
               {/* Data Collection */}
               <div>
                 <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#FFFFFF] mb-3 flex items-center">
-                  <Icon name="Database" size={24} className="text-[#FFD700] mr-3" />
+                  <Icon name="Database" size={24} className="text-[#FAA802] mr-3" />
                   What Data We Collect
                 </h3>
                 <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
@@ -241,7 +241,7 @@ const PrivacyPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
                       <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium mb-3 flex items-center">
-                        <Icon name="Activity" size={20} className="text-[#FFD700] mr-2" />
+                        <Icon name="Activity" size={20} className="text-[#FAA802] mr-2" />
                         Fitness Data We Store
                       </h4>
                       <ul className="space-y-2 text-sm">
@@ -255,7 +255,7 @@ const PrivacyPage = () => {
                     </div>
                     <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
                       <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium mb-3 flex items-center">
-                        <Icon name="Settings" size={20} className="text-[#FFD700] mr-2" />
+                        <Icon name="Settings" size={20} className="text-[#FAA802] mr-2" />
                         Technical Data We Store
                       </h4>
                       <ul className="space-y-2 text-sm">
@@ -269,7 +269,7 @@ const PrivacyPage = () => {
                     </div>
                   </div>
                   <div className="linear-card border border-white/[0.08] rounded-2xl p-6 mt-6">
-                    <h4 className="text-[#FFD700] font-medium mb-3 flex items-center">
+                    <h4 className="text-[#FAA802] font-medium mb-3 flex items-center">
                       <Icon name="Shield" size={20} className="mr-2" />
                       What We NEVER Collect
                     </h4>
@@ -294,7 +294,7 @@ const PrivacyPage = () => {
               {/* Local Processing */}
               <div>
                 <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#FFFFFF] mb-3 flex items-center">
-                  <Icon name="Smartphone" size={24} className="text-[#FFD700] mr-3" />
+                  <Icon name="Smartphone" size={24} className="text-[#FAA802] mr-3" />
                   Advanced Local Processing Technology
                 </h3>
                 <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
@@ -305,7 +305,7 @@ const PrivacyPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                     <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
                       <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium mb-3 flex items-center">
-                        <Icon name="Camera" size={18} className="text-[#FFD700] mr-2" />
+                        <Icon name="Camera" size={18} className="text-[#FAA802] mr-2" />
                         Real-Time Analysis
                       </h4>
                       <ul className="space-y-2 text-sm">
@@ -318,7 +318,7 @@ const PrivacyPage = () => {
                     </div>
                     <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
                       <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium mb-3 flex items-center">
-                        <Icon name="Cpu" size={18} className="text-[#FFD700] mr-2" />
+                        <Icon name="Cpu" size={18} className="text-[#FAA802] mr-2" />
                         On-Device Processing
                       </h4>
                       <ul className="space-y-2 text-sm">
@@ -331,7 +331,7 @@ const PrivacyPage = () => {
                     </div>
                     <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
                       <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium mb-3 flex items-center">
-                        <Icon name="Shield" size={18} className="text-[#FFD700] mr-2" />
+                        <Icon name="Shield" size={18} className="text-[#FAA802] mr-2" />
                         Privacy Guarantees
                       </h4>
                       <ul className="space-y-2 text-sm">
@@ -344,7 +344,7 @@ const PrivacyPage = () => {
                     </div>
                   </div>
                   <div className="linear-card border border-white/[0.08] rounded-2xl p-6 mt-6">
-                    <h4 className="text-[#FFD700] font-medium mb-3 flex items-center">
+                    <h4 className="text-[#FAA802] font-medium mb-3 flex items-center">
                       <Icon name="Zap" size={20} className="mr-2" />
                       Technical Implementation
                     </h4>
@@ -376,7 +376,7 @@ const PrivacyPage = () => {
               {/* Internet Identity */}
               <div>
                 <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#FFFFFF] mb-3 flex items-center">
-                  <Icon name="Key" size={24} className="text-[#FFD700] mr-3" />
+                  <Icon name="Key" size={24} className="text-[#FAA802] mr-3" />
                   Revolutionary Internet Identity Authentication
                 </h3>
                 <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
@@ -387,55 +387,55 @@ const PrivacyPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
                       <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium mb-3 flex items-center">
-                        <Icon name="UserCheck" size={18} className="text-[#FFD700] mr-2" />
+                        <Icon name="UserCheck" size={18} className="text-[#FAA802] mr-2" />
                         Anonymous by Design
                       </h4>
                       <ul className="space-y-2 text-sm">
                         <li className="flex items-start space-x-2">
-                          <Icon name="Check" size={14} className="text-[#FFD700] mt-1" />
+                          <Icon name="Check" size={14} className="text-[#FAA802] mt-1" />
                           <span>No email, phone, or personal info required</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                          <Icon name="Check" size={14} className="text-[#FFD700] mt-1" />
+                          <Icon name="Check" size={14} className="text-[#FAA802] mt-1" />
                           <span>Cryptographic identity anchors</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                          <Icon name="Check" size={14} className="text-[#FFD700] mt-1" />
+                          <Icon name="Check" size={14} className="text-[#FAA802] mt-1" />
                           <span>Biometric authentication (stays on device)</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                          <Icon name="Check" size={14} className="text-[#FFD700] mt-1" />
+                          <Icon name="Check" size={14} className="text-[#FAA802] mt-1" />
                           <span>Hardware security key support</span>
                         </li>
                       </ul>
                     </div>
                     <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
                       <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium mb-3 flex items-center">
-                        <Icon name="Lock" size={18} className="text-[#FFD700] mr-2" />
+                        <Icon name="Lock" size={18} className="text-[#FAA802] mr-2" />
                         Unbreakable Security
                       </h4>
                       <ul className="space-y-2 text-sm">
                         <li className="flex items-start space-x-2">
-                          <Icon name="Shield" size={14} className="text-[#FFD700] mt-1" />
+                          <Icon name="Shield" size={14} className="text-[#FAA802] mt-1" />
                           <span>Immune to password breaches</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                          <Icon name="Shield" size={14} className="text-[#FFD700] mt-1" />
+                          <Icon name="Shield" size={14} className="text-[#FAA802] mt-1" />
                           <span>Resistant to phishing attacks</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                          <Icon name="Shield" size={14} className="text-[#FFD700] mt-1" />
+                          <Icon name="Shield" size={14} className="text-[#FAA802] mt-1" />
                           <span>No central authority to compromise</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                          <Icon name="Shield" size={14} className="text-[#FFD700] mt-1" />
+                          <Icon name="Shield" size={14} className="text-[#FAA802] mt-1" />
                           <span>Quantum-resistant cryptography</span>
                         </li>
                       </ul>
                     </div>
                   </div>
                   <div className="linear-card border border-white/[0.08] rounded-2xl p-6 mt-6">
-                    <h4 className="text-[#FFD700] font-medium mb-3 flex items-center">
+                    <h4 className="text-[#FAA802] font-medium mb-3 flex items-center">
                       <Icon name="Globe" size={20} className="mr-2" />
                       How Internet Identity Protects You
                     </h4>
@@ -468,7 +468,7 @@ const PrivacyPage = () => {
               {/* ICP Blockchain Storage */}
               <div>
                 <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#FFFFFF] mb-3 flex items-center">
-                  <Icon name="Lock" size={24} className="text-[#FFD700] mr-3" />
+                  <Icon name="Lock" size={24} className="text-[#FAA802] mr-3" />
                   Internet Computer Protocol (ICP) Blockchain Storage
                 </h3>
                 <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
@@ -479,7 +479,7 @@ const PrivacyPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
                       <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium mb-3 flex items-center">
-                        <Icon name="Globe" size={20} className="text-[#FFD700] mr-2" />
+                        <Icon name="Globe" size={20} className="text-[#FAA802] mr-2" />
                         True Decentralization
                       </h4>
                       <p className="text-sm mb-3">
@@ -496,7 +496,7 @@ const PrivacyPage = () => {
                     
                     <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
                       <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium mb-3 flex items-center">
-                        <Icon name="Shield" size={20} className="text-[#FFD700] mr-2" />
+                        <Icon name="Shield" size={20} className="text-[#FAA802] mr-2" />
                         Military-Grade Security
                       </h4>
                       <p className="text-sm mb-3">
@@ -513,7 +513,7 @@ const PrivacyPage = () => {
 
                     <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
                       <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium mb-3 flex items-center">
-                        <Icon name="User" size={20} className="text-[#FFD700] mr-2" />
+                        <Icon name="User" size={20} className="text-[#FAA802] mr-2" />
                         Complete Data Ownership
                       </h4>
                       <p className="text-sm mb-3">
@@ -530,7 +530,7 @@ const PrivacyPage = () => {
 
                     <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-6">
                       <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium mb-3 flex items-center">
-                        <Icon name="Zap" size={20} className="text-[#FFD700] mr-2" />
+                        <Icon name="Zap" size={20} className="text-[#FAA802] mr-2" />
                         Smart Contract Automation
                       </h4>
                       <p className="text-sm mb-3">
@@ -546,7 +546,7 @@ const PrivacyPage = () => {
                     </div>
                   </div>
                   <div className="linear-card border border-white/[0.08] rounded-2xl p-6 mt-6">
-                    <h4 className="text-[#FFD700] font-medium mb-3 flex items-center">
+                    <h4 className="text-[#FAA802] font-medium mb-3 flex items-center">
                       <Icon name="Info" size={20} className="mr-2" />
                       Why ICP is Different from Other Blockchains
                     </h4>
@@ -579,14 +579,14 @@ const PrivacyPage = () => {
               {/* Data Usage */}
               <div>
                 <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#FFFFFF] mb-3 flex items-center">
-                  <Icon name="Eye" size={24} className="text-[#FFD700] mr-3" />
+                  <Icon name="Eye" size={24} className="text-[#FAA802] mr-3" />
                   How We Use Your Data
                 </h3>
                 <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
                   <p>Your data is used exclusively to provide and improve ATOS fit services:</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <div>
-                      <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium mb-3 text-[#FFD700]">✓ What We Do</h4>
+                      <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium mb-3 text-[#FAA802]">✓ What We Do</h4>
                       <ul className="space-y-2 text-sm">
                         <li>• Provide personalized workout recommendations</li>
                         <li>• Track your fitness progress over time</li>
@@ -612,7 +612,7 @@ const PrivacyPage = () => {
               {/* Your Rights */}
               <div>
                 <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#FFFFFF] mb-3 flex items-center">
-                  <Icon name="Users" size={24} className="text-[#FFD700] mr-3" />
+                  <Icon name="Users" size={24} className="text-[#FAA802] mr-3" />
                   Your Privacy Rights
                 </h3>
                 <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
@@ -620,14 +620,14 @@ const PrivacyPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <div className="space-y-4">
                       <div className="flex items-start space-x-3">
-                        <Icon name="Download" size={20} className="text-[#FFD700] mt-1" />
+                        <Icon name="Download" size={20} className="text-[#FAA802] mt-1" />
                         <div>
                           <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium">Data Export</h4>
                           <p className="text-sm">Download all your data in a standard format anytime.</p>
                         </div>
                       </div>
                       <div className="flex items-start space-x-3">
-                        <Icon name="Trash2" size={20} className="text-[#FFD700] mt-1" />
+                        <Icon name="Trash2" size={20} className="text-[#FAA802] mt-1" />
                         <div>
                           <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium">Data Deletion</h4>
                           <p className="text-sm">Permanently delete your account and all associated data.</p>
@@ -636,14 +636,14 @@ const PrivacyPage = () => {
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-start space-x-3">
-                        <Icon name="Settings" size={20} className="text-[#FFD700] mt-1" />
+                        <Icon name="Settings" size={20} className="text-[#FAA802] mt-1" />
                         <div>
                           <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium">Privacy Controls</h4>
                           <p className="text-sm">Granular controls over what data is collected and how it's used.</p>
                         </div>
                       </div>
                       <div className="flex items-start space-x-3">
-                        <Icon name="AlertCircle" size={20} className="text-[#FFD700] mt-1" />
+                        <Icon name="AlertCircle" size={20} className="text-[#FAA802] mt-1" />
                         <div>
                           <h4 className="text-[#0F1015] dark:text-[#FFFFFF] font-medium">Transparency</h4>
                           <p className="text-sm">Full visibility into what data we have and how it's processed.</p>
@@ -657,7 +657,7 @@ const PrivacyPage = () => {
               {/* Third-Party Services */}
               <div>
                 <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#FFFFFF] mb-3 flex items-center">
-                  <Icon name="ExternalLink" size={24} className="text-[#FFD700] mr-3" />
+                  <Icon name="ExternalLink" size={24} className="text-[#FAA802] mr-3" />
                   Third-Party Services & Integrations
                 </h3>
                 <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
@@ -697,7 +697,7 @@ const PrivacyPage = () => {
               {/* Data Retention */}
               <div>
                 <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#FFFFFF] mb-3 flex items-center">
-                  <Icon name="Clock" size={24} className="text-[#FFD700] mr-3" />
+                  <Icon name="Clock" size={24} className="text-[#FAA802] mr-3" />
                   Data Retention & Deletion
                 </h3>
                 <div className="space-y-4 text-sm text-[#8A8F98] leading-relaxed">
@@ -728,7 +728,7 @@ const PrivacyPage = () => {
               </div>
 
               {/* Contact */}
-              <div className="bg-[rgba(255, 215, 0,0.1)] border border-[rgba(255, 215, 0,0.2)] rounded-xl p-8 text-center">
+              <div className="bg-[rgba(250, 168, 2,0.1)] border border-[rgba(250, 168, 2,0.2)] rounded-xl p-8 text-center">
                 <h3 className="text-xl font-semibold text-[#0F1015] dark:text-[#FFFFFF] mb-3">
                   Questions About Your Privacy?
                 </h3>
@@ -737,7 +737,7 @@ const PrivacyPage = () => {
                   we're here to help. Our privacy team responds to all inquiries within 24 hours.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <button className="bg-[#FFD700] hover:bg-[#FFE033] text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300">
+                  <button className="bg-[#FAA802] hover:bg-[#FBB502] text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300">
                     Contact Privacy Team
                   </button>
                   <button 
@@ -768,7 +768,7 @@ const PrivacyPage = () => {
             <div className="flex items-center space-x-8">
               <button onClick={() => navigate('/')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-[#EDEDEF] transition-colors text-sm">Home</button>
               <button onClick={() => navigate('/pricing')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-[#EDEDEF] transition-colors text-sm">Pricing</button>
-              <span className="text-[#FFD700] font-semibold">Privacy</span>
+              <span className="text-[#FAA802] font-semibold">Privacy</span>
               <button onClick={() => navigate('/about')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-[#EDEDEF] transition-colors text-sm">About Us</button>
             </div>
             
@@ -777,7 +777,7 @@ const PrivacyPage = () => {
                 href="https://www.linkedin.com/company/atos-fit" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-[rgba(255,255,255,0.4)] hover:text-[#FFD700] transition-colors"
+                className="text-[rgba(255,255,255,0.4)] hover:text-[#FAA802] transition-colors"
                 aria-label="LinkedIn"
               >
                 <Icon name="Linkedin" size={24} />
@@ -786,7 +786,7 @@ const PrivacyPage = () => {
                 href="https://twitter.com/AtosFit" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-[rgba(255,255,255,0.4)] hover:text-[#FFD700] transition-colors"
+                className="text-[rgba(255,255,255,0.4)] hover:text-[#FAA802] transition-colors"
                 aria-label="Twitter/X"
               >
                 <Icon name="Twitter" size={24} />
@@ -795,7 +795,7 @@ const PrivacyPage = () => {
                 href="https://www.producthunt.com/posts/atos-fit?utm_source=other&utm_medium=social" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-[rgba(255,255,255,0.4)] hover:text-[#FFD700] transition-colors"
+                className="text-[rgba(255,255,255,0.4)] hover:text-[#FAA802] transition-colors"
                 aria-label="Product Hunt"
               >
                 <Icon name="ExternalLink" size={24} />

@@ -35,7 +35,7 @@ const PresetPlans = ({ onStartPlan }) => {
       ],
       targetMuscles: 'Chest, Arms',
       calories: 300,
-      color: '#FFD700'
+      color: '#FAA802'
     },
     {
       id: 'core-focused',
@@ -52,7 +52,7 @@ const PresetPlans = ({ onStartPlan }) => {
       ],
       targetMuscles: 'Core, Abs',
       calories: 280,
-      color: '#FFD700'
+      color: '#FAA802'
     },
     {
       id: 'full-body',
@@ -70,7 +70,7 @@ const PresetPlans = ({ onStartPlan }) => {
       ],
       targetMuscles: 'Full Body',
       calories: 450,
-      color: '#FFD700'
+      color: '#FAA802'
     },
     {
       id: 'beginner-friendly',
@@ -103,15 +103,15 @@ const PresetPlans = ({ onStartPlan }) => {
       ],
       targetMuscles: 'Cardio',
       calories: 400,
-      color: '#FFD700'
+      color: '#FAA802'
     }
   ];
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
       case 'Beginner': return { bg: 'rgba(167,162,137,0.15)', text: 'var(--bento-muted)', border: 'rgba(167,162,137,0.3)' };
-      case 'Intermediate': return { bg: 'rgba(255, 215, 0, 0.1)', text: '#FFD700', border: 'rgba(255, 215, 0, 0.25)' };
-      case 'Advanced': return { bg: 'rgba(255, 215, 0, 0.2)', text: '#FFD700', border: 'rgba(255, 215, 0, 0.4)' };
+      case 'Intermediate': return { bg: 'rgba(250, 168, 2, 0.1)', text: '#FAA802', border: 'rgba(250, 168, 2, 0.25)' };
+      case 'Advanced': return { bg: 'rgba(250, 168, 2, 0.2)', text: '#FAA802', border: 'rgba(250, 168, 2, 0.4)' };
       default: return { bg: 'rgba(167,162,137,0.1)', text: 'var(--bento-muted)', border: 'rgba(167,162,137,0.2)' };
     }
   };
@@ -140,15 +140,15 @@ const PresetPlans = ({ onStartPlan }) => {
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '1.25rem', paddingBottom: '1.25rem', borderBottom: '1px solid var(--bento-border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--bento-text)', fontSize: '0.8rem', fontWeight: 600 }}>
-            <Icon name="Clock" size={14} color="#FFD700" />
+            <Icon name="Clock" size={14} color="#FAA802" />
             {plan.duration}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--bento-text)', fontSize: '0.8rem', fontWeight: 600 }}>
-            <Icon name="Zap" size={14} color="#FFD700" />
+            <Icon name="Zap" size={14} color="#FAA802" />
             {plan.calories} cal
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--bento-text)', fontSize: '0.8rem', fontWeight: 600 }}>
-            <Icon name="Target" size={14} color="#FFD700" />
+            <Icon name="Target" size={14} color="#FAA802" />
             {plan.targetMuscles}
           </div>
         </div>
@@ -165,7 +165,7 @@ const PresetPlans = ({ onStartPlan }) => {
               </div>
             ))}
             {plan.exercises.length > 3 && (
-              <div style={{ color: '#FFD700', fontSize: '0.75rem', fontWeight: 700, marginTop: '4px' }}>
+              <div style={{ color: '#FAA802', fontSize: '0.75rem', fontWeight: 700, marginTop: '4px' }}>
                 +{plan.exercises.length - 3} more exercises
               </div>
             )}

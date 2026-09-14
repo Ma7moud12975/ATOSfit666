@@ -75,7 +75,7 @@ const InteractiveImage = () => {
       <div 
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[440px] md:w-[500px] h-[340px] sm:h-[440px] md:h-[500px] rounded-full pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, rgba(255, 215, 0, 0.28) 0%, rgba(192, 192, 192, 0.12) 42%, transparent 72%)',
+          background: 'radial-gradient(circle, rgba(250, 168, 2, 0.28) 0%, rgba(192, 192, 192, 0.12) 42%, transparent 72%)',
           filter: 'blur(55px)',
         }}
       />
@@ -88,7 +88,7 @@ const InteractiveImage = () => {
       >
         {/* Phone Mockup with exercise GIF */}
         <div className="relative group cursor-pointer">
-          <div className="relative rounded-[42px] p-1.5 bg-gradient-to-b from-[#C0C0C0]/40 via-[#222227]/40 to-[#FFD700]/30 shadow-[0_25px_60px_-15px_rgba(255,215,0,0.35)] overflow-hidden">
+          <div className="relative rounded-[42px] p-1.5 bg-gradient-to-b from-[#C0C0C0]/40 via-[#222227]/40 to-[#FAA802]/30 shadow-[0_25px_60px_-15px_rgba(250, 168, 2,0.35)] overflow-hidden">
             <img 
               src="/assets/images/weekly_tasks.gif" 
               alt="ATOS fit Exercise AI Motion Tracking" 
@@ -100,24 +100,24 @@ const InteractiveImage = () => {
             {/* Athletic HUD: Top Live Biomechanics Pill */}
             <div className="absolute top-4 left-4 right-4 flex items-center justify-between px-3 py-1.5 rounded-full bg-[#08080A]/80 backdrop-blur-md border border-[#C0C0C0]/20 text-[10px] sm:text-xs font-semibold text-white pointer-events-none">
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#FFD700] animate-pulse shadow-[0_0_8px_#FFD700]"></span>
+                <span className="w-2 h-2 rounded-full bg-[#FAA802] animate-pulse shadow-[0_0_8px_#FAA802]"></span>
                 <span className="tracking-wide text-white">{isAr ? 'تتبع حركي مباشر' : 'LIVE POSE AI'}</span>
               </div>
-              <span className="text-[#FFD700] font-bold" dir="ltr">60 FPS</span>
+              <span className="text-[#FAA802] font-bold" dir="ltr">60 FPS</span>
             </div>
 
             {/* Athletic HUD: Bottom Real-Time Telemetry Bar */}
             <div className="absolute bottom-4 left-3 right-3 p-2.5 rounded-2xl bg-[#08080A]/85 backdrop-blur-md border border-[#C0C0C0]/20 shadow-lg pointer-events-none">
               <div className="flex items-center justify-between text-[11px] sm:text-xs text-white">
                 <div className="flex items-center gap-1">
-                  <span className="text-[#FFD700] font-bold">🔥</span>
+                  <span className="text-[#FAA802] font-bold">🔥</span>
                   <span className="font-bold text-white" dir="ltr">420</span>
                   <span className="text-[10px] text-[#A8A8A8]">{isAr ? 'سعرة' : 'kcal'}</span>
                 </div>
                 <div className="h-3 w-[1px] bg-white/20"></div>
                 <div className="flex items-center gap-1">
-                  <span className="text-[#FFD700] font-bold">⚡</span>
-                  <span className="font-bold text-[#FFD700]" dir="ltr">8/12</span>
+                  <span className="text-[#FAA802] font-bold">⚡</span>
+                  <span className="font-bold text-[#FAA802]" dir="ltr">8/12</span>
                   <span className="text-[10px] text-[#A8A8A8]">{isAr ? 'تكرار' : 'reps'}</span>
                 </div>
                 <div className="h-3 w-[1px] bg-white/20"></div>
