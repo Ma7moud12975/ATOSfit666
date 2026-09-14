@@ -6,10 +6,12 @@ import Icon from '../../components/AppIcon';
 import CoachPulse from '../../components/CoachPulse';
 import { logFood, getFoodLogs, deleteFoodLog } from '../../utils/api/foodApi';
 import { getAccountId } from '../../utils/localAccountStorage';
+import { getNutritionStats, DASHBOARD_DATA_UPDATED } from '../../utils/dashboardStatsService';
 import { buildRecoveryMatch } from '../../utils/recoveryMatch';
 import { buildFoodCoachPulse } from '../../utils/coachPulse';
 import { normalizeFoodAnalysis, parseFoodAnalysisResponse } from '../../utils/foodAnalysisNormalizer';
 import { useLanguage } from '../../contexts/LanguageContext';
+import MealLoggedFeedbackModal from './components/MealLoggedFeedbackModal';
 import '../../styles/bento-dashboard.css';
 
 const ScannerPage = () => {
@@ -17,6 +19,9 @@ const ScannerPage = () => {
   const { language, t } = useLanguage();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [user, setUser] = useState({ name: 'Mahmoud Ayman', profilePicture: '' });
+  const [dailyStats, setDailyStats] = useState(null);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [justLoggedMeal, setJustLoggedMeal] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
   const [scanHistory, setScanHistory] = useState([]);
@@ -82,11 +87,20 @@ const ScannerPage = () => {
       const u = JSON.parse(localStorage.getItem('user') || '{}');
       if (u?.name) setUser(u);
 
-      const loadHistory = async () => {
-        const foods = await getFoodLogs(getUserId(u));
+      const refreshHistoryAndStats = async () => {
+        const uid = getUserId(u);
+        const foods = await getFoodLogs(uid);
         setScanHistory(foods.filter(isUsableFoodLog).map(formatHistoryItem));
+        setDailyStats(getNutritionStats(uid, new Date(), u));
       };
-      loadHistory();
+      refreshHistoryAndStats();
+
+      const onDataUpdated = () => {
+        const currentU = JSON.parse(localStorage.getItem('user') || '{}');
+        setDailyStats(getNutritionStats(getUserId(currentU), new Date(), currentU));
+      };
+      window.addEventListener(DASHBOARD_DATA_UPDATED, onDataUpdated);
+      return () => window.removeEventListener(DASHBOARD_DATA_UPDATED, onDataUpdated);
     } catch (e) { console.error(e); }
   }, []);
 
@@ -183,6 +197,11 @@ const ScannerPage = () => {
           const savedMeal = { ...formatHistoryItem(saved), saved: true };
           setScanResult(savedMeal);
           setScanHistory(prev => [savedMeal, ...prev.filter(item => String(item.id) !== String(savedMeal.id))]);
+          const currentU = JSON.parse(localStorage.getItem('user') || '{}');
+          const updatedStats = getNutritionStats(getUserId(currentU), new Date(), currentU);
+          setDailyStats(updatedStats);
+          setJustLoggedMeal(savedMeal);
+          setIsFeedbackModalOpen(true);
         } catch (saveError) {
           console.warn('Food analyzed but could not be saved:', saveError);
         }
@@ -239,10 +258,61 @@ const ScannerPage = () => {
       <main className="pt-24 lg:pl-72 min-h-screen">
         <div className="px-4 py-6 md:px-8 md:py-8 max-w-[1400px] mx-auto">
 
-          <div style={{ marginBottom: '2.5rem' }}>
+          <div style={{ marginBottom: '1.5rem' }}>
             <h1 style={{ fontSize: '2.4rem', fontWeight: 900, color: 'var(--bento-text)', margin: 0, letterSpacing: '0' }}>{t('scanner.title')}</h1>
             <p style={{ color: 'var(--bento-muted)', fontSize: '1rem', marginTop: '0.25rem' }}>{t('scanner.subtitle')}</p>
           </div>
+
+          {/* Daily Caloric Budget Banner */}
+          {dailyStats && (
+            <div className="bento-card mb-6 p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-primary/30 bg-gradient-to-r from-primary/10 via-white/[0.02] to-transparent shadow-[0_10px_30px_rgba(250,168,2,0.1)]">
+              <div className="flex items-center gap-3.5">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-primary/15 text-primary border border-primary/30 shadow-[0_0_20px_rgba(250,168,2,0.2)]">
+                  <Icon name="Flame" size={24} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-primary uppercase tracking-wider">
+                      {language === 'ar' ? 'ميزانية السعرات اليومية الحقيقية' : 'Daily Calorie Target'}
+                    </span>
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 font-mono text-muted-foreground">
+                      {dailyStats.targets.calories} kcal
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-black text-foreground mt-0.5">
+                    {language === 'ar'
+                      ? `المتبقي لك اليوم: ${Math.round(dailyStats.remainingCalories)} سعرة حرارية`
+                      : `${Math.round(dailyStats.remainingCalories)} kcal remaining today`}
+                  </h3>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/5 pt-3 md:pt-0">
+                <div className="text-left md:text-right">
+                  <span className="text-xs text-muted-foreground block">{language === 'ar' ? 'المستهلك اليوم' : 'Consumed today'}</span>
+                  <span className="font-mono font-bold text-base text-foreground">
+                    {Math.round(dailyStats.totals.calories)} <span className="text-xs text-muted-foreground">/ {dailyStats.targets.calories} kcal</span>
+                  </span>
+                </div>
+                <div className="w-32 sm:w-40">
+                  <div className="h-2.5 rounded-full bg-muted overflow-hidden border border-white/10">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${dailyStats.caloriesPct}%`,
+                        background: dailyStats.remainingCalories < 0
+                          ? 'linear-gradient(90deg, #F59E0B, #EF4444)'
+                          : 'linear-gradient(90deg, #FAA802, #FBB502)',
+                      }}
+                    />
+                  </div>
+                  <span className="text-[11px] text-muted-foreground text-right block mt-1 font-mono font-semibold">
+                    {dailyStats.caloriesPct}% {language === 'ar' ? 'مكتمل' : 'completed'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
             {/* 1. Camera Widget (Spans 7 cols) */}
@@ -416,6 +486,14 @@ const ScannerPage = () => {
           </div>
         </div>
       </main>
+
+      <MealLoggedFeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setIsFeedbackModalOpen(false)}
+        meal={justLoggedMeal}
+        dailyStats={dailyStats}
+        onNavigateDashboard={() => navigate('/dashboard')}
+      />
     </div>
   );
 };

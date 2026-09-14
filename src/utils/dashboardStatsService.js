@@ -1,4 +1,5 @@
 import { getAccountId, getLocalFoodLogs } from './localAccountStorage';
+import { calculateMetabolicTargets } from './metabolism';
 
 export const DASHBOARD_DATA_UPDATED = 'dashboardDataUpdated';
 
@@ -65,10 +66,11 @@ export const getWorkoutStats = () => readJson(STORAGE_KEYS.WORKOUT_STATS, {}) ||
 export const getHydrationKey = (userId = null) => `atos_hydration:${getAccountId(userId)}`;
 
 export const getHydrationStats = (userId = null, date = new Date()) => {
+  const user = getUserProfile();
   const dateKey = toDateKey(date);
   const saved = readJson(getHydrationKey(userId), {});
   const record = saved?.date === dateKey ? saved : {};
-  const goal = Number(record.goal) || 2500;
+  const goal = Number(record.goal) || Number(user.waterGoal) || 2500;
   const water = Number(record.water) || 0;
   const history = Array.isArray(record.history) ? record.history : [];
 
@@ -84,10 +86,12 @@ export const getHydrationStats = (userId = null, date = new Date()) => {
 };
 
 export const saveHydrationStats = (stats, userId = null) => {
+  const user = getUserProfile();
+  const defaultGoal = Number(user.waterGoal) || 2500;
   const next = {
     date: stats.date || toDateKey(),
     water: Math.max(0, Number(stats.water) || 0),
-    goal: Math.max(250, Number(stats.goal) || 2500),
+    goal: Math.max(250, Number(stats.goal) || defaultGoal),
     history: Array.isArray(stats.history) ? stats.history : []
   };
   writeJson(getHydrationKey(userId), next);
@@ -124,12 +128,19 @@ export const setHydrationGoal = (goal, userId = null, date = new Date()) => {
   return saveHydrationStats({ ...current, goal: Number(goal) || current.goal }, userId);
 };
 
-export const getNutritionTargets = (user = {}) => ({
-  calories: Number(user.dailyCalorieGoal || user.calorieGoal || user.targetCalories) || 2200,
-  protein: Number(user.proteinGoal) || 150,
-  carbs: Number(user.carbsGoal) || 300,
-  fat: Number(user.fatGoal) || 80
-});
+export const getNutritionTargets = (user = {}) => {
+  const metabolic = calculateMetabolicTargets(user);
+  return {
+    calories: Number(user.dailyCalorieGoal || user.calorieGoal || user.targetCalories || metabolic.dailyCalorieGoal) || 2200,
+    protein: Number(user.proteinGoal || metabolic.proteinGoal) || 150,
+    carbs: Number(user.carbsGoal || metabolic.carbsGoal) || 300,
+    fat: Number(user.fatGoal || metabolic.fatGoal) || 80,
+    bmr: Number(user.bmr || metabolic.bmr),
+    tdee: Number(user.tdee || metabolic.tdee),
+    water: Number(user.waterGoal || metabolic.waterGoal) || 2500,
+    metabolic,
+  };
+};
 
 export const getNutritionStats = (userId = null, date = new Date(), user = getUserProfile()) => {
   const dateKey = toDateKey(date);

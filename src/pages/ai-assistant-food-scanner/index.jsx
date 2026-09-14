@@ -13,6 +13,8 @@ import ScanHistory from './components/ScanHistory';
 import ChatHistory from './components/ChatHistory';
 import { logFood, getFoodLogs, clearAllFoodLogs } from '../../utils/api/foodApi';
 import { normalizeFoodAnalysis, parseFoodAnalysisResponse } from '../../utils/foodAnalysisNormalizer';
+import { getNutritionStats, DASHBOARD_DATA_UPDATED } from '../../utils/dashboardStatsService';
+import MealLoggedFeedbackModal from './components/MealLoggedFeedbackModal';
 
 const AIAssistantFoodScanner = ({ chatOnly = false }) => {
   const navigate = useNavigate();
@@ -23,6 +25,9 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
   const [scanHistory, setScanHistory] = useState([]);
+  const [dailyStats, setDailyStats] = useState(null);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [justLoggedMeal, setJustLoggedMeal] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [chatSessionId, setChatSessionId] = useState(null);
   const [chatSessions, setChatSessions] = useState([]);
@@ -578,8 +583,14 @@ User message: ${message}`
         recommendation: result.recommendation,
         dateLogged: result.timestamp ? new Date(result.timestamp).toISOString() : new Date().toISOString(),
       });
-      setScanHistory(prev => [formatFoodLog(saved), ...prev.filter(item => item.id !== saved.id)]);
+      const formatted = formatFoodLog(saved);
+      setScanHistory(prev => [formatted, ...prev.filter(item => item.id !== saved.id)]);
       setScanResult(null);
+      const currentU = JSON.parse(localStorage.getItem('user') || '{}');
+      const updatedStats = getNutritionStats(getUserId(), new Date(), currentU);
+      setDailyStats(updatedStats);
+      setJustLoggedMeal(formatted);
+      setIsFeedbackModalOpen(true);
     } catch (error) {
       console.warn('Could not save food scan:', error);
     }
@@ -816,6 +827,14 @@ User message: ${message}`
           </div>
         </div>
       </main>
+
+      <MealLoggedFeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setIsFeedbackModalOpen(false)}
+        meal={justLoggedMeal}
+        dailyStats={dailyStats}
+        onNavigateDashboard={() => navigate('/dashboard')}
+      />
     </div>
   );
 };

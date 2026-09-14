@@ -2,10 +2,17 @@ import React from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import { buildRecoveryMatch } from '../../../utils/recoveryMatch';
+import { getNutritionTargets, getUserProfile } from '../../../utils/dashboardStatsService';
 
 const FoodAnalysisResult = ({ result, onSaveToHistory, onNewScan }) => {
   if (!result) return null;
   const hasError = Boolean(result?.errorMessage);
+
+  const userProfile = getUserProfile();
+  const nutritionTargets = getNutritionTargets(userProfile);
+  const totalCalories = nutritionTargets.calories || 2200;
+  const caloriePercentage = Math.min(((result?.calories || 0) / totalCalories) * 100, 100);
+  const recoveryMatch = hasError ? null : buildRecoveryMatch(result);
 
   const nutritionData = [
     { 
@@ -24,7 +31,7 @@ const FoodAnalysisResult = ({ result, onSaveToHistory, onNewScan }) => {
     },
     { 
       label: 'Carbs', 
-      value: result?.carbohydrates || 0, 
+      value: result?.carbohydrates || result?.carbs || 0, 
       unit: 'g', 
       color: 'bg-warning',
       icon: 'Wheat'
@@ -38,16 +45,12 @@ const FoodAnalysisResult = ({ result, onSaveToHistory, onNewScan }) => {
     },
     { 
       label: 'Fat', 
-      value: result?.fat || 0, 
+      value: result?.fat || result?.fats || 0, 
       unit: 'g', 
       color: 'bg-error',
       icon: 'Droplet'
     }
   ];
-
-  const totalCalories = 400; // Daily target for progress calculation
-  const caloriePercentage = Math.min((result?.calories / totalCalories) * 100, 100);
-  const recoveryMatch = hasError ? null : buildRecoveryMatch(result);
 
   if (hasError) {
     return (

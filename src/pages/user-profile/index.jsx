@@ -12,6 +12,8 @@ import { paymentService } from '../../utils/paymentService';
 import { getUserProfile, updateUser, getUserStats } from '../../utils/api/userApi';
 import { applyTheme, getSavedTheme } from '../../utils/theme';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { calculateMetabolicTargets } from '../../utils/metabolism';
+import { emitDashboardDataUpdated } from '../../utils/dashboardStatsService';
 // Achievements tab removed per request
 
 const UserProfile = () => {
@@ -143,11 +145,27 @@ const UserProfile = () => {
   };
 
   const handleUpdateMetrics = async (metrics) => {
-    const updatedUser = { ...user, ...metrics };
+    const preliminaryUser = { ...user, ...metrics };
+    const metabolic = calculateMetabolicTargets(preliminaryUser);
+    const updatedUser = {
+      ...preliminaryUser,
+      dailyCalorieGoal: metabolic.dailyCalorieGoal,
+      calorieGoal: metabolic.calorieGoal,
+      targetCalories: metabolic.targetCalories,
+      proteinGoal: metabolic.proteinGoal,
+      carbsGoal: metabolic.carbsGoal,
+      fatGoal: metabolic.fatGoal,
+      waterGoal: metabolic.waterGoal,
+      bmr: metabolic.bmr,
+      tdee: metabolic.tdee,
+      bmi: metabolic.bmi,
+      metabolicProfile: metabolic,
+    };
     setUser(updatedUser);
     
     // Update localStorage
     localStorage.setItem('user', JSON.stringify(updatedUser));
+    emitDashboardDataUpdated({ type: 'PROFILE_UPDATED', user: updatedUser });
     
     // Update Supabase
     try {

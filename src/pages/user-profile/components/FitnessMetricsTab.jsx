@@ -5,6 +5,7 @@ import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
 import { updateUser } from '../../../utils/api/userApi';
+import { calculateMetabolicTargets } from '../../../utils/metabolism';
 
 const FitnessMetricsTab = ({ user, onUpdateMetrics }) => {
   const [editingMetric, setEditingMetric] = useState(null);
@@ -99,6 +100,7 @@ const FitnessMetricsTab = ({ user, onUpdateMetrics }) => {
 
   const currentBMI = calculateBMI(user?.weight, user?.height);
   const bmiInfo = getBMICategory(currentBMI);
+  const metabolic = calculateMetabolicTargets(user || {});
 
   return (
     <div className="space-y-6">
@@ -159,6 +161,58 @@ const FitnessMetricsTab = ({ user, onUpdateMetrics }) => {
             </div>
             <p className="text-2xl font-bold text-card-foreground">{currentBMI}</p>
             <p className={`text-xs font-medium ${bmiInfo?.color}`}>{bmiInfo?.category}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Scientific Metabolic Profile */}
+      <div className="rounded-xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-background p-5 shadow-elevation-1">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+              <Icon name="Sparkles" size={14} />
+              Scientific Metabolic Targets (Mifflin-St Jeor)
+            </span>
+            <h4 className="text-xl font-bold text-card-foreground mt-0.5">
+              {Number(user?.dailyCalorieGoal || user?.calorieGoal || metabolic.dailyCalorieGoal).toLocaleString()} <span className="text-sm font-normal text-muted-foreground">kcal / day</span>
+            </h4>
+          </div>
+          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary/15 text-primary border border-primary/30">
+            {metabolic.goalType === 'weight_loss' ? 'Deficit: -500 kcal' : metabolic.goalType === 'muscle_gain' ? 'Surplus: +350 kcal' : 'Maintenance'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          <div className="bg-card/70 border border-border rounded-lg p-3">
+            <span className="text-xs text-muted-foreground block">TDEE (Daily Burn)</span>
+            <span className="text-lg font-bold text-card-foreground">{metabolic.tdee} kcal</span>
+          </div>
+          <div className="bg-card/70 border border-border rounded-lg p-3">
+            <span className="text-xs text-muted-foreground block">BMR (Resting)</span>
+            <span className="text-lg font-bold text-card-foreground">{metabolic.bmr} kcal</span>
+          </div>
+          <div className="bg-card/70 border border-border rounded-lg p-3">
+            <span className="text-xs text-muted-foreground block">Daily Water</span>
+            <span className="text-lg font-bold text-card-foreground">{metabolic.waterGoalLiters} L</span>
+          </div>
+          <div className="bg-card/70 border border-border rounded-lg p-3">
+            <span className="text-xs text-muted-foreground block">Activity Factor</span>
+            <span className="text-lg font-bold text-card-foreground">{metabolic.activityLevel}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 border-t border-border/60 pt-3">
+          <div>
+            <span className="text-xs text-emerald-400 font-bold block">Protein Target</span>
+            <span className="text-base font-bold text-card-foreground">{user?.proteinGoal || metabolic.proteinGoal}g</span>
+          </div>
+          <div>
+            <span className="text-xs text-amber-400 font-bold block">Carbs Target</span>
+            <span className="text-base font-bold text-card-foreground">{user?.carbsGoal || metabolic.carbsGoal}g</span>
+          </div>
+          <div>
+            <span className="text-xs text-rose-400 font-bold block">Fats Target</span>
+            <span className="text-base font-bold text-card-foreground">{user?.fatGoal || metabolic.fatGoal}g</span>
           </div>
         </div>
       </div>

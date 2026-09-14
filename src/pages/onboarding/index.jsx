@@ -5,6 +5,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Icon from '../../components/AppIcon';
 import { updateUserProfile } from '../../utils/db';
+import { calculateMetabolicTargets } from '../../utils/metabolism';
 import fullBodyImg from './full body.png';
 import shouldersImg from './shoulders.png';
 import bicepsImg from './biceps.png';
@@ -31,10 +32,10 @@ const stepMeta = [
   { label: 'Focus', eyebrow: 'Training emphasis', title: 'Select your priority areas', description: 'Choose one or more areas so your workouts feel immediately relevant.', icon: 'ScanLine' },
   { label: 'Metrics', eyebrow: 'Measurements', title: 'Calibrate your body metrics', description: 'These details help balance intensity, volume, and progression.', icon: 'Ruler' },
   { label: 'Schedule', eyebrow: 'Routine design', title: 'Choose your training window', description: 'The best plan is the one that fits your real day.', icon: 'Clock3' },
-  { label: 'Level', eyebrow: 'Readiness', title: 'Set your current fitness level', description: 'We will match exercise complexity and coaching cues to your experience.', icon: 'Gauge' },
+  { label: 'Level & Activity', eyebrow: 'Metabolic Calibration', title: 'Set your fitness & daily movement level', description: 'We calculate your exact metabolic burn (TDEE) and match workout complexity to your lifestyle.', icon: 'Gauge' },
   { label: 'Coaching', eyebrow: 'Guidance style', title: 'Tell us how much direction you want', description: 'This tunes how prescriptive your workouts and recommendations should be.', icon: 'Quote' },
   { label: 'Success', eyebrow: 'Motivation', title: 'Define what progress means', description: 'Select the wins that will keep you coming back.', icon: 'Trophy' },
-  { label: 'Plan', eyebrow: 'Launch', title: 'Your transformation blueprint is ready', description: 'Review the plan signals ATOS-fit will use to personalize your next steps.', icon: 'Rocket' },
+  { label: 'Blueprint', eyebrow: 'Scientific Blueprint', title: 'Your scientific transformation blueprint is ready', description: 'Calculated with precision using Mifflin-St Jeor formula based on your real weight, height, age, and activity.', icon: 'Rocket' },
 ];
 
 const focusAreaOptions = [
@@ -85,6 +86,14 @@ const fitnessLevelOptions = [
   { id: 'beginner', color: 'bg-emerald-400', label: 'Beginner', description: "New to fitness or haven't trained consistently.", details: 'Simple movements, slower progressions, more coaching cues.' },
   { id: 'intermediate', color: 'bg-amber-400', label: 'Intermediate', description: 'Some experience and regular training rhythm.', details: 'Balanced volume, structured progression, form refinement.' },
   { id: 'advanced', color: 'bg-rose-500', label: 'Advanced', description: 'Consistent training and complex movement control.', details: 'Higher intensity, more variety, tighter performance targets.' },
+];
+
+const activityLevelOptions = [
+  { id: 'sedentary', label: 'Sedentary', labelAr: 'خامل / مكتبي', multiplier: '1.20x', desc: 'Little to no exercise, mostly desk work', icon: 'Armchair' },
+  { id: 'light', label: 'Lightly Active', labelAr: 'نشاط خفيف', multiplier: '1.38x', desc: 'Light movement, 1-3 workouts per week', icon: 'Footprints' },
+  { id: 'moderate', label: 'Moderately Active', labelAr: 'نشاط متوسط', multiplier: '1.55x', desc: 'Active routine, 3-5 workouts per week', icon: 'Zap' },
+  { id: 'very_active', label: 'Very Active', labelAr: 'نشاط عالي', multiplier: '1.73x', desc: 'Hard training 6-7 days per week', icon: 'Flame' },
+  { id: 'extra_active', label: 'Extremely Active', labelAr: 'نشاط رياضي شاق', multiplier: '1.90x', desc: 'Physical labor or double daily sessions', icon: 'Trophy' },
 ];
 
 const successMetricOptions = [
@@ -277,12 +286,14 @@ const OnboardingScreen = () => {
     height: 175,
     weight: 70,
     fitnessLevel: 'intermediate',
+    activityLevel: 'moderate',
     goals: [],
   });
 
   const progressPercent = Math.round((currentStep / totalSteps) * 100);
   const activeMeta = stepMeta[currentStep - 1];
   const weightProfile = useMemo(() => getWeightProfile(formData.bodyWeight), [formData.bodyWeight]);
+  const metabolic = useMemo(() => calculateMetabolicTargets(formData), [formData]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -338,6 +349,7 @@ const OnboardingScreen = () => {
   const saveAndExit = (skippedOnboarding = false) => {
     const principalId = principal?.toString() || `local_user_${Date.now()}`;
     const now = new Date().toISOString();
+    const calculatedMetabolic = calculateMetabolicTargets(formData);
     const userProfile = {
       ...formData,
       id: principalId,
@@ -348,6 +360,19 @@ const OnboardingScreen = () => {
       updatedAt: now,
       onboardingCompleted: !skippedOnboarding,
       skippedOnboarding,
+      dailyCalorieGoal: calculatedMetabolic.dailyCalorieGoal,
+      calorieGoal: calculatedMetabolic.calorieGoal,
+      targetCalories: calculatedMetabolic.targetCalories,
+      proteinGoal: calculatedMetabolic.proteinGoal,
+      carbsGoal: calculatedMetabolic.carbsGoal,
+      fatGoal: calculatedMetabolic.fatGoal,
+      waterGoal: calculatedMetabolic.waterGoal,
+      bmr: calculatedMetabolic.bmr,
+      tdee: calculatedMetabolic.tdee,
+      activityLevel: formData.activityLevel || calculatedMetabolic.activityLevel,
+      bmi: calculatedMetabolic.bmi,
+      estimatedWeeksToGoal: calculatedMetabolic.estimatedWeeksToGoal,
+      metabolicProfile: calculatedMetabolic,
     };
 
     localStorage.setItem('user', JSON.stringify(userProfile));
@@ -592,48 +617,106 @@ const OnboardingScreen = () => {
 
       case 8:
         return (
-          <div className="mx-auto max-w-3xl space-y-3">
-            {fitnessLevelOptions.map((level, index) => (
-              <button
-                key={level.id}
-                type="button"
-                aria-pressed={formData.fitnessLevel === level.id}
-                onClick={() => handleInputChange('fitnessLevel', level.id)}
-                className={classNames(
-                  'w-full rounded-[8px] border p-4 text-left transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70',
-                  formData.fitnessLevel === level.id
-                    ? 'border-primary bg-primary/12 shadow-[0_12px_32px_rgba(94, 106, 210, 0.25)]'
-                    : 'border-border/80 bg-white/[0.025] hover:border-primary/45 hover:bg-white/[0.045]'
-                )}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex min-w-0 gap-3">
-                    <span className={classNames('mt-1 h-4 w-4 flex-shrink-0 rounded-full', level.color)} />
-                    <span>
-                      <span className="block text-lg font-bold text-foreground">{level.label}</span>
-                      <span className="mt-1 block text-sm font-semibold text-foreground/85">{level.description}</span>
-                      <span className="mt-1 block text-xs leading-5 text-muted-foreground">{level.details}</span>
-                    </span>
-                  </div>
-                  {formData.fitnessLevel === level.id && <Icon name="Check" size={20} className="text-primary" />}
-                </div>
-                <div className="mt-4 grid grid-cols-3 gap-2">
-                  {[0, 1, 2].map((barIndex) => (
-                    <span
-                      key={barIndex}
+          <div className="mx-auto max-w-3xl space-y-6">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Icon name="Activity" size={18} className="text-primary" />
+                <h3 className="text-base font-bold text-foreground">
+                  Daily Movement & Activity Level
+                </h3>
+                <span className="text-[11px] text-primary font-bold bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full">
+                  Determines your TDEE
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                How much do you move on an average day? This directly multiplies your BMR to establish your true daily calorie burn.
+              </p>
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                {activityLevelOptions.map((opt) => {
+                  const isSelected = formData.activityLevel === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => handleInputChange('activityLevel', opt.id)}
                       className={classNames(
-                        'h-1.5 rounded-full',
-                        barIndex <= index ? 'bg-primary' : 'bg-muted'
+                        'flex items-start gap-3 p-3.5 rounded-[8px] border text-left transition duration-200',
+                        isSelected
+                          ? 'border-primary bg-primary/12 shadow-[0_8px_24px_rgba(250,168,2,0.15)]'
+                          : 'border-border/80 bg-white/[0.025] hover:border-primary/45 hover:bg-white/[0.04]'
                       )}
-                    />
-                  ))}
-                </div>
-              </button>
-            ))}
+                    >
+                      <span className={classNames(
+                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border',
+                        isSelected ? 'border-primary bg-primary text-black' : 'border-border bg-muted text-foreground'
+                      )}>
+                        <Icon name={opt.icon} size={16} />
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold text-foreground">{opt.label}</span>
+                          <span className="text-xs font-mono font-bold text-primary">{opt.multiplier}</span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-muted-foreground leading-4">{opt.desc}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Icon name="Gauge" size={18} className="text-primary" />
+                <h3 className="text-base font-bold text-foreground">
+                  Training Experience Level
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {fitnessLevelOptions.map((level, index) => (
+                  <button
+                    key={level.id}
+                    type="button"
+                    aria-pressed={formData.fitnessLevel === level.id}
+                    onClick={() => handleInputChange('fitnessLevel', level.id)}
+                    className={classNames(
+                      'w-full rounded-[8px] border p-3.5 text-left transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70',
+                      formData.fitnessLevel === level.id
+                        ? 'border-primary bg-primary/12 shadow-[0_12px_32px_rgba(94, 106, 210, 0.25)]'
+                        : 'border-border/80 bg-white/[0.025] hover:border-primary/45 hover:bg-white/[0.045]'
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex min-w-0 gap-3">
+                        <span className={classNames('mt-1 h-3.5 w-3.5 flex-shrink-0 rounded-full', level.color)} />
+                        <span>
+                          <span className="block text-base font-bold text-foreground">{level.label}</span>
+                          <span className="mt-0.5 block text-xs font-semibold text-foreground/85">{level.description}</span>
+                          <span className="mt-0.5 block text-xs leading-4 text-muted-foreground">{level.details}</span>
+                        </span>
+                      </div>
+                      {formData.fitnessLevel === level.id && <Icon name="Check" size={18} className="text-primary" />}
+                    </div>
+                    <div className="mt-3 grid grid-cols-3 gap-2">
+                      {[0, 1, 2].map((barIndex) => (
+                        <span
+                          key={barIndex}
+                          className={classNames(
+                            'h-1.5 rounded-full',
+                            barIndex <= index ? 'bg-primary' : 'bg-muted'
+                          )}
+                        />
+                      ))}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <InsightStrip
               icon="SlidersHorizontal"
-              title="Adaptive difficulty"
-              text="The first plan will start at this level and then adjust as your workout history grows."
+              title="Science-backed Calibration"
+              text="Your daily movement level multiplies your BMR to calculate your exact TDEE, ensuring your calorie target is 100% realistic."
             />
           </div>
         );
@@ -704,58 +787,143 @@ const OnboardingScreen = () => {
 
       case 11:
         return (
-          <div className="mx-auto grid max-w-5xl gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="rounded-[8px] border border-border/80 bg-white/[0.025] p-5 sm:p-6">
-              <div className="mb-5 flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold text-primary">First plan signal</p>
-                  <h2 className="mt-1 text-xl font-bold text-foreground">Balanced transformation path</h2>
+          <div className="mx-auto grid max-w-5xl gap-5 lg:grid-cols-[minmax(0,1fr)_330px]">
+            <div className="space-y-4">
+              {/* Scientific Metabolic Hero Card */}
+              <div className="rounded-[8px] border border-primary/30 bg-gradient-to-br from-primary/10 via-white/[0.02] to-transparent p-5 sm:p-6 shadow-[0_12px_40px_rgba(250,168,2,0.12)]">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-primary uppercase tracking-wider">
+                      <Icon name="Sparkles" size={14} />
+                      Scientific Metabolic Blueprint
+                    </span>
+                    <h2 className="mt-1 text-2xl font-black text-foreground sm:text-3xl">
+                      {metabolic.dailyCalorieGoal.toLocaleString()} <span className="text-lg font-bold text-primary">kcal / day</span>
+                    </h2>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs font-bold text-primary">
+                    <Icon name={metabolic.goalType === 'weight_loss' ? 'TrendingDown' : metabolic.goalType === 'muscle_gain' ? 'TrendingUp' : 'Activity'} size={14} />
+                    {metabolic.goalType === 'weight_loss' ? 'Deficit: -500 kcal' : metabolic.goalType === 'muscle_gain' ? 'Surplus: +350 kcal' : 'Maintenance'}
+                  </span>
                 </div>
-                <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-primary text-black">
-                  <Icon name="Route" size={21} />
-                </span>
+
+                <p className="text-xs leading-5 text-muted-foreground sm:text-sm">
+                  Based on your current weight ({Math.round(formData.bodyWeight)} kg), height ({Math.round(formData.height)} cm), age ({Math.round(formData.age)} yrs), and {activityLevelOptions.find(o => o.id === formData.activityLevel)?.label || 'Moderate'} activity, your daily target is scientifically calibrated for realistic, sustainable progress.
+                </p>
+
+                {/* Key Metabolic Markers Grid */}
+                <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <div className="rounded-[8px] border border-border/80 bg-background/50 p-3">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+                      <Icon name="Flame" size={14} className="text-amber-400" />
+                      <span>TDEE (Daily Burn)</span>
+                    </div>
+                    <p className="text-lg font-black text-foreground">{metabolic.tdee.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">kcal</span></p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Burn with activity</p>
+                  </div>
+
+                  <div className="rounded-[8px] border border-border/80 bg-background/50 p-3">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+                      <Icon name="HeartPulse" size={14} className="text-rose-400" />
+                      <span>BMR (Base Rate)</span>
+                    </div>
+                    <p className="text-lg font-black text-foreground">{metabolic.bmr.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">kcal</span></p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Mifflin-St Jeor base</p>
+                  </div>
+
+                  <div className="rounded-[8px] border border-border/80 bg-background/50 p-3">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+                      <Icon name="Droplets" size={14} className="text-cyan-400" />
+                      <span>Water Target</span>
+                    </div>
+                    <p className="text-lg font-black text-foreground">{metabolic.waterGoalLiters} <span className="text-xs font-normal text-muted-foreground">L</span></p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{metabolic.waterGoal} ml / day</p>
+                  </div>
+
+                  <div className="rounded-[8px] border border-border/80 bg-background/50 p-3">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+                      <Icon name="Activity" size={14} style={{ color: metabolic.bmiInfo.color }} />
+                      <span>BMI Index</span>
+                    </div>
+                    <p className="text-lg font-black text-foreground">{metabolic.bmi}</p>
+                    <p className="text-[10px] font-semibold mt-0.5" style={{ color: metabolic.bmiInfo.color }}>{metabolic.bmiInfo.labelEn}</p>
+                  </div>
+                </div>
+
+                {/* Target Timeline Projection */}
+                {metabolic.estimatedWeeksToGoal > 0 && (
+                  <div className="mt-4 rounded-[8px] border border-primary/20 bg-primary/5 p-3.5 flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+                      <Icon name="CalendarCheck" size={18} />
+                    </div>
+                    <div className="text-xs sm:text-sm">
+                      <span className="font-bold text-foreground">
+                        Target Timeline: ~{metabolic.estimatedWeeksToGoal} weeks to reach {Math.round(formData.weight)} kg
+                      </span>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Progressing at a healthy rate of ~{Math.abs(metabolic.weeklyChangeKg)} kg/week ({metabolic.goalType === 'weight_loss' ? 'fat loss' : 'lean muscle growth'}).
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="relative h-48 overflow-hidden rounded-[8px] border border-border/70 bg-background/50 p-4 sm:h-56">
-                <svg viewBox="0 0 560 220" className="h-full w-full" preserveAspectRatio="none" aria-hidden="true">
-                  <defs>
-                    <linearGradient id="loadLine" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#f59e0b" />
-                      <stop offset="100%" stopColor="#22c55e" />
-                    </linearGradient>
-                    <linearGradient id="recoveryLine" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#38bdf8" />
-                      <stop offset="100%" stopColor="#a78bfa" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M20 180 C120 130 160 155 240 96 C320 38 395 90 540 42" fill="none" stroke="url(#loadLine)" strokeWidth="8" strokeLinecap="round" />
-                  <path d="M20 120 C120 90 180 125 250 112 C340 96 420 138 540 104" fill="none" stroke="url(#recoveryLine)" strokeWidth="8" strokeLinecap="round" opacity="0.82" />
-                  <path d="M20 184 L540 184" stroke="currentColor" strokeWidth="2" opacity="0.16" />
-                  <circle cx="540" cy="42" r="10" fill="#22c55e" />
-                  <circle cx="540" cy="104" r="10" fill="#a78bfa" />
-                </svg>
-                <div className="absolute left-5 top-5 rounded-[8px] border border-border/70 bg-background/80 px-3 py-2 backdrop-blur">
-                  <p className="text-xs font-semibold text-foreground">Training load</p>
-                  <p className="text-xs text-muted-foreground">Progressive, not random</p>
+
+              {/* Daily Macronutrient Targets Card */}
+              <div className="rounded-[8px] border border-border/80 bg-white/[0.025] p-5 sm:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-base font-bold text-foreground">Target Daily Macronutrients</h3>
+                    <p className="text-xs text-muted-foreground">Tailored to fuel performance, recovery, and body composition</p>
+                  </div>
+                  <Icon name="PieChart" size={20} className="text-primary" />
                 </div>
-                <div className="absolute bottom-5 right-5 rounded-[8px] border border-border/70 bg-background/80 px-3 py-2 backdrop-blur">
-                  <p className="text-xs font-semibold text-foreground">Recovery rhythm</p>
-                  <p className="text-xs text-muted-foreground">Matched to your schedule</p>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="rounded-[8px] border border-border/80 bg-background/40 p-3.5 text-center">
+                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">Protein</span>
+                    <p className="mt-1 text-2xl font-black text-foreground">{metabolic.proteinGoal}<span className="text-xs font-normal text-muted-foreground">g</span></p>
+                    <span className="text-[11px] text-muted-foreground">{metabolic.proteinGoal * 4} kcal</span>
+                    <div className="mt-2 h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                      <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${Math.round(((metabolic.proteinGoal * 4) / metabolic.dailyCalorieGoal) * 100)}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="rounded-[8px] border border-border/80 bg-background/40 p-3.5 text-center">
+                    <span className="text-xs font-bold text-amber-400 uppercase tracking-wide">Carbs</span>
+                    <p className="mt-1 text-2xl font-black text-foreground">{metabolic.carbsGoal}<span className="text-xs font-normal text-muted-foreground">g</span></p>
+                    <span className="text-[11px] text-muted-foreground">{metabolic.carbsGoal * 4} kcal</span>
+                    <div className="mt-2 h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                      <div className="h-full bg-amber-400 rounded-full" style={{ width: `${Math.round(((metabolic.carbsGoal * 4) / metabolic.dailyCalorieGoal) * 100)}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="rounded-[8px] border border-border/80 bg-background/40 p-3.5 text-center">
+                    <span className="text-xs font-bold text-rose-400 uppercase tracking-wide">Healthy Fats</span>
+                    <p className="mt-1 text-2xl font-black text-foreground">{metabolic.fatGoal}<span className="text-xs font-normal text-muted-foreground">g</span></p>
+                    <span className="text-[11px] text-muted-foreground">{metabolic.fatGoal * 9} kcal</span>
+                    <div className="mt-2 h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                      <div className="h-full bg-rose-400 rounded-full" style={{ width: `${Math.round(((metabolic.fatGoal * 9) / metabolic.dailyCalorieGoal) * 100)}%` }} />
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <MiniStat icon="Dumbbell" label="Physique" value={getLabelById(physiqueOptions, formData.physique)} />
-                <MiniStat icon="Clock3" label="Workout time" value={getLabelById(workoutTimeOptions, formData.workoutTime)} />
-                <MiniStat icon="Gauge" label="Level" value={getLabelById(fitnessLevelOptions, formData.fitnessLevel)} />
               </div>
             </div>
+
+            {/* Right column: Profile & Training Routine summary */}
             <div className="space-y-3">
-              <MiniStat icon="Scale" label="Current weight" value={`${Math.round(formData.bodyWeight)} kg`} />
-              <MiniStat icon="Crosshair" label="Target weight" value={`${Math.round(formData.weight)} kg`} />
-              <MiniStat icon="ScanLine" label="Focus areas" value={getSelectedLabels(focusAreaOptions, formData.focusAreas)} />
+              <div className="rounded-[8px] border border-border/80 bg-white/[0.025] p-4 space-y-3">
+                <p className="text-xs font-bold text-primary uppercase tracking-wider">Plan Architecture</p>
+                <MiniStat icon="Scale" label="Current Weight" value={`${Math.round(formData.bodyWeight)} kg`} />
+                <MiniStat icon="Crosshair" label="Target Weight" value={`${Math.round(formData.weight)} kg`} />
+                <MiniStat icon="Gauge" label="Activity Factor" value={activityLevelOptions.find(o => o.id === formData.activityLevel)?.multiplier || '1.55x'} />
+                <MiniStat icon="Clock3" label="Training Window" value={getLabelById(workoutTimeOptions, formData.workoutTime)} />
+                <MiniStat icon="ScanLine" label="Priority Areas" value={getSelectedLabels(focusAreaOptions, formData.focusAreas)} />
+              </div>
+
               <InsightStrip
-                icon="ClipboardCheck"
-                title="Personalized results"
-                text="Your dashboard will use these choices to guide workouts, reminders, and progress feedback."
+                icon="ShieldCheck"
+                title="100% Real Calculations"
+                text="Every calorie, gram of protein, and fluid target is calculated from your body metrics and automatically synced to your dashboard and food scanner."
               />
             </div>
           </div>
