@@ -395,7 +395,7 @@ const LandingPage = () => {
           {/* Brand Logo & Name */}
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
             <div className="relative flex items-center justify-center">
-              <img src="/assets/images/atosfit.png" alt="ATOS fit Logo" className="w-11 h-11 object-contain drop-shadow-[0_4px_16px_rgba(79,70,229,0.35)] group-hover:scale-105 transition-transform" />
+              <img src="/assets/images/atosfit.png" alt="ATOS fit Logo" className="w-11 h-11 object-contain drop-shadow-[0_4px_16px_rgba(250,168,2,0.35)] group-hover:scale-105 transition-transform" />
             </div>
             <div className="flex items-baseline gap-1.5" dir="ltr">
               <span className="text-2xl font-black text-[#0F1015] dark:text-white tracking-tight">ATOS</span>
@@ -956,7 +956,7 @@ const LandingPage = () => {
             
             {/* Logo and Brand */}
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-              <img src="/assets/images/atosfit.png" alt="ATOS fit Logo" className="w-10 h-10 object-contain drop-shadow-[0_2px_12px_rgba(79,70,229,0.35)]" />
+              <img src="/assets/images/atosfit.png" alt="ATOS fit Logo" className="w-10 h-10 object-contain drop-shadow-[0_2px_12px_rgba(250,168,2,0.35)]" />
               <div className="flex items-baseline gap-1" dir="ltr">
                 <span className="text-xl font-bold text-[#0F1015] dark:text-white">ATOS</span>
                 <span className="text-xl font-bold bg-gradient-to-r from-[#FAA802] to-[#FFAE00] bg-clip-text text-transparent">fit</span>
