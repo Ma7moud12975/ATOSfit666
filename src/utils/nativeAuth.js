@@ -342,120 +342,128 @@ export async function loginUser({ email, password }) {
     throw lockErr;
   }
 
-  // Step 6B: Server-Side Credential Verification
+  // Step 6B: Server-Side Credential Verification (Fast Pipeline)
   let authenticatedUser = null;
   let cloudPayload = null;
   let credentialValid = false;
 
-  // 1. Verify against Supabase DB
+  // 1. Fast check: offline local session match (0ms)
   try {
-    if (supabase && typeof supabase.from === 'function') {
-      const { data: dbUser } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', cleanEmail)
-        .maybeSingle();
-
-      if (dbUser) {
-        const storedMeta = dbUser.raw_user_meta_data || {};
-        const storedHash = storedMeta.passwordHash;
-
-        if (storedHash) {
-          if (storedHash === passwordHash) {
-            credentialValid = true;
-          }
-        } else {
-          // Fallback verify against Supabase Auth
-          if (supabase?.auth?.signInWithPassword) {
-            const { error: sbAuthErr } = await supabase.auth.signInWithPassword({
-              email: cleanEmail,
-              password,
-            });
-            if (!sbAuthErr) {
-              credentialValid = true;
-              // Backfill passwordHash in DB
-              storedMeta.passwordHash = passwordHash;
-              await supabase
-                .from('users')
-                .update({ raw_user_meta_data: storedMeta })
-                .eq('id', dbUser.id);
-            }
-          }
-        }
-
-        if (credentialValid) {
-          const profilePic = dbUser.profile_picture || storedMeta?.user?.profilePicture || storedMeta?.user?.avatar || '';
-          const baseUserObj = {
-            ...(storedMeta.user || {}),
-            id: dbUser.id,
-            email: dbUser.email,
-            name: dbUser.full_name || storedMeta?.user?.name || 'Athlete',
-            fullName: dbUser.full_name || storedMeta?.user?.fullName || 'Athlete',
-            fitnessLevel: dbUser.fitness_level || storedMeta?.user?.fitnessLevel || 'intermediate',
-            goals: dbUser.goals || storedMeta?.user?.goals || [],
-            profilePicture: profilePic,
-            avatar: profilePic,
-            age: dbUser.age ?? storedMeta?.user?.age ?? '',
-            height: dbUser.height ?? storedMeta?.user?.height ?? '',
-            weight: dbUser.weight ?? storedMeta?.user?.weight ?? '',
-            onboardingCompleted: storedMeta?.user?.onboardingCompleted ?? true,
-          };
-          authenticatedUser = baseUserObj;
-          cloudPayload = {
-            ...(storedMeta || {}),
-            user: baseUserObj,
-            trainingPlan: storedMeta?.trainingPlan || null,
-          };
-
-          // Update last login in database
-          supabase
-            .from('users')
-            .update({ last_login: new Date().toISOString() })
-            .eq('id', dbUser.id)
-            .then();
+    const localSessionRaw = localStorage.getItem(NATIVE_AUTH_TOKEN_KEY);
+    if (localSessionRaw) {
+      const localSession = JSON.parse(localSessionRaw);
+      if (normalizeIdentifier(localSession.email) === cleanEmail && localSession.passwordHash === passwordHash) {
+        credentialValid = true;
+        const localUserRaw = localStorage.getItem(SESSION_STORAGE_KEY);
+        if (localUserRaw) {
+          authenticatedUser = JSON.parse(localUserRaw);
         }
       }
     }
-  } catch (dbErr) {
-    console.warn('[NativeAuth] Supabase lookup notice:', dbErr?.message);
-  }
+  } catch {}
 
-  // 2. Fallback verify against Supabase Auth direct
+  // 2. Verify against Supabase DB with 1200ms safety timeout
   if (!credentialValid) {
     try {
+      if (supabase && typeof supabase.from === 'function') {
+        const dbPromise = supabase
+          .from('users')
+          .select('*')
+          .eq('email', cleanEmail)
+          .maybeSingle();
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1200));
+        const { data: dbUser } = await Promise.race([dbPromise, timeoutPromise]);
+
+        if (dbUser) {
+          const storedMeta = dbUser.raw_user_meta_data || {};
+          const storedHash = storedMeta.passwordHash;
+
+          if (storedHash) {
+            if (storedHash === passwordHash) {
+              credentialValid = true;
+            } else {
+              credentialValid = false;
+            }
+          } else {
+            // Only if storedHash missing from DB, test Supabase Auth
+            if (supabase?.auth?.signInWithPassword) {
+              const authPromise = supabase.auth.signInWithPassword({
+                email: cleanEmail,
+                password,
+              });
+              const authTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1200));
+              const { error: sbAuthErr } = await Promise.race([authPromise, authTimeout]);
+              if (!sbAuthErr) {
+                credentialValid = true;
+                storedMeta.passwordHash = passwordHash;
+                supabase
+                  .from('users')
+                  .update({ raw_user_meta_data: storedMeta })
+                  .eq('id', dbUser.id)
+                  .then();
+              }
+            }
+          }
+
+          if (credentialValid) {
+            const profilePic = dbUser.profile_picture || storedMeta?.user?.profilePicture || storedMeta?.user?.avatar || '';
+            const baseUserObj = {
+              ...(storedMeta.user || {}),
+              id: dbUser.id,
+              email: dbUser.email,
+              name: dbUser.full_name || storedMeta?.user?.name || 'Athlete',
+              fullName: dbUser.full_name || storedMeta?.user?.fullName || 'Athlete',
+              fitnessLevel: dbUser.fitness_level || storedMeta?.user?.fitnessLevel || 'intermediate',
+              goals: dbUser.goals || storedMeta?.user?.goals || [],
+              profilePicture: profilePic,
+              avatar: profilePic,
+              age: dbUser.age ?? storedMeta?.user?.age ?? '',
+              height: dbUser.height ?? storedMeta?.user?.height ?? '',
+              weight: dbUser.weight ?? storedMeta?.user?.weight ?? '',
+              onboardingCompleted: storedMeta?.user?.onboardingCompleted ?? true,
+            };
+            authenticatedUser = baseUserObj;
+            cloudPayload = {
+              ...(storedMeta || {}),
+              user: baseUserObj,
+              trainingPlan: storedMeta?.trainingPlan || null,
+            };
+
+            // Non-blocking update of last login
+            supabase
+              .from('users')
+              .update({ last_login: new Date().toISOString() })
+              .eq('id', dbUser.id)
+              .then();
+          }
+        }
+      }
+    } catch (dbErr) {
+      console.warn('[NativeAuth] Supabase lookup notice:', dbErr?.message);
+    }
+  }
+
+  // 3. Fallback: only if user was not found in users table, test Supabase Auth (max 1200ms)
+  if (!credentialValid && !authenticatedUser) {
+    try {
       if (supabase?.auth?.signInWithPassword) {
-        const { data: sbAuthData, error: sbAuthErr } = await supabase.auth.signInWithPassword({
+        const authPromise = supabase.auth.signInWithPassword({
           email: cleanEmail,
           password,
         });
+        const authTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1200));
+        const { data: sbAuthData, error: sbAuthErr } = await Promise.race([authPromise, authTimeout]);
 
         if (!sbAuthErr && sbAuthData?.user) {
           credentialValid = true;
           const raw = sbAuthData.user;
-          cloudPayload = await fetchCloudUserProfile(cleanEmail);
-          authenticatedUser = cloudPayload?.user || {
+          authenticatedUser = {
             id: raw.id,
             email: raw.email,
             name: raw.user_metadata?.full_name || cleanEmail.split('@')[0],
+            fullName: raw.user_metadata?.full_name || cleanEmail.split('@')[0],
             onboardingCompleted: false,
           };
-        }
-      }
-    } catch {}
-  }
-
-  // 3. Fallback verify against cached local session if offline
-  if (!credentialValid) {
-    try {
-      const localSessionRaw = localStorage.getItem(NATIVE_AUTH_TOKEN_KEY);
-      if (localSessionRaw) {
-        const localSession = JSON.parse(localSessionRaw);
-        if (normalizeIdentifier(localSession.email) === cleanEmail && localSession.passwordHash === passwordHash) {
-          credentialValid = true;
-          const localUserRaw = localStorage.getItem(SESSION_STORAGE_KEY);
-          if (localUserRaw) {
-            authenticatedUser = JSON.parse(localUserRaw);
-          }
         }
       }
     } catch {}
@@ -485,15 +493,15 @@ export async function loginUser({ email, password }) {
   // Step 8: Issue Authentication Token
   const authToken = await issueAuthToken(authenticatedUser, context);
 
-  // Step 9: Send Token to Client & Step 10: Store Token Securely
+  // Step 9: Send Token to Client & Step 10: Store Token Securely (0ms local save)
   if (cloudPayload) {
     hydrateLocalSession(cloudPayload);
   } else {
-    const latestCloud = await fetchCloudUserProfile(cleanEmail);
-    if (latestCloud) {
-      hydrateLocalSession(latestCloud);
-      authenticatedUser = latestCloud.user;
-    }
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(authenticatedUser));
+    // Non-blocking background sync
+    fetchCloudUserProfile(cleanEmail).then((latest) => {
+      if (latest) hydrateLocalSession(latest);
+    }).catch(() => {});
   }
 
   storeTokenSecurely(authToken, authenticatedUser, passwordHash);

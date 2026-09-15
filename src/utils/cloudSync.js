@@ -243,9 +243,14 @@ export async function fetchCloudUserProfile(identifier) {
     console.warn('[CloudSync] Supabase fetch non-blocking warning:', sbErr?.message);
   }
 
-  // 2. Try Vercel Serverless Sync API
+  // 2. Try Vercel Serverless Sync API (max 300ms timeout)
   try {
-    const apiRes = await fetch(`/api/cloud-sync?identifier=${encodeURIComponent(cleanId)}`);
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timeoutId = controller ? setTimeout(() => controller.abort(), 300) : null;
+    const apiRes = await fetch(`/api/cloud-sync?identifier=${encodeURIComponent(cleanId)}`, {
+      signal: controller?.signal,
+    });
+    if (timeoutId) clearTimeout(timeoutId);
     if (apiRes.ok) {
       const cloudData = await apiRes.json();
       if (cloudData && cloudData.user) {
@@ -254,7 +259,7 @@ export async function fetchCloudUserProfile(identifier) {
       }
     }
   } catch {
-    // API not reachable in pure dev mode without Vercel CLI
+    // Non-blocking fallback
   }
 
   // 3. Try Local Resilient Cache
