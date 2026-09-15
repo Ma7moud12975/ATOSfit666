@@ -15,6 +15,7 @@ import { logFood, getFoodLogs, clearAllFoodLogs } from '../../utils/api/foodApi'
 import { normalizeFoodAnalysis, parseFoodAnalysisResponse } from '../../utils/foodAnalysisNormalizer';
 import { getNutritionStats, DASHBOARD_DATA_UPDATED } from '../../utils/dashboardStatsService';
 import MealLoggedFeedbackModal from './components/MealLoggedFeedbackModal';
+import { getChatbotApiKey, getChatbotModelName } from '../../utils/aiConfig';
 
 const AIAssistantFoodScanner = ({ chatOnly = false }) => {
   const navigate = useNavigate();
@@ -213,8 +214,8 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
     } catch { }
   }, [messages, chatSessionId]);
 
-  const CHATBOT_API_KEY = import.meta.env.VITE_CHATBOT_API_KEY || '';
-  const CHATBOT_MODEL_NAME = import.meta.env.VITE_CHATBOT_MODEL_NAME || 'gemini-3.6-flash';
+  const CHATBOT_API_KEY = getChatbotApiKey();
+  const CHATBOT_MODEL_NAME = getChatbotModelName();
   const handleSendMessage = async (message) => {
     const userMessage = {
       id: Date.now(),

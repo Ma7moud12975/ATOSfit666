@@ -9,6 +9,7 @@ import ChatHistory from './components/ChatHistory';
 import { saveConversationTurn, getConversationMessages, getConversations } from '../../utils/api/chatApi';
 import { getAccountId } from '../../utils/localAccountStorage';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { getChatbotApiKey, getChatbotModelName } from '../../utils/aiConfig';
 import '../../styles/bento-dashboard.css';
 
 const ChatPage = () => {
@@ -89,8 +90,8 @@ const ChatPage = () => {
     }
   }, [messages, isTyping]);
 
-  const CHATBOT_API_KEY = import.meta.env.VITE_CHATBOT_API_KEY || '';
-  const CHATBOT_MODEL_NAME = import.meta.env.VITE_CHATBOT_MODEL_NAME || 'gemini-3.6-flash';
+  const CHATBOT_API_KEY = getChatbotApiKey();
+  const CHATBOT_MODEL_NAME = getChatbotModelName();
 
   const handleSendMessage = async (message) => {
     const userMessage = { id: Date.now(), message, isUser: true, timestamp: new Date() };

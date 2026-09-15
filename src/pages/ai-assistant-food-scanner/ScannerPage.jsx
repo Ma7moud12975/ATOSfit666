@@ -12,6 +12,7 @@ import { buildFoodCoachPulse } from '../../utils/coachPulse';
 import { normalizeFoodAnalysis, parseFoodAnalysisResponse } from '../../utils/foodAnalysisNormalizer';
 import { useLanguage } from '../../contexts/LanguageContext';
 import MealLoggedFeedbackModal from './components/MealLoggedFeedbackModal';
+import { getChatbotApiKey, getChatbotModelName } from '../../utils/aiConfig';
 import '../../styles/bento-dashboard.css';
 
 const ScannerPage = () => {
@@ -28,8 +29,8 @@ const ScannerPage = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const fileInputRef = useRef(null);
 
-  const CHATBOT_API_KEY = import.meta.env.VITE_CHATBOT_API_KEY || '';
-  const CHATBOT_MODEL_NAME = import.meta.env.VITE_CHATBOT_MODEL_NAME || 'gemini-3.6-flash';
+  const CHATBOT_API_KEY = getChatbotApiKey();
+  const CHATBOT_MODEL_NAME = getChatbotModelName();
   const getUserId = (account = user) => getAccountId(account.principal || account.id || account.email || account.name);
 
   const formatHistoryItem = (food) => ({
