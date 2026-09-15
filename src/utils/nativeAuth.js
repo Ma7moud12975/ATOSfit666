@@ -99,7 +99,7 @@ export async function registerUser({ fullName, email, password, fitnessLevel = '
     if (supabase && typeof supabase.from === 'function') {
       const { error: insertErr } = await supabase
         .from('users')
-        .upsert({
+        .insert({
           id: userId,
           email: cleanEmail,
           full_name: fullName.trim(),
@@ -109,15 +109,25 @@ export async function registerUser({ fullName, email, password, fitnessLevel = '
           raw_user_meta_data: fullPayload,
           date_joined: now,
           last_login: now,
-        }, { onConflict: 'email' });
+        });
 
       if (insertErr) {
-        console.warn('[NativeAuth] Supabase upsert notice:', insertErr.message);
+        console.warn('[NativeAuth] Supabase insert notice:', insertErr.message);
+        // Fallback update if email exists
+        await supabase
+          .from('users')
+          .update({
+            full_name: fullName.trim(),
+            raw_user_meta_data: fullPayload,
+            last_login: now,
+          })
+          .eq('email', cleanEmail);
       } else {
         console.log('[NativeAuth] Account successfully created in Supabase:', cleanEmail);
       }
     }
   } catch (sbErr) {
+    if (sbErr.message && sbErr.message.includes('already registered')) throw sbErr;
     console.warn('[NativeAuth] Database save warning:', sbErr?.message);
   }
 
@@ -178,6 +188,11 @@ export async function loginUser({ email, password }) {
         }
 
         const profilePic = dbUser.profile_picture || storedMeta?.user?.profilePicture || storedMeta?.user?.avatar || '';
+        const isAlreadyOnboarded = Boolean(
+          storedMeta?.user?.onboardingCompleted === true ||
+          (dbUser.weight && dbUser.height)
+        );
+
         const baseUserObj = {
           ...(storedMeta.user || {}),
           id: dbUser.id,
@@ -191,7 +206,7 @@ export async function loginUser({ email, password }) {
           age: dbUser.age ?? storedMeta?.user?.age ?? '',
           height: dbUser.height ?? storedMeta?.user?.height ?? '',
           weight: dbUser.weight ?? storedMeta?.user?.weight ?? '',
-          onboardingCompleted: true,
+          onboardingCompleted: isAlreadyOnboarded,
         };
         authenticatedUser = baseUserObj;
         cloudPayload = {

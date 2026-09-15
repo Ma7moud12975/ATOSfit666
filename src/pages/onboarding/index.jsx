@@ -276,23 +276,31 @@ const OnboardingScreen = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [currentTheme, setCurrentTheme] = useState('dark');
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    picture: '',
-    gender: '',
-    bodyWeight: 70,
-    alignmentScore: 0,
-    physique: '',
-    successMetrics: [],
-    focusAreas: [],
-    workoutTime: '',
-    age: 25,
-    height: 175,
-    weight: 70,
-    fitnessLevel: 'intermediate',
-    activityLevel: 'moderate',
-    goals: [],
+  const [formData, setFormData] = useState(() => {
+    let localUser = null;
+    try {
+      const raw = localStorage.getItem('user');
+      if (raw) localUser = JSON.parse(raw);
+    } catch {}
+
+    return {
+      name: localUser?.name || localUser?.fullName || '',
+      email: localUser?.email || '',
+      picture: localUser?.picture || '',
+      gender: localUser?.gender || '',
+      bodyWeight: Number(localUser?.bodyWeight || localUser?.weight) || 70,
+      alignmentScore: 0,
+      physique: localUser?.physique || '',
+      successMetrics: localUser?.successMetrics || [],
+      focusAreas: localUser?.focusAreas || [],
+      workoutTime: localUser?.workoutTime || '',
+      age: Number(localUser?.age) || 25,
+      height: Number(localUser?.height) || 175,
+      weight: Number(localUser?.weight || localUser?.bodyWeight) || 70,
+      fitnessLevel: localUser?.fitnessLevel || 'intermediate',
+      activityLevel: localUser?.activityLevel || 'moderate',
+      goals: localUser?.goals || [],
+    };
   });
 
   const progressPercent = Math.round((currentStep / totalSteps) * 100);
@@ -326,16 +334,16 @@ const OnboardingScreen = () => {
       setFormData((prev) => ({
         ...prev,
         ...localUser,
-        name: localUser.name || prev.name || nameToSet,
-        email: localUser.email || prev.email || emailToSet,
-        picture: localUser.picture || prev.picture || pictureToSet,
+        name: localUser.name || localUser.fullName || nameToSet || prev.name,
+        email: localUser.email || emailToSet || prev.email,
+        picture: localUser.picture || pictureToSet || prev.picture,
       }));
     } else if (emailToSet || nameToSet) {
       setFormData((prev) => ({
         ...prev,
-        name: prev.name || nameToSet,
-        email: prev.email || emailToSet,
-        picture: prev.picture || pictureToSet,
+        name: nameToSet || prev.name,
+        email: emailToSet || prev.email,
+        picture: pictureToSet || prev.picture,
       }));
     }
   }, [supabaseUser, navigate]);

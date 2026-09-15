@@ -228,37 +228,11 @@ const LandingPage = () => {
   ];
 
   const handleGetStarted = () => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        if (user.onboardingCompleted) {
-          navigate('/dashboard');
-          return;
-        } else {
-          navigate('/onboarding');
-          return;
-        }
-      } catch {}
-    }
-    setAuthModal({ isOpen: true, mode: 'register' });
+    navigate('/login-screen?mode=register');
   };
 
   const handleLogin = () => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        if (user.onboardingCompleted) {
-          navigate('/dashboard');
-          return;
-        } else {
-          navigate('/onboarding');
-          return;
-        }
-      } catch {}
-    }
-    setAuthModal({ isOpen: true, mode: 'login' });
+    navigate('/login-screen?mode=login');
   };
 
   return (
