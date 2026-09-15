@@ -4,14 +4,18 @@ import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import GoogleSignInButton from '../../../components/auth/GoogleSignInButton';
+import OtpVerificationCard from './OtpVerificationCard';
 import { useSupabaseAuth } from '../../../contexts/SupabaseAuthContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { validateEmail, sendEmailVerificationOtp } from '../../../utils/emailVerificationService';
 
 const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: externalLoading = false }) => {
   const navigate = useNavigate();
   const { signIn, signUp, loading: authLoading } = useSupabaseAuth();
   const { isAr } = useLanguage();
   const [mode, setMode] = useState(initialMode);
+  const [step, setStep] = useState('form'); // 'form' | 'otp'
+  const [sentOtpCode, setSentOtpCode] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -24,6 +28,7 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
   useEffect(() => {
     if (initialMode && initialMode !== mode) {
       setMode(initialMode);
+      setStep('form');
       setError('');
     }
   }, [initialMode]);
@@ -32,6 +37,7 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
 
   const handleModeSwitch = (newMode) => {
     setMode(newMode);
+    setStep('form');
     setError('');
     if (onModeChange) onModeChange(newMode);
   };
@@ -45,15 +51,36 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
     if (error) setError('');
   };
 
+  const handleOtpSuccess = async () => {
+    setIsSubmitting(true);
+    try {
+      const cleanEmail = formData.email.trim().toLowerCase();
+      const cleanName = formData.fullName.trim();
+      const res = await signUp(cleanEmail, formData.password, cleanName);
+      if (res?.user) {
+        if (onSubmit) await onSubmit({ ...formData, email: cleanEmail, fullName: cleanName, mode });
+        navigate('/onboarding', { replace: true });
+      }
+    } catch (err) {
+      console.error('Registration finish error:', err);
+      setError(err?.message || (isAr ? 'تعذر إتمام التسجيل' : 'Failed to complete registration'));
+      setStep('form');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    const cleanEmail = formData.email.trim().toLowerCase();
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      setError(isAr ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Please enter a valid email address');
+    const validation = validateEmail(formData.email, isAr);
+    if (!validation.valid) {
+      setError(validation.error);
       return;
     }
+
+    const cleanEmail = validation.cleanEmail;
 
     if (!formData.password || formData.password.length < 6) {
       setError(isAr ? 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' : 'Password must be at least 6 characters');
@@ -73,11 +100,10 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
     try {
       if (mode === 'register') {
         const cleanName = formData.fullName.trim();
-        const res = await signUp(cleanEmail, formData.password, cleanName);
-        if (res?.user) {
-          if (onSubmit) await onSubmit({ ...formData, email: cleanEmail, fullName: cleanName, mode });
-          navigate('/onboarding', { replace: true });
-        }
+        // Send OTP verification to verify the email exists and is owned by the user
+        const otpRes = await sendEmailVerificationOtp(cleanEmail, cleanName);
+        setSentOtpCode(otpRes.code);
+        setStep('otp');
       } else {
         const data = await signIn(cleanEmail, formData.password);
         if (data?.user) {
@@ -105,6 +131,18 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
       setIsSubmitting(false);
     }
   };
+
+  if (step === 'otp') {
+    return (
+      <OtpVerificationCard
+        email={formData.email.trim().toLowerCase()}
+        fullName={formData.fullName}
+        initialCode={sentOtpCode}
+        onVerified={handleOtpSuccess}
+        onBack={() => setStep('form')}
+      />
+    );
+  }
 
   return (
     <div className="space-y-4">

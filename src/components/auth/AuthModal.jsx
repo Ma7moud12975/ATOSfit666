@@ -5,6 +5,7 @@ import Button from '../ui/Button';
 import Input from '../ui/Input';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { validateEmail } from '../../utils/emailVerificationService';
 
 const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
   const navigate = useNavigate();
@@ -38,11 +39,13 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
     e.preventDefault();
     setError('');
 
-    const cleanEmail = formData.email.trim().toLowerCase();
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      setError(isAr ? 'يرجى إدخال بريد إلكتروني صالح' : 'Please enter a valid email address');
+    const validation = validateEmail(formData.email, isAr);
+    if (!validation.valid) {
+      setError(validation.error);
       return;
     }
+
+    const cleanEmail = validation.cleanEmail;
 
     if (!formData.password || formData.password.length < 6) {
       setError(isAr ? 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' : 'Password must be at least 6 characters');
