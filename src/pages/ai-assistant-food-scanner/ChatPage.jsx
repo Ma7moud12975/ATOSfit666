@@ -188,11 +188,15 @@ const ChatPage = () => {
         }
       }
     } catch (error) {
-      console.error('AI chat error:', error);
-      const isQuota = error.message?.includes('quota') || error.message?.includes('429') || error.message?.includes('RESOURCE_EXHAUSTED');
-      const fallbackMsg = isQuota
-        ? (language === 'ar' ? 'الخدمة تشهد ضغطاً مؤقتاً، يرجى الانتظار بضع ثوانٍ والمحاولة ثانية.' : 'AI service is experiencing high temporary demand. Please wait a few seconds and retry.')
-        : `Error: ${error.message}`;
+      const isTemporaryIssue =
+        /quota|429|503|demand|temporary|busy|RESOURCE_EXHAUSTED|UNAVAILABLE/i.test(error.message || '');
+      const fallbackMsg = isTemporaryIssue
+        ? (language === 'ar'
+            ? 'سيرفر الذكاء الاصطناعي يشهد ضغطاً مؤقتاً في هذه اللحظة، جارٍ التبديل التلقائي. يرجى إعادة إرسال رسالتك الآن.'
+            : 'The AI model is experiencing a temporary spike in demand. Please resend your message in a few moments.')
+        : (language === 'ar'
+            ? 'حدث خطأ مؤقت في الاتصال بسيرفر الذكاء الاصطناعي، يرجى المحاولة مرة أخرى.'
+            : `Error: ${error.message}`);
       setMessages(prev => [...prev, { id: Date.now() + 1, message: fallbackMsg, isUser: false, timestamp: new Date() }]);
       setIsTyping(false);
     }

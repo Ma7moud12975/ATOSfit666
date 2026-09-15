@@ -330,10 +330,15 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('AI chat error:', error);
-      const isQuota = error.message?.includes('quota') || error.message?.includes('429') || error.message?.includes('RESOURCE_EXHAUSTED');
-      const fallbackMsg = isQuota
-        ? 'الخدمة تشهد ضغطاً مؤقتاً، يرجى الانتظار بضع ثوانٍ والمحاولة ثانية.'
-        : 'Error contacting AI service.';
+      const isTemporary =
+        /quota|429|503|demand|temporary|busy|RESOURCE_EXHAUSTED|UNAVAILABLE/i.test(error.message || '');
+      const fallbackMsg = isTemporary
+        ? (currentLanguage === 'ar'
+            ? 'سيرفر الذكاء الاصطناعي يشهد ضغطاً مؤقتاً في هذه اللحظة، جارٍ التبديل التلقائي. يرجى إعادة إرسال رسالتك الآن.'
+            : 'The AI model is experiencing a temporary spike in demand. Please resend your message in a few moments.')
+        : (currentLanguage === 'ar'
+            ? 'حدث خطأ مؤقت في الاتصال بسيرفر الذكاء الاصطناعي، يرجى المحاولة مرة أخرى.'
+            : 'Error contacting AI service.');
       const aiMessage = {
         id: Date.now() + 1,
         message: fallbackMsg,

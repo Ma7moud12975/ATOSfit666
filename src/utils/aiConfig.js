@@ -12,8 +12,9 @@ export const DEFAULT_CHATBOT_MODEL = 'gemini-3.5-flash';
 export const CANDIDATE_MODELS = [
   'gemini-3.5-flash',
   'gemini-3.5-flash-lite',
+  'gemini-3.1-flash-lite',
   'gemini-flash-lite-latest',
-  'gemini-3.6-flash'
+  'gemini-3-flash-preview'
 ];
 
 export const NON_FITNESS_REFUSAL_AR = 'عذراً، أنا مدربك الرياضي في ATOS fit المتخصص حصرياً في اللياقة البدنية، التمارين الرياضية، والتغذية الصحية. لا يمكنني الإجابة على أي موضوع خارج هذا النطاق الرياضي. كيف يمكنني مساعدتك اليوم في تمرينك أو نظامك الغذائي؟';
@@ -48,92 +49,73 @@ export const getNonFitnessRefusal = (text) => {
  * Deterministic pre-filter: catches queries that are unmistakably outside
  * the fitness & nutrition domain (politicians, coding, general trivia, entertainment, etc.)
  */
-export const isExplicitlyNonFitness = (text) => {
-  if (!text || typeof text !== 'string') return false;
-  const clean = text.toLowerCase().trim();
+export const isStrictlyOffTopic = (message) => {
+  if (!message || typeof message !== 'string') return false;
+  const normalized = message.toLowerCase().trim();
 
-  // Politics, politicians, world leaders, geopolitical terms
-  const politicsPatterns = [
-    'ترامب', 'دونالد ترامب', 'بايدن', 'أوباما', 'بوتين', 'السيسي', 'نتنياهو',
-    'رئيس', 'رؤساء', 'وزير', 'سياسة', 'حكومة', 'انتخابات', 'برلمان', 'حرب', 'جيش',
-    'trump', 'donald trump', 'biden', 'obama', 'putin', 'president', 'politics',
-    'minister', 'election', 'parliament', 'congress', 'senate', 'military'
+  // Explicit forbidden names and external general domains
+  const forbiddenKeywords = [
+    'donald trump', 'ترامب', 'بايدن', 'جو بايدن', 'joe biden', 'كامالا هاريس',
+    'kamala harris', 'نتنياهو', 'سيسي', 'بوتين', 'putin', 'أوباما', 'obama',
+    'حرب روسيا', 'انتخابات', 'سياسة', 'president of', 'prime minister',
+    'python', 'javascript', 'react', 'code a', 'write code', 'برمجة', 'اكتب كود',
+    'عاصمة فرنسا', 'عاصمة', 'capital of', 'who is the president', 'من هو رئيس',
+    'فيلم', 'مسلسل', 'أغنية', 'song lyrics', 'movie recommendations', 'bitcoin', 'crypto'
   ];
 
-  // Tech, programming, coding, IT
-  const techPatterns = [
-    'بايثون', 'جافاسكريبت', 'برمجة', 'كود', 'خوارزمية', 'هاكر', 'ويندوز', 'لينكس', 'رياكت',
-    'python', 'javascript', 'html', 'css', 'java', 'c++', 'c#', 'php', 'swift',
-    'programming', 'write code', 'write a code', 'coding', 'algorithm', 'hacker', 'database', 'sql'
-  ];
-
-  // General trivia, geography, history (unrelated to athletic training)
-  const triviaPatterns = [
-    'عاصمة', 'نهر النيل', 'جبل إيفرست', 'الحرب العالمية', 'تاريخ فرنسا',
-    'capital of', 'who was the president', 'who is the president',
-    'world war', 'history of france', 'history of america'
-  ];
-
-  // Entertainment / pop culture (actors, singers, movies, pop songs)
-  const entertainmentPatterns = [
-    'فيلم', 'مسلسل', 'ممثل', 'ممثلة', 'مغني', 'مغنية', 'أغنية',
-    'movie', 'cinema', 'actor', 'actress', 'singer', 'song', 'hollywood'
-  ];
-
-  const allForbidden = [
-    ...politicsPatterns,
-    ...techPatterns,
-    ...triviaPatterns,
-    ...entertainmentPatterns
-  ];
-
-  return allForbidden.some(pattern => clean.includes(pattern));
+  return forbiddenKeywords.some(keyword => normalized.includes(keyword));
 };
 
 /**
- * Builds the official Gemini system_instruction parameter.
+ * Builds the strict system instruction ensuring domain lock & user biometric context
  */
-export const buildFitnessSystemInstruction = ({ userProfile = null } = {}) => {
-  let profileSection = '';
-  if (userProfile) {
-    const age = userProfile.age || 'Unknown';
-    const height = userProfile.height || 'Unknown';
-    const weight = userProfile.weight || userProfile.bodyWeight || 'Unknown';
-    const fitnessLevel = userProfile.fitnessLevel || 'Unknown';
-    const goal = userProfile.goal || userProfile.primaryGoal || (Array.isArray(userProfile.goals) ? userProfile.goals.join(', ') : 'Unknown');
-    profileSection = `
-Athlete Profile:
-- Name: ${userProfile.name || userProfile.fullName || 'Athlete'}
-- Age: ${age}
-- Height: ${height} cm
-- Weight: ${weight} kg
-- Fitness Level: ${fitnessLevel}
-- Target Goal: ${goal}
-`;
-  }
+export const buildSystemInstruction = (userMetrics = {}) => {
+  const profileSection = userMetrics && Object.keys(userMetrics).length > 0
+    ? `USER BIOMETRICS & GOALS (USE TO PERSONALIZE ALL FITNESS & DIET ADVICE):
+- Name: ${userMetrics.name || 'User'}
+- Age: ${userMetrics.age || 'Not specified'}
+- Gender: ${userMetrics.gender || 'Not specified'}
+- Current Weight: ${userMetrics.weight || 'Not specified'} kg
+- Height: ${userMetrics.height || 'Not specified'} cm
+- Fitness Goal: ${userMetrics.fitnessGoal || userMetrics.goal || 'General Health'}
+- Fitness Level: ${userMetrics.fitnessLevel || userMetrics.level || 'Not specified'}
+- Activity Level: ${userMetrics.activityLevel || 'Moderate'}
+- Target Weight: ${userMetrics.targetWeight || 'Not specified'} kg`
+    : `USER PROFILE:
+No user profile is currently provided. Provide general safe evidence-based fitness advice.`;
 
-  return `You are ATOS FIT AI Coach, an elite certified personal trainer and sports nutritionist integrated into the ATOS fit application.
+  return `You are "ATOS fit AI Coach", an elite personal trainer and sports nutrition expert for the ATOS fit health platform.
 
-CRITICAL DIRECTIVE 1: STRICT AND EXCLUSIVE FITNESS SCOPE (ZERO TOLERANCE)
-You are strictly limited to physical fitness, workouts, body mechanics, exercise form, athletic conditioning, sports nutrition, caloric intake, macros, hydration, recovery, and stretching.
-If the user asks ANY question outside this domain:
-- NEVER answer or explain the topic, even briefly.
-- NEVER say "Yes, I know who X is" or give facts about a person, politician, celebrity, movie, coding language, or event.
-- NEVER offer to discuss a celebrity's workout routine if asked who they are.
-- IMMEDIATELY refuse using one polite sentence, and ask how you can help with their workout or diet.
-- Arabic refusal template: "${NON_FITNESS_REFUSAL_AR}"
-- English refusal template: "${NON_FITNESS_REFUSAL_EN}"
+CRITICAL DIRECTIVE 1: DOMAIN RESTRICTION
+- You are EXCLUSIVELY permitted to assist with:
+  1. Workouts, exercise routines, strength training, cardio, mobility, recovery.
+  2. Sports nutrition, macronutrients, calorie tracking, meal ideas, hydration.
+  3. Body composition, weight loss, muscle gain, personal fitness metrics.
+  4. Mental resilience, motivation, and healthy lifestyle habits directly connected to sports and athletics.
+- If the user asks about ANYTHING outside of health, fitness, workouts, or nutrition (such as politics, world leaders, coding, general trivia, movies, geography, math problems, personal advice unrelated to fitness):
+  YOU MUST IMMEDIATELY AND POLITELY REFUSE.
+  Refusal rules:
+  - If user asked in Arabic, say: "${NON_FITNESS_REFUSAL_AR}"
+  - If user asked in English, say: "${NON_FITNESS_REFUSAL_EN}"
+  - DO NOT provide the answer to the off-topic query even partially.
+  - DO NOT say "Yes I know him, but I cannot discuss politics". Say ONLY the refusal message.
 
-CRITICAL DIRECTIVE 2: DYNAMIC LANGUAGE MIRRORING
-- If the user writes in Arabic -> reply ONLY in natural, fluent Arabic.
-- If the user writes in English -> reply ONLY in natural, concise English.
-- Always match the user's language turn-by-turn with zero exceptions.
+CRITICAL DIRECTIVE 2: LANGUAGE MIRRORING
+- Always respond in the EXACT language used by the user in their latest prompt.
+- If the user asks in Arabic, reply entirely in natural, professional Arabic.
+- If the user asks in English, reply entirely in natural, encouraging English.
 
 CRITICAL DIRECTIVE 3: TONE AND FORMATTING
-- Encouraging, concise, scientifically accurate, and athletic.
-- Plain text only. Do NOT use markdown symbols like #, ##, ###, **, *, -, or ---.
-- Keep responses compact, clean, and direct.
+- Maintain an encouraging, scientific, and professional coach persona.
+- Keep responses structured, concise, and easy to read on mobile screens (use bullet points and bold headers).
+
 ${profileSection}`;
+};
+
+export const isExplicitlyNonFitness = isStrictlyOffTopic;
+
+export const buildFitnessSystemInstruction = ({ userProfile = null } = {}) => {
+  return buildSystemInstruction(userProfile || {});
 };
 
 /**
@@ -150,8 +132,8 @@ export const formatUserTurnWithLanguageGuidance = (message) => {
 
 /**
  * Executes a Gemini generateContent request with automatic fallback cascade.
- * If the primary model hits a 429 quota or 503 high-demand spike, it automatically
- * retries the exact query on alternative active Gemini models seamlessly.
+ * If the primary model hits a 429 quota, 503 high-demand spike, or temporary server busy state,
+ * it automatically cascades across the pool of active, tested candidate models seamlessly.
  */
 export const callGeminiWithFallback = async (payload, apiKey, preferredModel) => {
   const modelsToTry = [
@@ -172,23 +154,30 @@ export const callGeminiWithFallback = async (payload, apiKey, preferredModel) =>
 
       const data = await response.json();
 
-      // Check for quota or service availability errors to trigger auto-failover
-      const isQuotaOrDemandIssue =
+      // Check for quota, high demand, or transient service availability errors
+      const isTransientIssue =
         response.status === 429 ||
         response.status === 503 ||
+        response.status === 500 ||
+        response.status === 502 ||
+        response.status === 504 ||
         data?.error?.code === 429 ||
         data?.error?.code === 503 ||
+        data?.error?.code === 500 ||
         data?.error?.status === 'RESOURCE_EXHAUSTED' ||
-        data?.error?.status === 'UNAVAILABLE';
+        data?.error?.status === 'UNAVAILABLE' ||
+        /demand|quota|limit|unavailable|temporary|busy|exhausted/i.test(data?.error?.message || '');
 
-      if (isQuotaOrDemandIssue) {
-        console.warn(`[AI Failover] Model ${model} returned ${response.status} (${data?.error?.message}). Falling over to next candidate...`);
-        lastError = new Error(data?.error?.message || `Model ${model} unavailable`);
+      if (isTransientIssue) {
+        console.warn(`[AI Failover] Model ${model} is experiencing high demand/quota limit (${response.status}: ${data?.error?.message}). Cascading to next candidate...`);
+        lastError = new Error(data?.error?.message || `Model ${model} is temporarily unavailable`);
         continue;
       }
 
       if (!response.ok || data?.error) {
-        throw new Error(data?.error?.message || `Request failed with status ${response.status}`);
+        console.warn(`[AI Failover] Model ${model} returned error: ${data?.error?.message || response.status}. Cascading to next candidate...`);
+        lastError = new Error(data?.error?.message || `Request failed with status ${response.status}`);
+        continue;
       }
 
       return { data, modelUsed: model };
