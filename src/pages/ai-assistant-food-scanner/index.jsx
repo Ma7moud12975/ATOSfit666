@@ -15,7 +15,13 @@ import { logFood, getFoodLogs, clearAllFoodLogs } from '../../utils/api/foodApi'
 import { normalizeFoodAnalysis, parseFoodAnalysisResponse } from '../../utils/foodAnalysisNormalizer';
 import { getNutritionStats, DASHBOARD_DATA_UPDATED } from '../../utils/dashboardStatsService';
 import MealLoggedFeedbackModal from './components/MealLoggedFeedbackModal';
-import { getChatbotApiKey, getChatbotModelName, buildFitnessCoachPrompt } from '../../utils/aiConfig';
+import {
+  getChatbotApiKey,
+  getChatbotModelName,
+  isExplicitlyNonFitness,
+  getNonFitnessRefusal,
+  buildFitnessSystemInstruction
+} from '../../utils/aiConfig';
 
 const AIAssistantFoodScanner = ({ chatOnly = false }) => {
   const navigate = useNavigate();
@@ -244,6 +250,20 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
     }
     setIsTyping(true);
 
+    // 1. Strict Deterministic Guard for out-of-domain queries
+    if (isExplicitlyNonFitness(message)) {
+      const refusalText = getNonFitnessRefusal(message);
+      const aiMessage = {
+        id: Date.now() + 1,
+        message: refusalText,
+        isUser: false,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, aiMessage]);
+      setIsTyping(false);
+      return;
+    }
+
     try {
       if (!CHATBOT_API_KEY) {
         throw new Error('Gemini API key is missing. Add a fresh VITE_CHATBOT_API_KEY to .env.');
@@ -258,18 +278,19 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
         }
       } catch { }
 
-      const recentConversation = Array.isArray(messages)
-        ? messages
-            .filter(item => item?.message && !String(item.id).startsWith('welcome-'))
-            .slice(-10)
-            .map(item => `${item.isUser ? 'User' : 'AI Coach'}: ${item.message}`)
-            .join('\n')
-        : '';
+      const systemInstruction = buildFitnessSystemInstruction({ userProfile: currentUserProfile });
 
-      const promptText = buildFitnessCoachPrompt({
-        message,
-        recentConversation,
-        userProfile: currentUserProfile
+      const conversationTurns = (Array.isArray(messages) ? messages : [])
+        .filter(item => item?.message && !String(item.id).startsWith('welcome-'))
+        .slice(-10)
+        .map(item => ({
+          role: item.isUser ? 'user' : 'model',
+          parts: [{ text: item.message }]
+        }));
+
+      conversationTurns.push({
+        role: 'user',
+        parts: [{ text: message }]
       });
 
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${CHATBOT_MODEL_NAME}:generateContent?key=${CHATBOT_API_KEY}`;
@@ -279,16 +300,11 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: promptText
-                }
-              ]
-            }
-          ],
-          generationConfig: { temperature: 0.3, maxOutputTokens: 1024 }
+          system_instruction: {
+            parts: [{ text: systemInstruction }]
+          },
+          contents: conversationTurns,
+          generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
         })
       });
       const data = await response.json();
@@ -306,6 +322,12 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
           }
         }
       }
+
+      // Post-guard: catch any accidental non-fitness acknowledgements
+      if (aiText.startsWith('نعم، أعرف') || aiText.startsWith('نعم، اعلم') || aiText.startsWith('Yes, I know') || aiText.toLowerCase().includes('رئيس أمريكي') || aiText.toLowerCase().includes('donald trump')) {
+        aiText = getNonFitnessRefusal(message);
+      }
+
       const aiMessage = {
         id: Date.now() + 1,
         message: aiText,

@@ -1,11 +1,15 @@
 /**
- * ATOS fit AI & Gemini Configuration
- * Provides fallback API key and model name so AI Assistant and Food Scanner
- * work seamlessly both in local development and production deployments (Vercel).
+ * ATOS fit AI & Gemini Configuration & Strict Guard System
+ * Ensures the AI Coach NEVER leaves the fitness & nutrition domain,
+ * provides zero-hallucination refusals, and mirrors user language.
  */
 
 export const DEFAULT_CHATBOT_API_KEY = 'AQ.Ab8RN6K3qSM-0g7LcfL1ka7OE7rgqfSxMGZ8wiEKySoSxkBOlw';
 export const DEFAULT_CHATBOT_MODEL = 'gemini-3.6-flash';
+
+export const NON_FITNESS_REFUSAL_AR = 'عذراً، أنا مدربك الرياضي في ATOS fit المتخصص حصرياً في اللياقة البدنية، التمارين الرياضية، والتغذية الصحية. لا يمكنني الإجابة على أي موضوع خارج هذا النطاق الرياضي. كيف يمكنني مساعدتك اليوم في تمرينك أو نظامك الغذائي؟';
+
+export const NON_FITNESS_REFUSAL_EN = 'Sorry, I am your dedicated ATOS fit coach specialized exclusively in workouts, physical fitness, and sports nutrition. I cannot assist with topics outside of fitness and health. How can I help you with your training or diet goals today?';
 
 export const getChatbotApiKey = () => {
   return (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CHATBOT_API_KEY) || DEFAULT_CHATBOT_API_KEY;
@@ -16,7 +20,7 @@ export const getChatbotModelName = () => {
 };
 
 /**
- * Detects whether the given text contains Arabic characters.
+ * Detects whether the text is predominantly Arabic.
  */
 export const detectLanguage = (text) => {
   if (!text || typeof text !== 'string') return 'en';
@@ -25,17 +29,62 @@ export const detectLanguage = (text) => {
 };
 
 /**
- * Builds a strictly-scoped system prompt for the ATOS fit AI Coach:
- * 1. Strictly confined to physical fitness, workouts, biomechanics, and sports nutrition.
- * 2. Absolutely refuses any out-of-domain questions (coding, politics, history, trivia, general chat).
- * 3. Dynamic language matching: responds in Arabic when user writes in Arabic, English when user writes in English.
+ * Returns the localized refusal message matching user query language.
  */
-export const buildFitnessCoachPrompt = ({ message, recentConversation = '', userProfile = null }) => {
-  const userLang = detectLanguage(message);
-  const langDirective = userLang === 'ar'
-    ? 'CRITICAL: The user has written in ARABIC. You MUST answer entirely in fluent, natural ARABIC. Do NOT respond in English.'
-    : 'CRITICAL: The user has written in ENGLISH. You MUST answer entirely in natural, fluent ENGLISH. Do NOT respond in Arabic.';
+export const getNonFitnessRefusal = (text) => {
+  return detectLanguage(text) === 'ar' ? NON_FITNESS_REFUSAL_AR : NON_FITNESS_REFUSAL_EN;
+};
 
+/**
+ * Deterministic pre-filter: catches queries that are unmistakably outside
+ * the fitness & nutrition domain (politicians, coding, general trivia, entertainment, etc.)
+ */
+export const isExplicitlyNonFitness = (text) => {
+  if (!text || typeof text !== 'string') return false;
+  const clean = text.toLowerCase().trim();
+
+  // Politics, politicians, world leaders, geopolitical terms
+  const politicsPatterns = [
+    'ترامب', 'دونالد ترامب', 'بايدن', 'أوباما', 'بوتين', 'السيسي', 'نتنياهو',
+    'رئيس', 'رؤساء', 'وزير', 'سياسة', 'حكومة', 'انتخابات', 'برلمان', 'حرب', 'جيش',
+    'trump', 'donald trump', 'biden', 'obama', 'putin', 'president', 'politics',
+    'minister', 'election', 'parliament', 'congress', 'senate', 'military'
+  ];
+
+  // Tech, programming, coding, IT
+  const techPatterns = [
+    'بايثون', 'جافاسكريبت', 'برمجة', 'كود', 'خوارزمية', 'هاكر', 'ويندوز', 'لينكس', 'رياكت',
+    'python', 'javascript', 'html', 'css', 'java', 'c++', 'c#', 'php', 'swift',
+    'programming', 'write code', 'write a code', 'coding', 'algorithm', 'hacker', 'database', 'sql'
+  ];
+
+  // General trivia, geography, history (unrelated to athletic training)
+  const triviaPatterns = [
+    'عاصمة', 'نهر النيل', 'جبل إيفرست', 'الحرب العالمية', 'تاريخ فرنسا',
+    'capital of', 'who was the president', 'who is the president',
+    'world war', 'history of france', 'history of america'
+  ];
+
+  // Entertainment / pop culture (actors, singers, movies, pop songs)
+  const entertainmentPatterns = [
+    'فيلم', 'مسلسل', 'ممثل', 'ممثلة', 'مغني', 'مغنية', 'أغنية',
+    'movie', 'cinema', 'actor', 'actress', 'singer', 'song', 'hollywood'
+  ];
+
+  const allForbidden = [
+    ...politicsPatterns,
+    ...techPatterns,
+    ...triviaPatterns,
+    ...entertainmentPatterns
+  ];
+
+  return allForbidden.some(pattern => clean.includes(pattern));
+};
+
+/**
+ * Builds the official Gemini system_instruction parameter.
+ */
+export const buildFitnessSystemInstruction = ({ userProfile = null } = {}) => {
   let profileSection = '';
   if (userProfile) {
     const age = userProfile.age || 'Unknown';
@@ -44,7 +93,7 @@ export const buildFitnessCoachPrompt = ({ message, recentConversation = '', user
     const fitnessLevel = userProfile.fitnessLevel || 'Unknown';
     const goal = userProfile.goal || userProfile.primaryGoal || (Array.isArray(userProfile.goals) ? userProfile.goals.join(', ') : 'Unknown');
     profileSection = `
-User Physical Profile:
+Athlete Profile:
 - Name: ${userProfile.name || userProfile.fullName || 'Athlete'}
 - Age: ${age}
 - Height: ${height} cm
@@ -54,43 +103,26 @@ User Physical Profile:
 `;
   }
 
-  return `You are ATOS FIT AI Coach, an elite personal trainer and sports nutrition specialist built into the ATOS fit platform.
+  return `You are ATOS FIT AI Coach, an elite certified personal trainer and sports nutritionist integrated into the ATOS fit application.
 
-============================================================
-NON-NEGOTIABLE RULE 1: STRICT DOMAIN RESTRICTION (FITNESS ONLY)
-============================================================
-You are exclusively a fitness, workout, body composition, athletic recovery, and sports nutrition assistant.
-You MUST NEVER answer, discuss, speculate, or assist with ANY topic outside of physical fitness, exercises, bodybuilding, workouts, athletic performance, and healthy nutrition.
+CRITICAL DIRECTIVE 1: STRICT AND EXCLUSIVE FITNESS SCOPE (ZERO TOLERANCE)
+You are strictly limited to physical fitness, workouts, body mechanics, exercise form, athletic conditioning, sports nutrition, caloric intake, macros, hydration, recovery, and stretching.
+If the user asks ANY question outside this domain:
+- NEVER answer or explain the topic, even briefly.
+- NEVER say "Yes, I know who X is" or give facts about a person, politician, celebrity, movie, coding language, or event.
+- NEVER offer to discuss a celebrity's workout routine if asked who they are.
+- IMMEDIATELY refuse using one polite sentence, and ask how you can help with their workout or diet.
+- Arabic refusal template: "${NON_FITNESS_REFUSAL_AR}"
+- English refusal template: "${NON_FITNESS_REFUSAL_EN}"
 
-Forbidden topics include, but are not limited to:
-- General trivia, history, geography, celebrities, pop culture, movies, music
-- Computer programming, software, web development, coding, tech questions
-- Mathematics, physics, academics, or homework (unless calculating workout volume, calories, or macros)
-- Politics, world news, social debates, religion, law, or financial advice
-- Medical diagnosis or pharmacology (always advise seeing a doctor for injuries or medical conditions)
-- Creative writing, storytelling, poetry, roleplaying, or general chat unrelated to health/fitness
+CRITICAL DIRECTIVE 2: DYNAMIC LANGUAGE MIRRORING
+- If the user writes in Arabic -> reply ONLY in natural, fluent Arabic.
+- If the user writes in English -> reply ONLY in natural, concise English.
+- Always match the user's language turn-by-turn with zero exceptions.
 
-IF THE USER'S PROMPT IS ABOUT ANYTHING OUTSIDE FITNESS AND NUTRITION:
-You MUST politely and immediately decline to answer, and guide them back to fitness. Do not answer even a part of the question.
-- In Arabic refusal: "عذراً، أنا مدربك الرياضي في ATOS fit المتخصص حصرياً في اللياقة البدنية، التمارين الرياضية، والتغذية الصحية. لا يمكنني الإجابة على أي موضوع خارج هذا النطاق الرياضي. كيف أستطيع مساعدتك اليوم في تمرينك أو نظامك الغذائي؟"
-- In English refusal: "Sorry, I am your dedicated ATOS fit coach specialized exclusively in workouts, physical fitness, and sports nutrition. I cannot assist with topics outside of fitness and health. How can I help you with your training or diet goals today?"
-
-============================================================
-NON-NEGOTIABLE RULE 2: STRICT LANGUAGE MATCHING
-============================================================
-${langDirective}
-- If the user writes in Arabic -> reply in Arabic.
-- If the user writes in English -> reply in English.
-- Always mirror the language of the user's latest message with zero exceptions.
-
-============================================================
-TONE & FORMATTING
-============================================================
-- Professional, motivating, concise, and scientifically grounded (biomechanics, progressive overload, energy balance).
-- Output plain text only. Do NOT use markdown symbols such as #, ##, ###, **, *, -, or ---.
-- Keep paragraphs compact and easy to read on mobile.
-${profileSection}
-${recentConversation ? `Recent Conversation History:\n${recentConversation}\n` : ''}
-User Query:
-${message}`;
+CRITICAL DIRECTIVE 3: TONE AND FORMATTING
+- Encouraging, concise, scientifically accurate, and athletic.
+- Plain text only. Do NOT use markdown symbols like #, ##, ###, **, *, -, or ---.
+- Keep responses compact, clean, and direct.
+${profileSection}`;
 };

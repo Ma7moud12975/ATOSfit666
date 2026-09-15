@@ -9,7 +9,13 @@ import ChatHistory from './components/ChatHistory';
 import { saveConversationTurn, getConversationMessages, getConversations } from '../../utils/api/chatApi';
 import { getAccountId } from '../../utils/localAccountStorage';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { getChatbotApiKey, getChatbotModelName, buildFitnessCoachPrompt } from '../../utils/aiConfig';
+import {
+  getChatbotApiKey,
+  getChatbotModelName,
+  isExplicitlyNonFitness,
+  getNonFitnessRefusal,
+  buildFitnessSystemInstruction
+} from '../../utils/aiConfig';
 import '../../styles/bento-dashboard.css';
 
 const ChatPage = () => {
@@ -95,13 +101,22 @@ const ChatPage = () => {
 
   const handleSendMessage = async (message) => {
     const userMessage = { id: Date.now(), message, isUser: true, timestamp: new Date() };
-    const recentConversation = messages
-      .filter(item => item?.message && !String(item.id).startsWith('welcome-'))
-      .slice(-12)
-      .map(item => `${item.isUser ? 'User' : 'AI Coach'}: ${item.message}`)
-      .join('\n');
     setMessages(prev => [...prev, userMessage]);
     setIsTyping(true);
+
+    // 1. Strict Deterministic Guard for out-of-domain queries
+    if (isExplicitlyNonFitness(message)) {
+      const refusalText = getNonFitnessRefusal(message);
+      const aiMessage = { id: Date.now() + 1, message: refusalText, isUser: false, timestamp: new Date() };
+      setMessages(prev => [...prev, aiMessage]);
+      setIsTyping(false);
+
+      const userId = getUserId();
+      if (userId) {
+        saveConversationTurn(userId, message, refusalText, currentConversationId).catch(() => {});
+      }
+      return;
+    }
 
     try {
       if (!CHATBOT_API_KEY) {
@@ -114,10 +129,19 @@ const ChatPage = () => {
         if (rawUser) userProfile = JSON.parse(rawUser);
       } catch {}
 
-      const promptText = buildFitnessCoachPrompt({
-        message,
-        recentConversation,
-        userProfile
+      const systemInstruction = buildFitnessSystemInstruction({ userProfile });
+
+      const conversationTurns = messages
+        .filter(item => item?.message && !String(item.id).startsWith('welcome-'))
+        .slice(-10)
+        .map(item => ({
+          role: item.isUser ? 'user' : 'model',
+          parts: [{ text: item.message }]
+        }));
+
+      conversationTurns.push({
+        role: 'user',
+        parts: [{ text: message }]
       });
 
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${CHATBOT_MODEL_NAME}:generateContent?key=${CHATBOT_API_KEY}`;
@@ -125,12 +149,11 @@ const ChatPage = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: promptText
-            }]
-          }],
-          generationConfig: { temperature: 0.3, maxOutputTokens: 1024 }
+          system_instruction: {
+            parts: [{ text: systemInstruction }]
+          },
+          contents: conversationTurns,
+          generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
         })
       });
 
@@ -145,6 +168,11 @@ const ChatPage = () => {
         if (Array.isArray(parts) && parts[0]?.text) {
           aiText = parts[0].text.trim();
         }
+      }
+
+      // Post-guard: catch any accidental non-fitness acknowledgements
+      if (aiText.startsWith('نعم، أعرف') || aiText.startsWith('نعم، اعلم') || aiText.startsWith('Yes, I know') || aiText.toLowerCase().includes('رئيس أمريكي') || aiText.toLowerCase().includes('donald trump')) {
+        aiText = getNonFitnessRefusal(message);
       }
 
       const aiMessage = { id: Date.now() + 1, message: aiText, isUser: false, timestamp: new Date() };
