@@ -6,7 +6,12 @@ import Icon from '../../components/AppIcon';
 import ChatMessage from './components/ChatMessage';
 import ChatInput from './components/ChatInput';
 import ChatHistory from './components/ChatHistory';
-import { saveConversationTurn, getConversationMessages, getConversations } from '../../utils/api/chatApi';
+import {
+  saveConversationTurn,
+  getConversationMessages,
+  getConversations,
+  syncLocalConversationsToCloud
+} from '../../utils/api/chatApi';
 import { getAccountId } from '../../utils/localAccountStorage';
 import { useLanguage } from '../../contexts/LanguageContext';
 import {
@@ -31,14 +36,20 @@ const ChatPage = () => {
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const [currentConversationTitle, setCurrentConversationTitle] = useState(null);
   const [historyVersion, setHistoryVersion] = useState(0);
-  const [user, setUser] = useState({ name: 'Mahmoud Ayman', profilePicture: '' });
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || '{}');
+    } catch {
+      return { name: 'Athlete' };
+    }
+  });
   const chatContainerRef = useRef(null);
 
   useEffect(() => {
     document.body.style.backgroundColor = 'var(--bento-bg)';
     try {
       const u = JSON.parse(localStorage.getItem('user') || '{}');
-      if (u?.name) setUser(u);
+      if (u?.name || u?.id) setUser(u);
     } catch { }
   }, []);
 
@@ -49,7 +60,14 @@ const ChatPage = () => {
     timestamp: new Date(),
   });
 
-  const getUserId = () => getAccountId(user.principal || user.id || user.email || user.name);
+  const getUserId = () => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('user') || '{}');
+      return stored.id || stored.email || user?.id || user?.email || user?.name || 'default-user';
+    } catch {
+      return user?.id || user?.email || user?.name || 'default-user';
+    }
+  };
 
   const getCurrentConversationKey = (userId) => `atos_ai_chat_current_conversation:${getAccountId(userId)}`;
 
@@ -68,7 +86,7 @@ const ChatPage = () => {
 
     setMessages(formatConversationMessages(storedMessages));
     setCurrentConversationId(conversationId);
-    setCurrentConversationTitle(title || storedMessages[0].conversation_title || storedMessages[0].message.substring(0, 30));
+    setCurrentConversationTitle(title || storedMessages[0]?.message?.substring(0, 30) || 'Conversation');
     localStorage.setItem(getCurrentConversationKey(userId), conversationId);
     return true;
   };
@@ -77,12 +95,16 @@ const ChatPage = () => {
     const loadConversation = async () => {
       try {
         const userId = getUserId();
+        // 1. Sync any local / offline conversations to Supabase Cloud automatically
+        await syncLocalConversationsToCloud(userId);
+
         const requestedConversationId = searchParams.get('conversation');
         const lastConversationId = localStorage.getItem(getCurrentConversationKey(userId));
         const conversationId = requestedConversationId || lastConversationId;
 
-        if (await loadConversationMessages(conversationId)) return;
+        if (conversationId && (await loadConversationMessages(conversationId))) return;
 
+        // 2. If no active conversation, load the latest conversation from cloud
         const [latestConversation] = await getConversations(userId, 1);
         if (latestConversation) {
           await loadConversationMessages(latestConversation.id, latestConversation.title);

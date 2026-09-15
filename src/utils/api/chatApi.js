@@ -58,7 +58,20 @@ export async function resolveDbUserId(identifier) {
         }
       }
 
-      // 3. Fallback to active localStorage user ID
+      // 3. Name lookup match
+      const { data: byName } = await supabase
+        .from('users')
+        .select('id')
+        .ilike('full_name', `%${idStr}%`)
+        .limit(1)
+        .maybeSingle();
+
+      if (byName?.id) {
+        userIdCache.set(idStr, byName.id);
+        return byName.id;
+      }
+
+      // 4. Fallback to active localStorage user ID
       try {
         const stored = JSON.parse(localStorage.getItem('user') || '{}');
         if (stored?.id && stored.id !== idStr) {
@@ -82,6 +95,49 @@ export async function resolveDbUserId(identifier) {
   }
 
   return idStr;
+}
+
+/**
+ * Synchronizes any conversations currently sitting only in localStorage into Supabase chatbot_logs.
+ * Guarantees that turns chatted before cloud sync was active are immediately pushed to Supabase.
+ */
+export async function syncLocalConversationsToCloud(userId) {
+  const dbUserId = await resolveDbUserId(userId);
+  if (!dbUserId) return;
+
+  try {
+    const localConvs = getLocalConversations(userId);
+    if (!localConvs || !localConvs.length) return;
+
+    // Fetch existing conversation IDs from Supabase to avoid duplicates
+    const { data: remoteLogs } = await supabase
+      .from('chatbot_logs')
+      .select('conversation_id')
+      .eq('user_id', dbUserId);
+
+    const existingConvIds = new Set((remoteLogs || []).map(r => r.conversation_id));
+
+    for (const conv of localConvs) {
+      const convId = ensureUuid(conv.id);
+      if (!existingConvIds.has(convId)) {
+        const messages = getLocalConversationMessages(userId, conv.id);
+        if (messages && messages.length) {
+          const rowsToInsert = messages.map(m => ({
+            user_id: dbUserId,
+            message: m.message,
+            is_user_message: Boolean(m.is_user_message ?? m.isUser),
+            conversation_id: convId,
+            timestamp: m.timestamp || new Date().toISOString(),
+          }));
+
+          const { error } = await supabase.from('chatbot_logs').insert(rowsToInsert);
+          if (!error) existingConvIds.add(convId);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[chatApi] Local to cloud conversation sync notice:', err?.message);
+  }
 }
 
 export async function saveChatMessage(userId, message, isUserMessage = true, conversationId = null) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
-import { getConversations } from '../../../utils/api/chatApi';
+import { getConversations, deleteConversation } from '../../../utils/api/chatApi';
 import { getAccountId } from '../../../utils/localAccountStorage';
 import { useLanguage } from '../../../contexts/LanguageContext';
 
@@ -13,13 +13,28 @@ const ChatHistory = ({ isOpen, onClose, onConversationSelect, currentConversatio
     try {
       setLoading(true);
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const userId = getAccountId(user.principal || user.id || user.email || user.name);
-      const convs = await getConversations(userId, 20);
-      setConversations(convs);
+      const userId = user.id || user.email || user.name || getAccountId();
+      const convs = await getConversations(userId, 30);
+      setConversations(convs || []);
     } catch (error) {
       console.warn('Chat history could not be loaded. Continuing without saved conversations:', error);
       setConversations([]);
     } finally { setLoading(false); }
+  };
+
+  const handleDeleteConversation = async (e, convId) => {
+    e.stopPropagation();
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const userId = user.id || user.email || user.name || getAccountId();
+      await deleteConversation(userId, convId);
+      setConversations(prev => prev.filter(c => c.id !== convId));
+      if (currentConversationId === convId) {
+        onConversationSelect(null);
+      }
+    } catch (err) {
+      console.warn('Could not delete conversation:', err);
+    }
   };
 
   useEffect(() => { loadConversations(); }, [refreshKey]);
@@ -97,8 +112,28 @@ const ChatHistory = ({ isOpen, onClose, onConversationSelect, currentConversatio
                     {conv.title}
                   </h3>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--bento-muted)' }}>
-                    <span>{conv.messageCount || 0} {t('chat.msgs')}</span>
-                    <span>{formatDate(conv.lastMessage)}</span>
+                    <span>{conv.messageCount || 0} {t('chat.msgs')} • {formatDate(conv.lastMessage)}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteConversation(e, conv.id)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--bento-muted)',
+                        cursor: 'pointer',
+                        padding: '3px 6px',
+                        borderRadius: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'color 0.2s, background 0.2s'
+                      }}
+                      onMouseOver={e => { e.currentTarget.style.color = '#EF4444'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
+                      onMouseOut={e => { e.currentTarget.style.color = 'var(--bento-muted)'; e.currentTarget.style.background = 'transparent'; }}
+                      title={t('common.delete') || 'Delete'}
+                    >
+                      <Icon name="Trash2" size={13} />
+                    </button>
                   </div>
                 </div>
               )

@@ -105,6 +105,18 @@ const AppHeader = ({ onSidebarToggle, isSidebarOpen, user, onLogout }) => {
 
         {/* Right: Controls & Profile */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          {/* AI Coach Quick Launcher */}
+          <button
+            type="button"
+            onClick={() => navigate('/ai-chat')}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#FAA802]/30 bg-[#FAA802]/10 hover:bg-[#FAA802]/20 text-[#FAA802] font-bold text-xs transition-all shadow-[0_0_12px_rgba(250,168,2,0.15)] cursor-pointer"
+            title={language === 'ar' ? 'محادثة المدرب الذكي' : 'Chat with AI Coach'}
+          >
+            <span className="w-2 h-2 rounded-full bg-[#FAA802] animate-ping" />
+            <Icon name="MessageSquare" size={15} />
+            <span>{language === 'ar' ? 'المدرب الذكي' : 'AI Coach'}</span>
+          </button>
+
           {/* Theme Toggle */}
           <button
             type="button"

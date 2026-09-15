@@ -408,7 +408,11 @@ export default function Dashboard() {
 
             {/* 1. TODAY'S WORKOUT — spans 3 cols */}
             <div className="col-span-1 md:col-span-2 lg:col-span-4">
-              <CoachPulse {...coachPulse} />
+              <CoachPulse
+                {...coachPulse}
+                actionLabel={coachPulse?.actionLabel || (language === 'ar' ? 'تحدث مع المدرب ←' : 'Chat with Coach →')}
+                onClick={() => navigate('/ai-chat')}
+              />
             </div>
 
             <div className="bento-card col-span-1 md:col-span-2 lg:col-span-3" style={{ minHeight: 200 }}>
