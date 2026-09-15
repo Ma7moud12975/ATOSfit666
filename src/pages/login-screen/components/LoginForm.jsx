@@ -15,7 +15,6 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
   const { isAr } = useLanguage();
   const [mode, setMode] = useState(initialMode);
   const [step, setStep] = useState('form'); // 'form' | 'otp'
-  const [sentOtpCode, setSentOtpCode] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -101,8 +100,7 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
       if (mode === 'register') {
         const cleanName = formData.fullName.trim();
         // Send OTP verification to verify the email exists and is owned by the user
-        const otpRes = await sendEmailVerificationOtp(cleanEmail, cleanName);
-        setSentOtpCode(otpRes.code);
+        await sendEmailVerificationOtp(cleanEmail, cleanName);
         setStep('otp');
       } else {
         const data = await signIn(cleanEmail, formData.password);
@@ -137,7 +135,6 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
       <OtpVerificationCard
         email={formData.email.trim().toLowerCase()}
         fullName={formData.fullName}
-        initialCode={sentOtpCode}
         onVerified={handleOtpSuccess}
         onBack={() => setStep('form')}
       />
