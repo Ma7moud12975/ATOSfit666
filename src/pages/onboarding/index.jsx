@@ -283,6 +283,13 @@ const OnboardingScreen = () => {
       if (raw) localUser = JSON.parse(raw);
     } catch {}
 
+    if (!localUser) {
+      try {
+        const rawGoogle = localStorage.getItem('atos_google_session');
+        if (rawGoogle) localUser = JSON.parse(rawGoogle);
+      } catch {}
+    }
+
     return {
       name: localUser?.name || localUser?.fullName || '',
       email: localUser?.email || '',
@@ -315,16 +322,22 @@ const OnboardingScreen = () => {
   }, []);
 
   useEffect(() => {
-    // Pre-fill from existing user session or Supabase
+    // Pre-fill from existing user session, Supabase, or Google
     let localUser = null;
     try {
       const raw = localStorage.getItem('user');
       if (raw) localUser = JSON.parse(raw);
     } catch {}
 
-    const emailToSet = localUser?.email || supabaseUser?.email || '';
-    const nameToSet = localUser?.name || localUser?.fullName || supabaseUser?.name || supabaseUser?.full_name || '';
-    const pictureToSet = localUser?.picture || supabaseUser?.picture || supabaseUser?.avatar_url || '';
+    let googleSession = null;
+    try {
+      const rawG = localStorage.getItem('atos_google_session');
+      if (rawG) googleSession = JSON.parse(rawG);
+    } catch {}
+
+    const emailToSet = localUser?.email || supabaseUser?.email || googleUser?.email || googleSession?.email || '';
+    const nameToSet = localUser?.name || localUser?.fullName || supabaseUser?.name || supabaseUser?.full_name || googleUser?.name || googleSession?.name || '';
+    const pictureToSet = localUser?.picture || supabaseUser?.picture || supabaseUser?.avatar_url || googleUser?.picture || googleSession?.picture || '';
 
     if (localUser) {
       if (localUser.onboardingCompleted && !localUser.skippedOnboarding) {
@@ -346,7 +359,7 @@ const OnboardingScreen = () => {
         picture: pictureToSet || prev.picture,
       }));
     }
-  }, [supabaseUser, navigate]);
+  }, [supabaseUser, googleUser, navigate]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
