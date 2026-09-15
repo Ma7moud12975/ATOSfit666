@@ -137,6 +137,18 @@ ${profileSection}`;
 };
 
 /**
+ * Appends an explicit turn-level language directive to the user's message
+ * ensuring the model never gets confused by previous conversation language history.
+ */
+export const formatUserTurnWithLanguageGuidance = (message) => {
+  const isAr = detectLanguage(message) === 'ar';
+  const directive = isAr
+    ? '\n[CRITICAL INSTRUCTION: The user has asked in ARABIC. You MUST formulate your entire response in 100% natural, fluent ARABIC. Do NOT use English.]'
+    : '\n[CRITICAL INSTRUCTION: The user has asked in ENGLISH. You MUST formulate your entire response in 100% natural, fluent ENGLISH. Do NOT use Arabic.]';
+  return message + directive;
+};
+
+/**
  * Executes a Gemini generateContent request with automatic fallback cascade.
  * If the primary model hits a 429 quota or 503 high-demand spike, it automatically
  * retries the exact query on alternative active Gemini models seamlessly.

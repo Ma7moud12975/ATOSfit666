@@ -15,6 +15,7 @@ import {
   isExplicitlyNonFitness,
   getNonFitnessRefusal,
   buildFitnessSystemInstruction,
+  formatUserTurnWithLanguageGuidance,
   callGeminiWithFallback
 } from '../../utils/aiConfig';
 import '../../styles/bento-dashboard.css';
@@ -142,7 +143,7 @@ const ChatPage = () => {
 
       conversationTurns.push({
         role: 'user',
-        parts: [{ text: message }]
+        parts: [{ text: formatUserTurnWithLanguageGuidance(message) }]
       });
 
       const payload = {

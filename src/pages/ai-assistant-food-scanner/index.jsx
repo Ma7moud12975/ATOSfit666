@@ -21,6 +21,7 @@ import {
   isExplicitlyNonFitness,
   getNonFitnessRefusal,
   buildFitnessSystemInstruction,
+  formatUserTurnWithLanguageGuidance,
   callGeminiWithFallback
 } from '../../utils/aiConfig';
 
@@ -291,7 +292,7 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
 
       conversationTurns.push({
         role: 'user',
-        parts: [{ text: message }]
+        parts: [{ text: formatUserTurnWithLanguageGuidance(message) }]
       });
 
       const payload = {
