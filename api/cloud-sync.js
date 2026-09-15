@@ -73,6 +73,7 @@ export default async function handler(req, res) {
             role: 'user',
             fitness_level: safeUser.fitnessLevel || 'intermediate',
             goals: Array.isArray(safeUser.goals) ? safeUser.goals : [safeUser.primaryGoal].filter(Boolean),
+            profile_picture: safeUser.profilePicture || safeUser.avatar || null,
             age: Number(safeUser.age) || null,
             height: Number(safeUser.height) || null,
             weight: Number(safeUser.weight) || null,
@@ -145,23 +146,26 @@ export default async function handler(req, res) {
           }
           const { data, error } = await query.maybeSingle();
           if (!error && data) {
-            if (data.raw_user_meta_data && data.raw_user_meta_data.user) {
-              edgeStore.set(key, data.raw_user_meta_data);
-              return res.status(200).json(data.raw_user_meta_data);
-            }
+            const userMeta = data.raw_user_meta_data?.user ? { ...data.raw_user_meta_data.user } : {};
+            const picture = data.profile_picture || userMeta.profilePicture || userMeta.avatar || '';
+
             const reconstructed = {
+              ...(data.raw_user_meta_data || {}),
               user: {
+                ...userMeta,
                 id: data.id,
-                name: data.full_name,
-                email: data.email,
-                fitnessLevel: data.fitness_level || 'intermediate',
-                goals: data.goals || [],
-                age: data.age,
-                height: data.height,
-                weight: data.weight,
+                name: data.full_name || userMeta.name || 'Athlete',
+                email: data.email || userMeta.email || key,
+                profilePicture: picture,
+                avatar: picture,
+                fitnessLevel: data.fitness_level || userMeta.fitnessLevel || 'intermediate',
+                goals: data.goals || userMeta.goals || [],
+                age: data.age ?? userMeta.age ?? null,
+                height: data.height ?? userMeta.height ?? null,
+                weight: data.weight ?? userMeta.weight ?? null,
                 onboardingCompleted: true,
               },
-              trainingPlan: null,
+              trainingPlan: data.raw_user_meta_data?.trainingPlan || null,
             };
             edgeStore.set(key, reconstructed);
             return res.status(200).json(reconstructed);

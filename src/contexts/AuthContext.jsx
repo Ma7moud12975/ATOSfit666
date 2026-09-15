@@ -178,6 +178,17 @@ export const AuthProvider = ({ children }) => {
             setSupabaseUser(parsed);
             setIsNewUser(!parsed.onboardingCompleted);
             setLoading(false);
+
+            // Background refresh to pull newest cloud profile & picture from other devices
+            fetchCloudUserProfile(parsed.email || parsed.id)
+              .then((latest) => {
+                if (latest?.user) {
+                  hydrateLocalSession(latest);
+                  setSupabaseUser(latest.user);
+                }
+              })
+              .catch(() => {});
+
             return;
           }
         } catch {}

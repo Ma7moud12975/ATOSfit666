@@ -101,18 +101,18 @@ export async function getCurrentUser() {
 
 // Get user profile from database
 export async function getUserProfile(userId) {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', userId)
-    .is('deleted_at', null)
-    .single();
+  if (!userId) return null;
+  let query = supabase.from('users').select('*').is('deleted_at', null);
+  const cleanId = String(userId).trim();
+  if (cleanId.includes('@')) {
+    query = query.eq('email', cleanId.toLowerCase());
+  } else {
+    query = query.eq('id', cleanId);
+  }
 
-  if (error) {
-    if (error.code === 'PGRST116') {
-      return null; // User not found
-    }
-    throw error;
+  const { data, error } = await query.maybeSingle();
+  if (error || !data) {
+    return null;
   }
 
   return data;
@@ -120,30 +120,44 @@ export async function getUserProfile(userId) {
 
 // Update user profile
 export async function updateUser(userId, updates) {
-  const { data, error } = await supabase
-    .from('users')
-    .update(updates)
-    .eq('id', userId)
-    .select()
-    .single();
+  if (!userId) return null;
+  const cleanId = String(userId).trim();
+  let query = supabase.from('users').update(updates);
+  if (cleanId.includes('@')) {
+    query = query.eq('email', cleanId.toLowerCase());
+  } else {
+    query = query.eq('id', cleanId);
+  }
 
-  if (error) throw error;
+  const { data, error } = await query.select().maybeSingle();
+  if (error) {
+    console.warn('[userApi] updateUser warning:', error.message);
+    throw error;
+  }
   return data;
 }
 
 // Get user stats
 export async function getUserStats(userId) {
+  if (!userId) return null;
+  const cleanId = String(userId).trim();
+  let targetId = cleanId;
+  if (cleanId.includes('@')) {
+    const { data: u } = await supabase.from('users').select('id').eq('email', cleanId.toLowerCase()).maybeSingle();
+    if (u?.id) targetId = u.id;
+  }
+
   const { data, error } = await supabase
     .from('user_stats')
     .select('*')
-    .eq('user_id', userId)
-    .single();
+    .eq('user_id', targetId)
+    .maybeSingle();
 
   if (error) {
     if (error.code === 'PGRST116') {
       return null;
     }
-    throw error;
+    return null;
   }
 
   return data;

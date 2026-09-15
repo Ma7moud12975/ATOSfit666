@@ -37,17 +37,17 @@ const UserProfile = () => {
         const userData = localStorage.getItem('user');
         if (userData) {
           const u = JSON.parse(userData);
-          const principalId = u?.id || u?.principalId || u?.principal;
+          const lookupId = u?.email || u?.id || u?.principalId || u?.principal;
           
           // Try to load from Supabase first
           let supabaseUser = null;
           let supabaseStats = null;
           
-          if (principalId) {
+          if (lookupId) {
             try {
-              console.log('📥 Loading user profile from Supabase:', principalId);
-              supabaseUser = await getUserProfile(principalId);
-              supabaseStats = await getUserStats(principalId);
+              console.log('📥 Loading user profile from Supabase:', lookupId);
+              supabaseUser = await getUserProfile(lookupId);
+              supabaseStats = await getUserStats(lookupId);
               console.log('✅ Supabase user:', supabaseUser);
               console.log('✅ Supabase stats:', supabaseStats);
             } catch (error) {
@@ -55,15 +55,18 @@ const UserProfile = () => {
             }
           }
           
+          const picture = supabaseUser?.profile_picture || supabaseUser?.raw_user_meta_data?.user?.profilePicture || u?.profilePicture || u?.avatar || '';
+
           // Merge Supabase data with localStorage data
           setUser({
-            id: principalId,
+            id: supabaseUser?.id || u?.id || lookupId,
             name: supabaseUser?.full_name || u?.name || 'New User',
             email: supabaseUser?.email || u?.email || '',
             phone: u?.phone || '',
             dateOfBirth: u?.dateOfBirth || '',
             location: u?.location || '',
-            profilePicture: supabaseUser?.profile_picture || u?.profilePicture || '',
+            profilePicture: picture,
+            avatar: picture,
             joinDate: (supabaseUser?.date_joined || u?.createdAt || new Date().toISOString()).slice(0,10),
             totalWorkouts: supabaseStats?.total_workouts || 0,
             currentStreak: supabaseStats?.current_streak || 0,
@@ -192,18 +195,21 @@ const UserProfile = () => {
 
 
   const handleProfilePictureUpdate = async (newPicture) => {
-    const updatedUser = { ...user, profilePicture: newPicture };
+    const updatedUser = { ...user, profilePicture: newPicture, avatar: newPicture };
     setUser(updatedUser);
     
-    // Update localStorage & broadcast
+    // Update localStorage & broadcast immediately
     localStorage.setItem('user', JSON.stringify(updatedUser));
     window.dispatchEvent(new CustomEvent('atos_user_profile_hydrated', { detail: updatedUser }));
     
     // Sync to Supabase Cloud & DB
     try {
       await saveCloudUserProfile(updatedUser);
+      const targetIdentifier = user?.email || user?.id;
+      if (targetIdentifier) {
+        await updateUser(targetIdentifier, { profile_picture: newPicture });
+      }
       if (user?.id) {
-        await updateUser(user.id, { profile_picture: newPicture });
         await updateUserProfile(user.id, { profilePicture: newPicture });
       }
     } catch (e) {

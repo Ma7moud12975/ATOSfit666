@@ -89,27 +89,45 @@ export async function saveCloudUserProfile(userProfile, trainingMesocycle = null
   let supabaseSuccess = false;
   try {
     if (supabase && typeof supabase.from === 'function') {
-      // If passwordHash still not present, read it from existing user in DB
-      if (!fullPayload.passwordHash && email) {
-        try {
-          const { data: existingRow } = await supabase
-            .from('users')
-            .select('raw_user_meta_data, profile_picture')
-            .eq('email', email)
-            .maybeSingle();
-          if (existingRow?.raw_user_meta_data?.passwordHash) {
-            fullPayload.passwordHash = existingRow.raw_user_meta_data.passwordHash;
-          }
-          if (!enrichedProfile.profilePicture && existingRow?.profile_picture) {
-            enrichedProfile.profilePicture = existingRow.profile_picture;
-            fullPayload.user.profilePicture = existingRow.profile_picture;
-          }
-        } catch {}
+      // Look up existing user row by email or id
+      let existingRow = null;
+      if (email) {
+        const { data } = await supabase
+          .from('users')
+          .select('id, email, raw_user_meta_data, profile_picture')
+          .eq('email', email)
+          .maybeSingle();
+        existingRow = data;
+      }
+      if (!existingRow && userId) {
+        const { data } = await supabase
+          .from('users')
+          .select('id, email, raw_user_meta_data, profile_picture')
+          .eq('id', userId)
+          .maybeSingle();
+        existingRow = data;
+      }
+
+      const effectiveId = existingRow?.id || userId;
+      enrichedProfile.id = effectiveId;
+      fullPayload.user.id = effectiveId;
+
+      // Preserve existing password hash from DB if not present in payload
+      if (!fullPayload.passwordHash && existingRow?.raw_user_meta_data?.passwordHash) {
+        fullPayload.passwordHash = existingRow.raw_user_meta_data.passwordHash;
+      }
+
+      // Prioritize the incoming profile picture if provided; otherwise keep existing from DB
+      if (enrichedProfile.profilePicture) {
+        fullPayload.user.profilePicture = enrichedProfile.profilePicture;
+      } else if (existingRow?.profile_picture) {
+        enrichedProfile.profilePicture = existingRow.profile_picture;
+        fullPayload.user.profilePicture = existingRow.profile_picture;
       }
 
       const basePayload = {
-        id: userId,
-        email: enrichedProfile.email,
+        id: effectiveId,
+        email: enrichedProfile.email || email,
         full_name: enrichedProfile.name,
         role: 'user',
         fitness_level: enrichedProfile.fitnessLevel || 'intermediate',
@@ -119,35 +137,38 @@ export async function saveCloudUserProfile(userProfile, trainingMesocycle = null
         height: Number(enrichedProfile.height) || null,
         weight: Number(enrichedProfile.weight) || null,
         last_login: now,
+        raw_user_meta_data: fullPayload,
       };
 
-      const { data, error } = await supabase
-        .from('users')
-        .upsert({
-          ...basePayload,
-          raw_user_meta_data: fullPayload
-        }, { onConflict: 'email' })
-        .select()
-        .single();
-
-      if (!error) {
-        supabaseSuccess = true;
-        console.log('[CloudSync] Successfully saved to Supabase:', userId);
-      } else {
-        // Fallback without raw_user_meta_data in case of schema discrepancy
-        const { error: fallbackErr } = await supabase
+      if (existingRow) {
+        // UPDATE existing record without hitting non-existent UNIQUE email constraint
+        const { error: updateErr } = await supabase
           .from('users')
-          .upsert(basePayload, { onConflict: 'email' });
-        if (!fallbackErr) {
+          .update(basePayload)
+          .eq('id', existingRow.id);
+
+        if (!updateErr) {
           supabaseSuccess = true;
-          console.log('[CloudSync] Successfully saved base profile to Supabase:', userId);
+          console.log('[CloudSync] Successfully updated profile in Supabase for:', effectiveId);
         } else {
-          console.warn('[CloudSync] Supabase upsert notice:', fallbackErr.message);
+          console.warn('[CloudSync] Supabase update warning:', updateErr.message);
+        }
+      } else {
+        // INSERT new user record
+        const { error: insertErr } = await supabase
+          .from('users')
+          .insert(basePayload);
+
+        if (!insertErr) {
+          supabaseSuccess = true;
+          console.log('[CloudSync] Successfully inserted new user to Supabase:', effectiveId);
+        } else {
+          console.warn('[CloudSync] Supabase insert warning:', insertErr.message);
         }
       }
     }
   } catch (sbErr) {
-    console.warn('[CloudSync] Supabase connection inactive, using resilient cloud layer:', sbErr?.message);
+    console.warn('[CloudSync] Supabase connection error:', sbErr?.message);
   }
 
   // 3. Sync to Vercel Serverless Sync API endpoint (/api/cloud-sync)
@@ -190,30 +211,32 @@ export async function fetchCloudUserProfile(identifier) {
 
       const { data, error } = await query.maybeSingle();
       if (!error && data) {
-        if (data.raw_user_meta_data && data.raw_user_meta_data.user) {
-          const userMeta = { ...data.raw_user_meta_data.user };
-          if (!userMeta.profilePicture && data.profile_picture) {
-            userMeta.profilePicture = data.profile_picture;
-          }
-          console.log('[CloudSync] Found full profile in Supabase raw_user_meta_data');
-          return { ...data.raw_user_meta_data, user: userMeta };
-        }
+        const userMeta = data.raw_user_meta_data?.user ? { ...data.raw_user_meta_data.user } : {};
+        const picture = data.profile_picture || userMeta.profilePicture || userMeta.avatar || '';
 
-        // Reconstruct from columns if raw_user_meta_data is not set
-        const reconstructedUser = {
+        const mergedUser = {
+          ...userMeta,
           id: data.id,
-          name: data.full_name,
-          email: data.email,
-          fitnessLevel: data.fitness_level,
-          goals: data.goals || [],
-          profilePicture: data.profile_picture || '',
-          age: data.age,
-          height: data.height,
-          weight: data.weight,
+          name: data.full_name || userMeta.name || 'Athlete',
+          fullName: data.full_name || userMeta.name || 'Athlete',
+          email: data.email || userMeta.email || cleanId,
+          profilePicture: picture,
+          avatar: picture,
+          fitnessLevel: data.fitness_level || userMeta.fitnessLevel || 'intermediate',
+          goals: data.goals || userMeta.goals || [],
+          age: data.age ?? userMeta.age ?? '',
+          height: data.height ?? userMeta.height ?? '',
+          weight: data.weight ?? userMeta.weight ?? '',
           onboardingCompleted: true,
         };
-        const activePlan = getUserTrainingPlan(data.id, reconstructedUser);
-        return { user: reconstructedUser, trainingPlan: activePlan };
+
+        const activePlan = data.raw_user_meta_data?.trainingPlan || getUserTrainingPlan(data.id, mergedUser);
+        console.log('[CloudSync] Found full profile in Supabase for:', cleanId, 'hasPicture:', !!picture);
+        return {
+          ...(data.raw_user_meta_data || {}),
+          user: mergedUser,
+          trainingPlan: activePlan
+        };
       }
     }
   } catch (sbErr) {

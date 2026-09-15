@@ -7,6 +7,7 @@ import {
   mergeLocalFoodLogs,
 } from '../localAccountStorage';
 import { emitDashboardDataUpdated } from '../dashboardStatsService';
+import { resolveDbUserId } from './chatApi';
 
 const toFoodRecord = (userId, foodData) => ({
   user_id: userId,
@@ -24,9 +25,11 @@ export async function logFood(userId, foodData) {
   const local = saveLocalFoodLog(userId, foodData);
   emitDashboardDataUpdated({ type: 'MEAL_LOGGED', meal: local });
 
+  const resolvedUid = (await resolveDbUserId(userId)) || userId;
+
   const { data, error } = await supabase
     .from('food_logs')
-    .insert(toFoodRecord(userId, foodData))
+    .insert(toFoodRecord(resolvedUid, foodData))
     .select()
     .single();
 
@@ -45,9 +48,11 @@ export async function logFoods(userId, foods) {
   const localFoods = foods.map(food => saveLocalFoodLog(userId, food));
   emitDashboardDataUpdated({ type: 'MEALS_LOGGED', meals: localFoods });
 
+  const resolvedUid = (await resolveDbUserId(userId)) || userId;
+
   const { data, error } = await supabase
     .from('food_logs')
-    .insert(foods.map(food => toFoodRecord(userId, food)))
+    .insert(foods.map(food => toFoodRecord(resolvedUid, food)))
     .select();
 
   if (error) {
@@ -60,10 +65,11 @@ export async function logFoods(userId, foods) {
 }
 
 export async function getFoodLogs(userId, filters = {}) {
+  const resolvedUid = (await resolveDbUserId(userId)) || userId;
   let query = supabase
     .from('food_logs')
     .select('*')
-    .eq('user_id', userId)
+    .or(`user_id.eq.${resolvedUid},user_id.eq.${userId}`)
     .order('date_logged', { ascending: false });
 
   if (filters.date) {
