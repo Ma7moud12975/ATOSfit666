@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import MobileBottomNav from './MobileBottomNav';
-import FloatingCoachWidget from '../FloatingCoachWidget';
 
 const HIDDEN_NAV_PATHS = [
   '/',
@@ -23,7 +22,6 @@ const MobileLayout = ({ children }) => {
       <div className={`flex-1 ${shouldShowBottomNav ? 'pb-24 lg:pb-0' : ''}`}>
         {children}
       </div>
-      <FloatingCoachWidget />
       {shouldShowBottomNav && <MobileBottomNav />}
     </div>
   );
