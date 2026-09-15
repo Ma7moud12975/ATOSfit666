@@ -330,7 +330,7 @@ export const AuthProvider = ({ children }) => {
         signUpWithCredentials,
         signIn: signInWithCredentials,
         signUp: signUpWithCredentials,
-        loginWithGoogle,
+        loginWithGoogle: () => Promise.resolve(),
         logout,
         loading,
         user: supabaseUser,
