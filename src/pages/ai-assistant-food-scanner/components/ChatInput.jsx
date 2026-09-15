@@ -12,54 +12,8 @@ const ChatInput = ({ onSendMessage, disabled = false }) => {
   const { language, t } = useLanguage();
 
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
     if (!SpeechRecognition) {
-      setSpeechSupported(false);
-      return;
-    }
-
-    try {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.lang = language === 'ar' ? 'ar-EG' : 'en-US';
-
-      recognition.onstart = () => {
-        setIsRecording(true);
-        setRecordingStatus(language === 'ar' ? 'جارٍ الاستماع... تحدث الآن' : 'Listening... Speak now');
-      };
-
-      recognition.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
-        }
-        if (transcript.trim()) {
-          setMessage(prev => {
-            const trimmed = prev.trim();
-            return trimmed ? `${trimmed} ${transcript.trim()}` : transcript.trim();
-          });
-        }
-        if (textareaRef?.current) {
-          textareaRef.current.style.height = 'auto';
-          textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
-        }
-      };
-
-      recognition.onerror = (event) => {
-        console.warn('Speech recognition notice:', event.error);
-        setIsRecording(false);
-        setRecordingStatus('');
-      };
-
-      recognition.onend = () => {
-        setIsRecording(false);
-        setRecordingStatus('');
-      };
-
-      recognitionRef.current = recognition;
-    } catch (e) {
-      console.warn('SpeechRecognition initialization notice:', e);
       setSpeechSupported(false);
     }
 
@@ -68,33 +22,96 @@ const ChatInput = ({ onSendMessage, disabled = false }) => {
         try { recognitionRef.current.abort(); } catch {}
       }
     };
-  }, [language]);
+  }, []);
 
   const toggleVoiceRecording = () => {
     if (disabled) return;
 
-    if (!speechSupported) {
+    const SpeechRecognition = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
+    if (!SpeechRecognition) {
       alert(language === 'ar'
-        ? 'التعرف الصوتي غير مدعوم في متصفحك الحالي. يُرجى استخدام متصفح Chrome أو Edge أو Safari.'
-        : 'Voice input is not supported on this browser. Please use Chrome, Edge, or Safari.');
+        ? 'التعرف الصوتي غير مدعوم في متصفحك الحالي. يُرجى استخدام متصفح Google Chrome أو Microsoft Edge أو Safari.'
+        : 'Voice input is not supported on this browser. Please use Google Chrome, Microsoft Edge, or Safari.');
       return;
     }
 
-    if (!recognitionRef.current) return;
-
+    // If currently recording, stop it cleanly
     if (isRecording) {
-      try {
-        recognitionRef.current.stop();
-      } catch {}
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch {}
+      }
       setIsRecording(false);
       setRecordingStatus('');
-    } else {
-      try {
-        recognitionRef.current.lang = language === 'ar' ? 'ar-EG' : 'en-US';
-        recognitionRef.current.start();
-      } catch (err) {
-        console.warn('Could not start microphone:', err);
+      return;
+    }
+
+    // Start fresh recognition instance on user click
+    try {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort(); } catch {}
+        recognitionRef.current = null;
       }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = language === 'ar' ? 'ar-EG' : 'en-US';
+
+      // Keep snapshot of message before voice input starts
+      const baseMessage = message;
+
+      recognition.onstart = () => {
+        setIsRecording(true);
+        setRecordingStatus(language === 'ar' ? 'جارٍ الاستماع... تحدث الآن 🎙️' : 'Listening... Speak now 🎙️');
+      };
+
+      recognition.onresult = (event) => {
+        let finalTranscript = '';
+        let interimTranscript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          const item = event.results[i];
+          if (item && item[0]) {
+            if (item.isFinal) {
+              finalTranscript += item[0].transcript;
+            } else {
+              interimTranscript += item[0].transcript;
+            }
+          }
+        }
+        const spoken = (finalTranscript || interimTranscript).trim();
+        if (spoken) {
+          const prefix = baseMessage.trim();
+          setMessage(prefix ? `${prefix} ${spoken}` : spoken);
+        }
+        if (textareaRef?.current) {
+          textareaRef.current.style.height = 'auto';
+          textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.warn('Speech recognition notice:', event?.error);
+        setIsRecording(false);
+        setRecordingStatus('');
+        if (event?.error === 'not-allowed' || event?.error === 'service-not-allowed') {
+          alert(language === 'ar'
+            ? 'تم حظر الميكروفون. يُرجى السماح للمتصفح بالوصول للميكروفون من إعدادات الموقع لتفعيل الإملاء الصوتي.'
+            : 'Microphone access denied. Please allow microphone permissions in your browser.');
+        }
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+        setRecordingStatus('');
+        recognitionRef.current = null;
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err) {
+      console.warn('Could not start microphone:', err);
+      setIsRecording(false);
+      setRecordingStatus('');
     }
   };
 
@@ -176,10 +193,7 @@ const ChatInput = ({ onSendMessage, disabled = false }) => {
       </div>
 
       <form onSubmit={handleSubmit} className="chat-input-form">
-        <div className="chat-input-wrapper" style={{
-          borderColor: isRecording ? '#FAA802' : undefined,
-          boxShadow: isRecording ? '0 0 12px rgba(250, 168, 2, 0.3)' : undefined
-        }}>
+        <div className="chat-input-wrapper">
           <textarea
             ref={textareaRef}
             value={message}
@@ -190,7 +204,9 @@ const ChatInput = ({ onSendMessage, disabled = false }) => {
             rows={1}
             className="chat-input-textarea"
             style={{
-              opacity: disabled ? 0.6 : 1
+              opacity: disabled ? 0.6 : 1,
+              borderColor: isRecording ? '#FAA802' : undefined,
+              boxShadow: isRecording ? '0 0 12px rgba(250, 168, 2, 0.35)' : undefined
             }}
           />
           <button
@@ -204,11 +220,11 @@ const ChatInput = ({ onSendMessage, disabled = false }) => {
               background: isRecording ? 'rgba(250, 168, 2, 0.2)' : undefined,
               borderRadius: '50%',
               transition: 'all 0.2s ease',
-              transform: isRecording ? 'scale(1.15)' : 'scale(1)',
+              transform: isRecording ? 'translateY(-50%) scale(1.12)' : 'translateY(-50%)',
               cursor: disabled ? 'not-allowed' : 'pointer'
             }}
           >
-            <Icon name="Mic" size={20} />
+            <Icon name="Mic" size={19} />
           </button>
         </div>
 

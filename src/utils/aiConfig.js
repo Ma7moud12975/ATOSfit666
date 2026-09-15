@@ -6,14 +6,15 @@
  */
 
 export const DEFAULT_CHATBOT_API_KEY = 'AQ.Ab8RN6K3qSM-0g7LcfL1ka7OE7rgqfSxMGZ8wiEKySoSxkBOlw';
-export const DEFAULT_CHATBOT_MODEL = 'gemini-3.5-flash';
+export const DEFAULT_CHATBOT_MODEL = 'gemini-flash-lite-latest';
 
 // Resilient pool of active models to automatically failover if one hits rate limits (429) or high demand (503)
+// Prioritized by response latency: sub-second lite models first, falling back to standard models
 export const CANDIDATE_MODELS = [
-  'gemini-3.5-flash',
+  'gemini-flash-lite-latest',
   'gemini-3.5-flash-lite',
   'gemini-3.1-flash-lite',
-  'gemini-flash-lite-latest',
+  'gemini-3.5-flash',
   'gemini-3-flash-preview'
 ];
 

@@ -306,7 +306,7 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
           parts: [{ text: systemInstruction }]
         },
         contents: conversationTurns,
-        generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
+        generationConfig: { temperature: 0.1, maxOutputTokens: 600 }
       };
 
       const { data } = await callGeminiWithFallback(payload, CHATBOT_API_KEY, CHATBOT_MODEL_NAME);

@@ -1051,13 +1051,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   transition: all 0.2s ease;
+  z-index: 3;
+  box-sizing: border-box;
+  overflow: visible;
 }
 .chat-input-mic-btn:hover {
-  background-color: rgba(250, 168, 2, 0.1);
+  background-color: rgba(250, 168, 2, 0.12);
   color: #FAA802;
 }
 
