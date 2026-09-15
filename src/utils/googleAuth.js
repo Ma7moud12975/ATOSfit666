@@ -163,7 +163,7 @@ export async function signInWithGoogle({ redirectTo } = {}) {
   // This shows the real Google account picker via a redirect
   try {
     if (supabase && typeof supabase.auth?.signInWithOAuth === 'function') {
-      const target = redirectTo || `${window.location.origin}/login-screen`;
+      const target = redirectTo || `${window.location.origin}/onboarding`;
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

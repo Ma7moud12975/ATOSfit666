@@ -21,7 +21,7 @@ const GoogleSignInButton = ({
   className = '',
   text = 'Sign in with Google',
   onSuccess,
-  redirectTo,
+  redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/onboarding` : '/onboarding',
   fullWidth = true,
   size = 'lg',
 }) => {

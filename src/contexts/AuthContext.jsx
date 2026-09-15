@@ -92,12 +92,10 @@ export const AuthProvider = ({ children }) => {
                 onboardingCompleted: false,
               };
               localStorage.setItem('user', JSON.stringify(minimalUser));
+              setSupabaseUser(minimalUser);
               setIsNewUser(true);
 
-              if (
-                window.location.pathname !== '/onboarding' &&
-                window.location.pathname !== '/login-screen'
-              ) {
+              if (window.location.pathname !== '/onboarding') {
                 window.location.replace('/onboarding');
               }
             }
@@ -132,7 +130,9 @@ export const AuthProvider = ({ children }) => {
         try {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user) {
-            // Session already handled by onAuthStateChange
+            setIsAuthenticated(true);
+            const savedGoogle = getSavedGoogleUser();
+            if (savedGoogle) setGoogleUser(savedGoogle);
             setLoading(false);
             return;
           }

@@ -10,7 +10,7 @@ import Icon from '../../components/AppIcon';
 
 const LoginScreen = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, loading, supabaseUser, googleUser } = useAuth();
+  const { isAuthenticated, loading, supabaseUser, googleUser, loginWithGoogle } = useAuth();
   const { t } = useLanguage();
   const [isVisible, setIsVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('google'); // 'google' | 'icp'
@@ -20,7 +20,7 @@ const LoginScreen = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Redirect if already authenticated and profile is complete
+  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !loading) {
       const userData = localStorage.getItem('user');
@@ -39,9 +39,9 @@ const LoginScreen = () => {
         }
       }
 
-      if (supabaseUser?.full_name && supabaseUser.full_name !== 'ICP User') {
+      if (supabaseUser?.onboardingCompleted) {
         navigate('/dashboard', { replace: true });
-      } else if (googleUser) {
+      } else {
         navigate('/onboarding', { replace: true });
       }
     }
@@ -127,7 +127,7 @@ const LoginScreen = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowGoogleModal(true)}
+              onClick={() => loginWithGoogle({ redirectTo: window.location.origin + '/onboarding' })}
               className="text-xs text-primary hover:text-primary/80"
             >
               Choose Google account manually

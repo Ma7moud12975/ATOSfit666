@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Icon from '../../components/AppIcon';
 import { updateUserProfile } from '../../utils/db';
-import { calculateMetabolicTargets } from '../../utils/metabolism';
+import { calculateMetabolicTargets, calculateBMI, calculateBMR, calculateTDEE } from '../../utils/metabolism';
 import { generateMonthlyMesocycle, saveUserTrainingPlan, determineSplitStrategy } from '../../utils/trainingPlanEngine';
 import { getSavedGoogleUser } from '../../utils/googleAuth';
 import { saveCloudUserProfile } from '../../utils/cloudSync';
@@ -29,17 +30,17 @@ import extremeObesityImg from './سمنه مفرطه.webp';
 const totalSteps = 11;
 
 const stepMeta = [
-  { label: 'Profile', eyebrow: 'Identity', title: 'Build your training profile', description: 'Start with the basics so ATOS-fit can shape a plan around you.', icon: 'Sparkles' },
-  { label: 'Identity', eyebrow: 'Personalization', title: 'Choose the profile that fits you', description: 'This helps tune visuals, language, and recommendations during setup.', icon: 'Users' },
-  { label: 'Weight', eyebrow: 'Baseline', title: 'Set your current body weight', description: 'We use this as the first marker in your transformation dashboard.', icon: 'Scale' },
-  { label: 'Physique', eyebrow: 'Goal shape', title: 'Pick the physique direction', description: 'Choose the destination that best matches how you want to train.', icon: 'Target' },
-  { label: 'Focus', eyebrow: 'Training emphasis', title: 'Select your priority areas', description: 'Choose one or more areas so your workouts feel immediately relevant.', icon: 'ScanLine' },
-  { label: 'Metrics', eyebrow: 'Measurements', title: 'Calibrate your body metrics', description: 'These details help balance intensity, volume, and progression.', icon: 'Ruler' },
-  { label: 'Schedule', eyebrow: 'Routine design', title: 'Choose your training window', description: 'The best plan is the one that fits your real day.', icon: 'Clock3' },
-  { label: 'Level & Activity', eyebrow: 'Metabolic Calibration', title: 'Set your fitness & daily movement level', description: 'We calculate your exact metabolic burn (TDEE) and match workout complexity to your lifestyle.', icon: 'Gauge' },
-  { label: 'Coaching', eyebrow: 'Guidance style', title: 'Tell us how much direction you want', description: 'This tunes how prescriptive your workouts and recommendations should be.', icon: 'Quote' },
-  { label: 'Success', eyebrow: 'Motivation', title: 'Define what progress means', description: 'Select the wins that will keep you coming back.', icon: 'Trophy' },
-  { label: 'Blueprint', eyebrow: 'Scientific Blueprint', title: 'Your scientific transformation blueprint is ready', description: 'Calculated with precision using Mifflin-St Jeor formula based on your real weight, height, age, and activity.', icon: 'Rocket' },
+  { label: 'Profile', labelAr: 'الملف الشخصي', eyebrow: 'Identity', eyebrowAr: 'الهوية', title: 'Build your training profile', titleAr: 'أنشئ ملفك التدريبي', description: 'Start with the basics so ATOS-fit can shape a plan around you.', descriptionAr: 'ابدأ بالبيانات الأساسية ليقوم النظام الذكي بتخصيص خطتك.', icon: 'Sparkles' },
+  { label: 'Identity', labelAr: 'النوع', eyebrow: 'Personalization', eyebrowAr: 'التخصيص', title: 'Choose the profile that fits you', titleAr: 'اختر ملفك الشخصي', description: 'This helps tune visuals, language, and recommendations during setup.', descriptionAr: 'يساعدنا في ضبط التوصيات والمعايير المناسبة لك.', icon: 'Users' },
+  { label: 'Weight', labelAr: 'الوزن الحالي', eyebrow: 'Baseline', eyebrowAr: 'القياس الأولي', title: 'Set your current body weight', titleAr: 'حدد وزنك الحالي', description: 'We use this as the first marker in your transformation dashboard.', descriptionAr: 'نقطة الانطلاق الأولى لحساب كتلة الجسم ومعدل الحرق.', icon: 'Scale' },
+  { label: 'Physique', labelAr: 'الهدف الجسدي', eyebrow: 'Goal shape', eyebrowAr: 'الشكل المستهدف', title: 'Pick the physique direction', titleAr: 'اختر شكل الجسم المطلوب', description: 'Choose the destination that best matches how you want to train.', descriptionAr: 'حدد الهدف الذي ترغب في الوصول إليه (رشيق، عضلي، مقسم).', icon: 'Target' },
+  { label: 'Focus', labelAr: 'التركيز العضلي', eyebrow: 'Training emphasis', eyebrowAr: 'أولويات التمرين', title: 'Select your priority areas', titleAr: 'اختر العضلات المستهدفة', description: 'Choose one or more areas so your workouts feel immediately relevant.', descriptionAr: 'اختر منطقة أو أكثر للتركيز عليها في التمارين.', icon: 'ScanLine' },
+  { label: 'Metrics', labelAr: 'القياسات الحيوية', eyebrow: 'Measurements', eyebrowAr: 'القياسات', title: 'Calibrate your body metrics', titleAr: 'اضبط قياساتك الحيوية', description: 'These details help balance intensity, volume, and progression.', descriptionAr: 'الطول والسن والوزن المستهدف لتحديد السعرات بدقة علمية.', icon: 'Ruler' },
+  { label: 'Schedule', labelAr: 'المواعيد', eyebrow: 'Routine design', eyebrowAr: 'الجدول الزمني', title: 'Choose your training window', titleAr: 'اختر وقت التمرين المفضل', description: 'The best plan is the one that fits your real day.', descriptionAr: 'أفضل تمرين هو ما يتناسب مع روتين يومك الحقيقي.', icon: 'Clock3' },
+  { label: 'Level & Activity', labelAr: 'النشاط والمستوى', eyebrow: 'Metabolic Calibration', eyebrowAr: 'المعايرة الأيضية', title: 'Set your fitness & daily movement level', titleAr: 'حدد مستواك البدني ومعدل حركتك', description: 'We calculate your exact metabolic burn (TDEE) and match workout complexity to your lifestyle.', descriptionAr: 'لحساب استهلاكك الدقيق من الطاقة ومطابقة صعوبة التمارين.', icon: 'Gauge' },
+  { label: 'Coaching', labelAr: 'أسلوب التدريب', eyebrow: 'Guidance style', eyebrowAr: 'التوجيه', title: 'Tell us how much direction you want', titleAr: 'ما مدى تفصيل الإرشادات المطلوبة؟', description: 'This tunes how prescriptive your workouts and recommendations should be.', descriptionAr: 'يحدد دقة التوجيه والملاحظات التدريبية الموجهة لك.', icon: 'Quote' },
+  { label: 'Success', labelAr: 'معايير النجاح', eyebrow: 'Motivation', eyebrowAr: 'التحفيز', title: 'Define what progress means', titleAr: 'ماذا يعني النجاح بالنسبة لك؟', description: 'Select the wins that will keep you coming back.', descriptionAr: 'حدد الإنجازات التي ستشعرك بالتقدم المستمر.', icon: 'Trophy' },
+  { label: 'Blueprint', labelAr: 'المخطط العلمي', eyebrow: 'Scientific Blueprint', eyebrowAr: 'المخطط الشامل', title: 'Your scientific transformation blueprint is ready', titleAr: 'مخطط تحولك العلمي جاهز الآن', description: 'Calculated with precision using Mifflin-St Jeor formula based on your real weight, height, age, and activity.', descriptionAr: 'تم حسابه بدقة بناءً على وزنك وطولك وسنك ونشاطك الفعلي.', icon: 'Rocket' },
 ];
 
 const focusAreaOptions = [
@@ -134,14 +135,14 @@ const getSelectedLabels = (options, selectedIds) => {
     .join(', ');
 };
 
-const StepHeader = ({ meta }) => (
+const StepHeader = ({ meta, isAr }) => (
   <div className="mx-auto max-w-2xl text-center">
     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[8px] border border-primary/30 bg-primary/10 text-primary shadow-[0_0_28px_rgba(94, 106, 210, 0.25)]">
       <Icon name={meta.icon} size={22} />
     </div>
-    <p className="mt-4 text-sm font-semibold text-primary">{meta.eyebrow}</p>
-    <h1 className="mt-2 text-2xl font-bold text-foreground sm:text-3xl">{meta.title}</h1>
-    <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">{meta.description}</p>
+    <p className="mt-4 text-sm font-semibold text-primary">{isAr ? (meta.eyebrowAr || meta.eyebrow) : meta.eyebrow}</p>
+    <h1 className="mt-2 text-2xl font-bold text-foreground sm:text-3xl">{isAr ? (meta.titleAr || meta.title) : meta.title}</h1>
+    <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">{isAr ? (meta.descriptionAr || meta.description) : meta.description}</p>
   </div>
 );
 
@@ -272,13 +273,15 @@ const MiniStat = ({ label, value, icon }) => (
 
 const OnboardingScreen = () => {
   const navigate = useNavigate();
-  const { principal } = useAuth();
+  const { principal, googleUser, supabaseUser } = useAuth();
+  const { isAr, toggleLanguage } = useLanguage();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [currentTheme, setCurrentTheme] = useState('dark');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    picture: '',
     gender: '',
     bodyWeight: 70,
     alignmentScore: 0,
@@ -286,7 +289,7 @@ const OnboardingScreen = () => {
     successMetrics: [],
     focusAreas: [],
     workoutTime: '',
-    age: 30,
+    age: 25,
     height: 175,
     weight: 70,
     fitnessLevel: 'intermediate',
@@ -306,13 +309,21 @@ const OnboardingScreen = () => {
   }, []);
 
   useEffect(() => {
-    // Pre-fill from Google session if available
-    const googleUser = getSavedGoogleUser();
-    if (googleUser) {
+    // Pre-fill from Google session or AuthContext
+    const savedGoogle = getSavedGoogleUser();
+    const activeGoogle = googleUser || savedGoogle;
+    const activeSupabase = supabaseUser;
+
+    const emailToSet = activeGoogle?.email || activeSupabase?.email || '';
+    const nameToSet = activeGoogle?.name || activeSupabase?.name || activeSupabase?.full_name || '';
+    const pictureToSet = activeGoogle?.picture || activeSupabase?.picture || activeSupabase?.avatar_url || '';
+
+    if (emailToSet || nameToSet) {
       setFormData((prev) => ({
         ...prev,
-        name: prev.name || googleUser.name || '',
-        email: prev.email || googleUser.email || '',
+        name: prev.name || nameToSet,
+        email: prev.email || emailToSet,
+        picture: prev.picture || pictureToSet,
       }));
     }
 
@@ -324,12 +335,18 @@ const OnboardingScreen = () => {
           navigate('/dashboard', { replace: true });
           return;
         }
-        setFormData((prev) => ({ ...prev, ...user }));
+        setFormData((prev) => ({
+          ...prev,
+          ...user,
+          name: user.name || prev.name || nameToSet,
+          email: user.email || prev.email || emailToSet,
+          picture: user.picture || prev.picture || pictureToSet,
+        }));
       } catch (error) {
         console.error('Error parsing user data:', error);
       }
     }
-  }, [navigate]);
+  }, [googleUser, supabaseUser, navigate]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -440,44 +457,89 @@ const OnboardingScreen = () => {
       case 1:
         return (
           <div className="mx-auto max-w-2xl space-y-5">
-            {/* Quick Google Sign In */}
-            <div className="p-3.5 rounded-xl border border-border/80 bg-white/[0.04] space-y-2">
-              <div>
-                <div className="text-xs font-bold text-foreground">Sign in with Google</div>
-                <div className="text-[11px] text-muted-foreground">Pre-fill info and synchronize your mesocycle to the cloud</div>
+            {/* Quick Google Sign In or Connected Google Badge */}
+            {formData.email ? (
+              <div className="flex items-center gap-3.5 p-4 rounded-xl border border-primary/35 bg-primary/10 shadow-[0_4px_20px_rgba(250,168,2,0.12)]">
+                {formData.picture ? (
+                  <img
+                    src={formData.picture}
+                    alt="Google Profile"
+                    className="w-12 h-12 rounded-full border-2 border-primary object-cover shadow-sm"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold border border-primary/40">
+                    <Icon name="Mail" size={22} />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <Icon name="CheckCircle2" size={15} className="text-primary" />
+                    <span className="text-xs font-bold text-primary uppercase tracking-wider">
+                      {isAr ? 'حساب Google متصل وموثق' : 'Verified Google Account'}
+                    </span>
+                  </div>
+                  <p className="text-sm font-black text-foreground truncate">{formData.email}</p>
+                  {formData.name && (
+                    <p className="text-xs text-muted-foreground truncate">{formData.name}</p>
+                  )}
+                </div>
               </div>
-              <GoogleSignInButton
-                text="Link Google Account"
-                size="md"
-                fullWidth
-                onSuccess={(u) => setFormData(p => ({ ...p, name: u.name || p.name, email: u.email || p.email }))}
-              />
-            </div>
+            ) : (
+              <div className="p-4 rounded-xl border border-border/80 bg-white/[0.04] space-y-2">
+                <div>
+                  <div className="text-xs font-bold text-foreground">
+                    {isAr ? 'تسجيل الدخول عبر Google' : 'Sign in with Google'}
+                  </div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {isAr
+                      ? 'لربط بريدك الإلكتروني ومزامنة خطتك التدريبية عبر السحابة'
+                      : 'Pre-fill info and synchronize your mesocycle to the cloud'}
+                  </div>
+                </div>
+                <GoogleSignInButton
+                  text={isAr ? 'ربط حساب Google' : 'Link Google Account'}
+                  size="md"
+                  fullWidth
+                  onSuccess={(u) =>
+                    setFormData((p) => ({
+                      ...p,
+                      name: u.name || p.name,
+                      email: u.email || p.email,
+                      picture: u.picture || p.picture,
+                    }))
+                  }
+                />
+              </div>
+            )}
 
             <div className="grid gap-4 sm:grid-cols-2">
               <Input
-                label="Full name"
+                label={isAr ? "الاسم الكامل" : "Full name"}
                 value={formData.name}
                 onChange={(event) => handleInputChange('name', event.target.value)}
-                placeholder="Enter your full name"
+                placeholder={isAr ? "اكتب اسمك الكامل" : "Enter your full name"}
                 required
                 prefix={<Icon name="User" size={17} className="text-muted-foreground" />}
                 className="h-12 rounded-[8px] border-border/80 bg-white/[0.035] text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/60"
               />
               <Input
-                label="Email address"
+                label={isAr ? "البريد الإلكتروني" : "Email address"}
                 type="email"
                 value={formData.email}
                 onChange={(event) => handleInputChange('email', event.target.value)}
-                placeholder="Optional"
+                placeholder={isAr ? "بريدك الإلكتروني" : "name@example.com"}
+                required
                 prefix={<Icon name="Mail" size={17} className="text-muted-foreground" />}
                 className="h-12 rounded-[8px] border-border/80 bg-white/[0.035] text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/60"
               />
             </div>
             <InsightStrip
               icon="ShieldCheck"
-              title="Editable later"
-              text="Your onboarding answers shape the starting plan. You can refine them anytime from your profile."
+              title={isAr ? "بياناتك مشفرة ومحفوظة" : "Editable later"}
+              text={isAr
+                ? "إجاباتك تحدد نقطة البداية لخطتك التدريبية والغذائية. يمكنك تعديل أي بيانات لاحقاً من ملفك الشخصي."
+                : "Your onboarding answers shape the starting plan. You can refine them anytime from your profile."
+              }
             />
           </div>
         );
@@ -503,7 +565,13 @@ const OnboardingScreen = () => {
           </div>
         );
 
-      case 3:
+      case 3: {
+        const liveBmi = calculateBMI(formData.bodyWeight, formData.height || 175);
+        const idealMinWeight = Math.round(18.5 * Math.pow((formData.height || 175) / 100, 2));
+        const idealMaxWeight = Math.round(24.9 * Math.pow((formData.height || 175) / 100, 2));
+        const liveBmr = calculateBMR(formData.gender, formData.bodyWeight, formData.height || 175, formData.age || 25);
+        const liveTdee = calculateTDEE(liveBmr, formData.activityLevel || 'moderate');
+
         return (
           <div className="mx-auto grid max-w-4xl gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
             <div className="overflow-hidden rounded-[8px] border border-border/80 bg-white/[0.025] p-4">
@@ -511,32 +579,67 @@ const OnboardingScreen = () => {
                 <img src={weightProfile.image} alt="" className="h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
-                  <p className="text-4xl font-bold text-primary">{Math.round(formData.bodyWeight)} kg</p>
+                  <p className="text-4xl font-bold text-primary">{Math.round(formData.bodyWeight)} {isAr ? 'كجم' : 'kg'}</p>
                   <p className="mt-1 text-base font-semibold text-foreground">{weightProfile.label}</p>
                 </div>
               </div>
             </div>
             <div className="space-y-4">
               <RangeControl
-                label="Current weight"
+                label={isAr ? "الوزن الحالي" : "Current weight"}
                 value={Math.round(formData.bodyWeight)}
-                unit="kg"
+                unit={isAr ? "كجم" : "kg"}
                 min={30}
                 max={200}
-                minLabel="30 kg"
-                middleLabel="115 kg"
-                maxLabel="200 kg"
+                minLabel={isAr ? "30 كجم" : "30 kg"}
+                middleLabel={isAr ? "115 كجم" : "115 kg"}
+                maxLabel={isAr ? "200 كجم" : "200 kg"}
                 gradient="linear-gradient(90deg, #FAA802 0%, #FAA802 100%)"
                 onChange={(value) => handleInputChange('bodyWeight', value)}
               />
+
+              {/* Smart Dynamic Body Diagnostics Card */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-[8px] border border-border/80 bg-background/50 p-3.5">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+                    <Icon name="Activity" size={15} style={{ color: liveBmi.color }} />
+                    <span className="font-semibold">{isAr ? 'مؤشر كتلة الجسم (BMI)' : 'BMI Index'}</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-black text-foreground">{liveBmi.bmi}</span>
+                    <span
+                      className="text-[11px] font-bold px-2 py-0.5 rounded-md"
+                      style={{ backgroundColor: `${liveBmi.color}25`, color: liveBmi.color }}
+                    >
+                      {isAr ? liveBmi.labelAr : liveBmi.labelEn}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="rounded-[8px] border border-border/80 bg-background/50 p-3.5">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+                    <Icon name="Target" size={15} className="text-primary" />
+                    <span className="font-semibold">{isAr ? 'الوزن المثالي لطولك' : 'Ideal Weight Range'}</span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-xl font-black text-primary">{idealMinWeight} - {idealMaxWeight}</span>
+                    <span className="text-xs font-semibold text-muted-foreground">{isAr ? 'كجم' : 'kg'}</span>
+                  </div>
+                </div>
+              </div>
+
               <InsightStrip
-                icon="Activity"
-                title={weightProfile.note}
-                text="Weight is only one signal. Your target, level, schedule, and success markers will make the plan more precise."
+                icon="Sparkles"
+                title={isAr ? `تشخيص ذكي: ${liveBmi.labelAr}` : `Smart Analysis: ${liveBmi.labelEn}`}
+                text={isAr
+                  ? `بناءً على وزنك (${Math.round(formData.bodyWeight)} كجم)، يحرق جسمك بالراحة التامة حوالي ${liveBmr.toLocaleString()} سعرة (BMR) ومع نمط حركتك يستهلك قرابة ${liveTdee.toLocaleString()} سعرة يومياً (TDEE).`
+                  : `At ${Math.round(formData.bodyWeight)} kg, your body burns ~${liveBmr.toLocaleString()} kcal at complete rest (BMR) and ~${liveTdee.toLocaleString()} kcal with your daily activity (TDEE).`
+                }
               />
             </div>
           </div>
         );
+      }
 
       case 4:
         return (
@@ -595,57 +698,136 @@ const OnboardingScreen = () => {
           </div>
         );
 
-      case 6:
+      case 6: {
+        const liveBmr = calculateBMR(formData.gender, formData.bodyWeight, formData.height, formData.age);
+        const liveTdee = calculateTDEE(liveBmr, formData.activityLevel);
+        const idealMinWeight = Math.round(18.5 * Math.pow(formData.height / 100, 2));
+        const idealMaxWeight = Math.round(24.9 * Math.pow(formData.height / 100, 2));
+        const weightDiff = Math.round(formData.weight - formData.bodyWeight);
+        const targetBmi = calculateBMI(formData.weight, formData.height);
+
         return (
-          <div className="mx-auto grid max-w-4xl gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
+          <div className="mx-auto grid max-w-5xl gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="space-y-4">
               <RangeControl
-                label="Height"
+                label={isAr ? "الطول" : "Height"}
                 value={Math.round(formData.height)}
-                unit="cm"
+                unit={isAr ? "سم" : "cm"}
                 min={140}
                 max={220}
-                minLabel="140 cm"
-                middleLabel="180 cm"
-                maxLabel="220 cm"
+                minLabel={isAr ? "140 سم" : "140 cm"}
+                middleLabel={isAr ? "180 سم" : "180 cm"}
+                maxLabel={isAr ? "220 سم" : "220 cm"}
                 gradient="linear-gradient(90deg, #FAA802 0%, #FAA802 100%)"
                 onChange={(value) => handleInputChange('height', value)}
               />
               <RangeControl
-                label="Age"
+                label={isAr ? "السن" : "Age"}
                 value={Math.round(formData.age)}
-                unit="years"
+                unit={isAr ? "سنة" : "years"}
                 min={15}
                 max={80}
-                minLabel="15"
-                middleLabel="48"
-                maxLabel="80"
+                minLabel={isAr ? "15 سنة" : "15"}
+                middleLabel={isAr ? "48 سنة" : "48"}
+                maxLabel={isAr ? "80 سنة" : "80"}
                 gradient="linear-gradient(90deg, #FAA802 0%, #FAA802 100%)"
                 onChange={(value) => handleInputChange('age', value)}
               />
               <RangeControl
-                label="Target weight"
+                label={isAr ? "الوزن المستهدف" : "Target weight"}
                 value={Math.round(formData.weight)}
-                unit="kg"
+                unit={isAr ? "كجم" : "kg"}
                 min={30}
                 max={200}
-                minLabel="30 kg"
-                middleLabel="115 kg"
-                maxLabel="200 kg"
+                minLabel={isAr ? "30 كجم" : "30 kg"}
+                middleLabel={isAr ? "115 كجم" : "115 kg"}
+                maxLabel={isAr ? "200 كجم" : "200 kg"}
                 gradient="linear-gradient(90deg, #FAA802 0%, #FAA802 100%)"
                 onChange={(value) => handleInputChange('weight', value)}
               />
+
+              <InsightStrip
+                icon="Brain"
+                title={isAr ? "التحليل الذكي للهدف" : "Smart Target Analysis"}
+                text={isAr
+                  ? weightDiff < 0
+                    ? `هدفك خسارة ${Math.abs(weightDiff)} كجم للوصول إلى ${Math.round(formData.weight)} كجم (BMI مستهدف: ${targetBmi.bmi} - ${targetBmi.labelAr}). سيعتمد برنامجك على عجز سعرات تدريجي ومستدام.`
+                    : weightDiff > 0
+                    ? `هدفك اكتساب ${weightDiff} كجم كتلة عضلية للوصول إلى ${Math.round(formData.weight)} كجم (BMI مستهدف: ${targetBmi.bmi} - ${targetBmi.labelAr}). سيعتمد برنامجك على فائض سعرات وتضخيم نظيف.`
+                    : `هدفك هو الحفاظ على وزنك الحالي (${Math.round(formData.bodyWeight)} كجم) مع إعادة تشكيل الجسم وتفصيل العضلات.`
+                  : weightDiff < 0
+                    ? `Your goal is shedding ${Math.abs(weightDiff)} kg fat to reach ${Math.round(formData.weight)} kg (target BMI: ${targetBmi.bmi} - ${targetBmi.labelEn}).`
+                    : weightDiff > 0
+                    ? `Your goal is building ${weightDiff} kg clean muscle to reach ${Math.round(formData.weight)} kg (target BMI: ${targetBmi.bmi} - ${targetBmi.labelEn}).`
+                    : `Your goal is body recomposition and athletic tone at your current weight.`
+                }
+              />
             </div>
-            <div className="rounded-[8px] border border-border/80 bg-white/[0.025] p-4">
-              <p className="mb-4 text-sm font-semibold text-foreground">Profile snapshot</p>
-              <div className="space-y-3">
-                <MiniStat icon="Ruler" label="Height" value={`${Math.round(formData.height)} cm`} />
-                <MiniStat icon="Calendar" label="Age" value={`${Math.round(formData.age)} years`} />
-                <MiniStat icon="Crosshair" label="Target" value={`${Math.round(formData.weight)} kg`} />
+
+            {/* Smart Real-Time Bio-Calibration Sidebar */}
+            <div className="rounded-[8px] border border-primary/25 bg-gradient-to-b from-card/90 via-card/70 to-card/90 p-5 shadow-lg space-y-4">
+              <div className="flex items-center justify-between border-b border-border/80 pb-3">
+                <div className="flex items-center gap-2">
+                  <Icon name="Sparkles" size={17} className="text-primary" />
+                  <span className="text-sm font-bold text-foreground">
+                    {isAr ? 'المعايرة الحيوية الذكية' : 'Smart Bio-Calibration'}
+                  </span>
+                </div>
+                <span className="text-[10px] font-bold text-primary bg-primary/15 border border-primary/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Live
+                </span>
+              </div>
+
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-background/60 border border-border/60">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Icon name="HeartPulse" size={15} className="text-rose-400" />
+                    <span>{isAr ? 'معدل الحرق الأساسي (BMR)' : 'Base Burn (BMR)'}</span>
+                  </div>
+                  <span className="text-sm font-black text-foreground">
+                    {liveBmr.toLocaleString()} <span className="text-[10px] text-muted-foreground font-normal">kcal</span>
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-background/60 border border-border/60">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Icon name="Flame" size={15} className="text-amber-400" />
+                    <span>{isAr ? 'الاستهلاك اليومي (TDEE)' : 'Daily Burn (TDEE)'}</span>
+                  </div>
+                  <span className="text-sm font-black text-foreground">
+                    {liveTdee.toLocaleString()} <span className="text-[10px] text-muted-foreground font-normal">kcal</span>
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-background/60 border border-border/60">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Icon name="Target" size={15} className="text-primary" />
+                    <span>{isAr ? 'الوزن المثالي لطولك' : 'Ideal Range'}</span>
+                  </div>
+                  <span className="text-xs font-black text-primary">
+                    {idealMinWeight} - {idealMaxWeight} {isAr ? 'كجم' : 'kg'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-primary/20 bg-primary/8 p-3.5">
+                <div className="text-xs font-bold text-primary mb-1">
+                  {isAr ? 'المدة التقديرية للإنجاز' : 'Estimated Timeline'}
+                </div>
+                <div className="text-xs text-foreground font-semibold leading-relaxed">
+                  {Math.abs(weightDiff) >= 1 ? (
+                    isAr
+                      ? `تحتاج حوالي ${Math.max(2, Math.round(Math.abs(weightDiff) / 0.5))} أسابيع بمعدل نزول/زيادة صحي ~0.5 كجم أسبوعياً.`
+                      : `~${Math.max(2, Math.round(Math.abs(weightDiff) / 0.5))} weeks at a healthy ~0.5 kg/week progression.`
+                  ) : (
+                    isAr ? 'أنت في نطاق وزنك المستهدف تماماً!' : 'You are right at your target weight!'
+                  )}
+                </div>
               </div>
             </div>
           </div>
         );
+      }
 
       case 7:
         return (
@@ -1047,10 +1229,13 @@ const OnboardingScreen = () => {
   };
 
   return (
-    <div className={classNames(
-      'min-h-screen overflow-hidden bg-background text-foreground',
-      currentTheme === 'dark' && 'dark'
-    )}>
+    <div
+      dir={isAr ? 'rtl' : 'ltr'}
+      className={classNames(
+        'min-h-screen overflow-hidden bg-background text-foreground',
+        currentTheme === 'dark' && 'dark'
+      )}
+    >
       <div className="relative min-h-screen">
         <div
           className="pointer-events-none absolute inset-0 opacity-90"
@@ -1063,9 +1248,31 @@ const OnboardingScreen = () => {
 
         <div className="relative mx-auto flex min-h-screen w-full max-w-5xl px-4 py-5 lg:px-6">
           <main className="flex min-w-0 flex-1 flex-col justify-center py-2 lg:py-6">
+            {/* Top Bar: Brand & Language Switcher */}
+            <div className="mb-3 flex items-center justify-between px-1">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 text-primary shadow-sm">
+                  <Icon name="Zap" size={17} />
+                </div>
+                <span className="text-base font-black tracking-tight text-foreground">
+                  ATOS<span className="text-primary">fit</span>
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={toggleLanguage}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-card/80 px-3 py-1.5 text-xs font-bold text-foreground transition hover:border-primary/50 shadow-sm"
+              >
+                <Icon name="Languages" size={14} className="text-primary" />
+                <span>{isAr ? 'English' : 'عربي'}</span>
+              </button>
+            </div>
+
             <div className="mb-4 rounded-[8px] border border-border/70 bg-card/70 p-3 shadow-[0_12px_34px_rgba(0,0,0,0.16)] backdrop-blur">
               <div className="mb-2 flex items-center justify-between gap-4">
-                <span className="text-sm font-semibold text-foreground">Step {currentStep} of {totalSteps}</span>
+                <span className="text-sm font-semibold text-foreground">
+                  {isAr ? `الخطوة ${currentStep} من ${totalSteps}` : `Step ${currentStep} of ${totalSteps}`}
+                </span>
                 <span className="text-sm font-semibold text-primary">{progressPercent}%</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-muted">
@@ -1077,7 +1284,7 @@ const OnboardingScreen = () => {
             </div>
 
             <section className="rounded-[8px] border border-border/80 bg-card/88 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.24)] backdrop-blur sm:p-7 lg:p-8">
-              <StepHeader meta={activeMeta} />
+              <StepHeader meta={activeMeta} isAr={isAr} />
               <div className="mt-8">{renderStep()}</div>
 
               <div className="mt-8 flex flex-col gap-3 border-t border-border/80 pt-5 sm:flex-row sm:items-center sm:justify-between">
@@ -1087,8 +1294,8 @@ const OnboardingScreen = () => {
                   disabled={currentStep === 1}
                   className="h-11 rounded-[8px] border-border/80 bg-white/[0.025] px-4"
                 >
-                  <Icon name="ChevronLeft" size={16} />
-                  <span className="ml-2">Previous</span>
+                  <Icon name={isAr ? "ChevronRight" : "ChevronLeft"} size={16} />
+                  <span className={isAr ? "mr-2" : "ml-2"}>{isAr ? "السابق" : "Previous"}</span>
                 </Button>
 
                 {currentStep === totalSteps ? (
@@ -1096,19 +1303,19 @@ const OnboardingScreen = () => {
                     onClick={handleComplete}
                     disabled={!isStepValid() || isLoading}
                     loading={isLoading}
-                    className="h-11 rounded-[8px] px-5"
+                    className="h-11 rounded-[8px] px-5 font-bold"
                   >
                     <Icon name="Check" size={16} />
-                    <span className="ml-2">Complete setup</span>
+                    <span className={isAr ? "mr-2" : "ml-2"}>{isAr ? "إتمام الخطة والبدء" : "Complete setup"}</span>
                   </Button>
                 ) : (
                   <Button
                     onClick={handleNext}
                     disabled={!isStepValid()}
-                    className="h-11 rounded-[8px] px-5"
+                    className="h-11 rounded-[8px] px-5 font-bold"
                   >
-                    <span>Continue</span>
-                    <Icon name="ChevronRight" size={16} className="ml-2" />
+                    <span>{isAr ? "متابعة" : "Continue"}</span>
+                    <Icon name={isAr ? "ChevronLeft" : "ChevronRight"} size={16} className={isAr ? "mr-2" : "ml-2"} />
                   </Button>
                 )}
               </div>
@@ -1119,7 +1326,7 @@ const OnboardingScreen = () => {
               onClick={handleSkip}
               className="mx-auto mt-4 rounded-[8px] px-4 py-2 text-sm text-muted-foreground transition hover:bg-white/[0.04] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
             >
-              Skip for now
+              {isAr ? "تخطي الآن والبدء لاحقاً" : "Skip for now"}
             </button>
           </main>
         </div>
