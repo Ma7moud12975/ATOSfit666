@@ -9,7 +9,7 @@ import ChatHistory from './components/ChatHistory';
 import { saveConversationTurn, getConversationMessages, getConversations } from '../../utils/api/chatApi';
 import { getAccountId } from '../../utils/localAccountStorage';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { getChatbotApiKey, getChatbotModelName } from '../../utils/aiConfig';
+import { getChatbotApiKey, getChatbotModelName, buildFitnessCoachPrompt } from '../../utils/aiConfig';
 import '../../styles/bento-dashboard.css';
 
 const ChatPage = () => {
@@ -108,6 +108,18 @@ const ChatPage = () => {
         throw new Error('Gemini API key is missing. Add a fresh VITE_CHATBOT_API_KEY to .env.');
       }
 
+      let userProfile = null;
+      try {
+        const rawUser = localStorage.getItem('user');
+        if (rawUser) userProfile = JSON.parse(rawUser);
+      } catch {}
+
+      const promptText = buildFitnessCoachPrompt({
+        message,
+        recentConversation,
+        userProfile
+      });
+
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${CHATBOT_MODEL_NAME}:generateContent?key=${CHATBOT_API_KEY}`;
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -115,18 +127,10 @@ const ChatPage = () => {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `You are ATOS fit, a helpful AI fitness coach.
-Answer in plain text only. Do not use Markdown formatting or symbols such as #, ##, ###, **, *, -, or ---.
-Use short paragraphs or numbered lines without special symbols.
-Reply in ${language === 'ar' ? 'Arabic unless the user asks for another language' : 'English unless the user asks for another language'}.
-
-Conversation so far:
-${recentConversation || 'This is the first user turn in this chat.'}
-
-User message: ${message}`
+              text: promptText
             }]
           }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+          generationConfig: { temperature: 0.3, maxOutputTokens: 1024 }
         })
       });
 
