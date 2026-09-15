@@ -1,11 +1,20 @@
 /**
  * ATOS fit AI & Gemini Configuration & Strict Guard System
  * Ensures the AI Coach NEVER leaves the fitness & nutrition domain,
- * provides zero-hallucination refusals, and mirrors user language.
+ * provides zero-hallucination refusals, mirrors user language,
+ * and seamlessly handles model failover across high-availability Gemini models.
  */
 
 export const DEFAULT_CHATBOT_API_KEY = 'AQ.Ab8RN6K3qSM-0g7LcfL1ka7OE7rgqfSxMGZ8wiEKySoSxkBOlw';
-export const DEFAULT_CHATBOT_MODEL = 'gemini-3.6-flash';
+export const DEFAULT_CHATBOT_MODEL = 'gemini-3.5-flash';
+
+// Resilient pool of active models to automatically failover if one hits rate limits (429) or high demand (503)
+export const CANDIDATE_MODELS = [
+  'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-flash-lite-latest',
+  'gemini-3.6-flash'
+];
 
 export const NON_FITNESS_REFUSAL_AR = 'عذراً، أنا مدربك الرياضي في ATOS fit المتخصص حصرياً في اللياقة البدنية، التمارين الرياضية، والتغذية الصحية. لا يمكنني الإجابة على أي موضوع خارج هذا النطاق الرياضي. كيف يمكنني مساعدتك اليوم في تمرينك أو نظامك الغذائي؟';
 
@@ -125,4 +134,57 @@ CRITICAL DIRECTIVE 3: TONE AND FORMATTING
 - Plain text only. Do NOT use markdown symbols like #, ##, ###, **, *, -, or ---.
 - Keep responses compact, clean, and direct.
 ${profileSection}`;
+};
+
+/**
+ * Executes a Gemini generateContent request with automatic fallback cascade.
+ * If the primary model hits a 429 quota or 503 high-demand spike, it automatically
+ * retries the exact query on alternative active Gemini models seamlessly.
+ */
+export const callGeminiWithFallback = async (payload, apiKey, preferredModel) => {
+  const modelsToTry = [
+    preferredModel,
+    ...CANDIDATE_MODELS.filter(m => m !== preferredModel)
+  ].filter(Boolean);
+
+  let lastError = null;
+
+  for (const model of modelsToTry) {
+    try {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      // Check for quota or service availability errors to trigger auto-failover
+      const isQuotaOrDemandIssue =
+        response.status === 429 ||
+        response.status === 503 ||
+        data?.error?.code === 429 ||
+        data?.error?.code === 503 ||
+        data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+        data?.error?.status === 'UNAVAILABLE';
+
+      if (isQuotaOrDemandIssue) {
+        console.warn(`[AI Failover] Model ${model} returned ${response.status} (${data?.error?.message}). Falling over to next candidate...`);
+        lastError = new Error(data?.error?.message || `Model ${model} unavailable`);
+        continue;
+      }
+
+      if (!response.ok || data?.error) {
+        throw new Error(data?.error?.message || `Request failed with status ${response.status}`);
+      }
+
+      return { data, modelUsed: model };
+    } catch (err) {
+      console.warn(`[AI Failover] Error trying model ${model}:`, err.message);
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error('All AI service endpoints are currently busy. Please retry in a few moments.');
 };

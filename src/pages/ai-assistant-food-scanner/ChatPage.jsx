@@ -14,7 +14,8 @@ import {
   getChatbotModelName,
   isExplicitlyNonFitness,
   getNonFitnessRefusal,
-  buildFitnessSystemInstruction
+  buildFitnessSystemInstruction,
+  callGeminiWithFallback
 } from '../../utils/aiConfig';
 import '../../styles/bento-dashboard.css';
 
@@ -144,24 +145,16 @@ const ChatPage = () => {
         parts: [{ text: message }]
       });
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${CHATBOT_MODEL_NAME}:generateContent?key=${CHATBOT_API_KEY}`;
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemInstruction }]
-          },
-          contents: conversationTurns,
-          generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
-        })
-      });
+      const payload = {
+        system_instruction: {
+          parts: [{ text: systemInstruction }]
+        },
+        contents: conversationTurns,
+        generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
+      };
 
-      const data = await response.json();
-      if (data?.error) {
-        throw new Error(data.error.message || 'AI service error.');
-      }
-      if (!response.ok) throw new Error(`AI service request failed with status ${response.status}.`);
+      const { data } = await callGeminiWithFallback(payload, CHATBOT_API_KEY, CHATBOT_MODEL_NAME);
+
       let aiText = t('chat.fallback');
       if (Array.isArray(data?.candidates) && data.candidates.length > 0) {
         const parts = data.candidates[0]?.content?.parts;
@@ -194,7 +187,12 @@ const ChatPage = () => {
         }
       }
     } catch (error) {
-      setMessages(prev => [...prev, { id: Date.now() + 1, message: `Error: ${error.message}`, isUser: false, timestamp: new Date() }]);
+      console.error('AI chat error:', error);
+      const isQuota = error.message?.includes('quota') || error.message?.includes('429') || error.message?.includes('RESOURCE_EXHAUSTED');
+      const fallbackMsg = isQuota
+        ? (language === 'ar' ? 'الخدمة تشهد ضغطاً مؤقتاً، يرجى الانتظار بضع ثوانٍ والمحاولة ثانية.' : 'AI service is experiencing high temporary demand. Please wait a few seconds and retry.')
+        : `Error: ${error.message}`;
+      setMessages(prev => [...prev, { id: Date.now() + 1, message: fallbackMsg, isUser: false, timestamp: new Date() }]);
       setIsTyping(false);
     }
   };

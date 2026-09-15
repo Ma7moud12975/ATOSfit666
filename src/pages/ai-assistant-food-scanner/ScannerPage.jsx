@@ -12,7 +12,7 @@ import { buildFoodCoachPulse } from '../../utils/coachPulse';
 import { normalizeFoodAnalysis, parseFoodAnalysisResponse } from '../../utils/foodAnalysisNormalizer';
 import { useLanguage } from '../../contexts/LanguageContext';
 import MealLoggedFeedbackModal from './components/MealLoggedFeedbackModal';
-import { getChatbotApiKey, getChatbotModelName } from '../../utils/aiConfig';
+import { getChatbotApiKey, getChatbotModelName, callGeminiWithFallback } from '../../utils/aiConfig';
 import '../../styles/bento-dashboard.css';
 
 const ScannerPage = () => {
@@ -132,30 +132,17 @@ const ScannerPage = () => {
         throw new Error('Gemini API key is missing. Add a fresh VITE_CHATBOT_API_KEY to .env.');
       }
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${CHATBOT_MODEL_NAME}:generateContent?key=${CHATBOT_API_KEY}`;
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { inline_data: { mime_type: file.type, data: imageBase64 } },
-              { text: 'Analyze this food image and return one minified JSON object only. Do not use markdown, code fences, comments, or prose. Estimate all nutrition values for the visible serving; never omit macros. Use numeric grams/kcal only. Required fields: {"name":string,"calories":number,"protein":number,"carbohydrates":number,"fat":number,"sugar":number,"serving_size":string}.' }
-            ]
-          }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 1024, responseMimeType: 'application/json' }
-        })
-      });
+      const payload = {
+        contents: [{
+          parts: [
+            { inline_data: { mime_type: file.type, data: imageBase64 } },
+            { text: 'Analyze this food image and return one minified JSON object only. Do not use markdown, code fences, comments, or prose. Estimate all nutrition values for the visible serving; never omit macros. Use numeric grams/kcal only. Required fields: {"name":string,"calories":number,"protein":number,"carbohydrates":number,"fat":number,"sugar":number,"serving_size":string}.' }
+          ]
+        }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 1024, responseMimeType: 'application/json' }
+      };
 
-      const data = await response.json();
-
-      if (data?.error) {
-        throw new Error(data.error.message || 'Food analysis API error.');
-      }
-
-      if (!response.ok) {
-        throw new Error(`Food analysis API request failed with status ${response.status}.`);
-      }
+      const { data } = await callGeminiWithFallback(payload, CHATBOT_API_KEY, CHATBOT_MODEL_NAME);
 
       let result = null;
       let rawText = '';

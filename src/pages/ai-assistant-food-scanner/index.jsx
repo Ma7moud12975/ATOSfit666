@@ -20,7 +20,8 @@ import {
   getChatbotModelName,
   isExplicitlyNonFitness,
   getNonFitnessRefusal,
-  buildFitnessSystemInstruction
+  buildFitnessSystemInstruction,
+  callGeminiWithFallback
 } from '../../utils/aiConfig';
 
 const AIAssistantFoodScanner = ({ chatOnly = false }) => {
@@ -293,25 +294,16 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
         parts: [{ text: message }]
       });
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${CHATBOT_MODEL_NAME}:generateContent?key=${CHATBOT_API_KEY}`;
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+      const payload = {
+        system_instruction: {
+          parts: [{ text: systemInstruction }]
         },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemInstruction }]
-          },
-          contents: conversationTurns,
-          generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
-        })
-      });
-      const data = await response.json();
-      if (data?.error) {
-        throw new Error(data.error.message || 'AI service error.');
-      }
-      if (!response.ok) throw new Error(`AI service request failed with status ${response.status}.`);
+        contents: conversationTurns,
+        generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
+      };
+
+      const { data } = await callGeminiWithFallback(payload, CHATBOT_API_KEY, CHATBOT_MODEL_NAME);
+
       let aiText = 'Sorry, no response from AI.';
       if (Array.isArray(data?.candidates) && data.candidates.length > 0) {
         const parts = data.candidates[0]?.content?.parts;
@@ -336,9 +328,14 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
       };
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
+      console.error('AI chat error:', error);
+      const isQuota = error.message?.includes('quota') || error.message?.includes('429') || error.message?.includes('RESOURCE_EXHAUSTED');
+      const fallbackMsg = isQuota
+        ? 'الخدمة تشهد ضغطاً مؤقتاً، يرجى الانتظار بضع ثوانٍ والمحاولة ثانية.'
+        : 'Error contacting AI service.';
       const aiMessage = {
         id: Date.now() + 1,
-        message: 'Error contacting AI service.',
+        message: fallbackMsg,
         isUser: false,
         timestamp: new Date()
       };
