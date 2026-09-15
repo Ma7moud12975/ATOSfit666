@@ -628,7 +628,7 @@ export default function Dashboard() {
                       <span style={{ fontSize:'.75rem', color:'#FAA802', fontWeight:700 }}>{detail}</span>
                     </div>
                     <div style={{ height:5, borderRadius:999, background:'var(--bento-field)' }}>
-                      <div style={{ height:'100%', borderRadius:999, background:'linear-gradient(90deg, #FAA802, #FBB502)', width:`${val}%`, transition:'width 1s ease' }} />
+                      <div style={{ height:'100%', borderRadius:999, background:'linear-gradient(90deg, #FFC107 0%, #FAA802 50%, #FF6B00 100%)', width:`${val}%`, transition:'width 1s ease' }} />
                     </div>
                   </div>
                 ))}

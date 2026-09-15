@@ -298,8 +298,12 @@
 .mission-progress-track div {
   height:100%;
   border-radius:999px;
-  background:linear-gradient(90deg,#FAA802,#FBB502,#9DA8FF);
+  background:linear-gradient(90deg, #FFC107 0%, #FAA802 45%, #FF6B00 100%);
+  box-shadow: 0 0 10px rgba(250, 168, 2, 0.35);
   transition:width .5s ease;
+}
+[dir="rtl"] .mission-progress-track div {
+  background:linear-gradient(270deg, #FFC107 0%, #FAA802 45%, #FF6B00 100%);
 }
 .mission-list {
   display:grid;
