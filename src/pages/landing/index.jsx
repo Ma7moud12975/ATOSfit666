@@ -5,17 +5,15 @@ import { useAuth } from '../../contexts/AuthContext';
 import InteractiveImage from '../../components/InteractiveImage';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { applyTheme, getSavedTheme } from '../../utils/theme';
-import AuthModal from '../../components/auth/AuthModal';
 import '../../styles/bento-dashboard.css';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const { loading: authLoading } = useAuth();
+  const { isAuthenticated, supabaseUser, loading: authLoading } = useAuth();
   const { language, toggleLanguage } = useLanguage();
   const [theme, setTheme] = useState(getSavedTheme);
   const [isVisible, setIsVisible] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [authModal, setAuthModal] = useState({ isOpen: false, mode: 'login' });
 
   useEffect(() => {
     setIsVisible(true);
@@ -228,11 +226,15 @@ const LandingPage = () => {
   ];
 
   const handleGetStarted = () => {
-    navigate('/login-screen?mode=register');
+    if (isAuthenticated && supabaseUser?.id) {
+      navigate('/dashboard');
+    } else {
+      navigate('/register-screen');
+    }
   };
 
   const handleLogin = () => {
-    navigate('/login-screen?mode=login');
+    navigate('/login-screen');
   };
 
   return (
@@ -324,18 +326,30 @@ const LandingPage = () => {
               <Icon name="Languages" size={16} />
               <span className="font-bold">{isAr ? 'EN' : 'AR'}</span>
             </button>
-            <button
-              onClick={handleLogin}
-              className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-semibold transition-colors text-xs sm:text-sm px-3 py-2"
-            >
-              {landingCopy.signIn}
-            </button>
-            <button
-              onClick={handleGetStarted}
-              className="inline-flex items-center justify-center bg-gradient-to-r from-[#FAA802] to-[#FB9202] hover:from-[#FBB502] hover:to-[#FAA802] text-[#08080A] px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold shadow-[0_0_20px_rgba(250, 168, 2,0.35)] hover:shadow-[0_0_25px_rgba(250, 168, 2,0.5)] transition-all"
-            >
-              {landingCopy.signUp}
-            </button>
+            {isAuthenticated && supabaseUser?.id ? (
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#FAA802] to-[#FB9202] hover:from-[#FBB502] hover:to-[#FAA802] text-[#08080A] px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold shadow-[0_0_20px_rgba(250,168,2,0.35)] transition-all"
+              >
+                <Icon name="LayoutDashboard" size={16} />
+                <span>{isAr ? 'لوحة التحكم' : 'Dashboard'}</span>
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handleLogin}
+                  className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-semibold transition-colors text-xs sm:text-sm px-3 py-2"
+                >
+                  {landingCopy.signIn}
+                </button>
+                <button
+                  onClick={handleGetStarted}
+                  className="inline-flex items-center justify-center bg-gradient-to-r from-[#FAA802] to-[#FB9202] hover:from-[#FBB502] hover:to-[#FAA802] text-[#08080A] px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold shadow-[0_0_20px_rgba(250,168,2,0.35)] hover:shadow-[0_0_25px_rgba(250,168,2,0.5)] transition-all"
+                >
+                  {landingCopy.signUp}
+                </button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Toggle Button */}
@@ -408,24 +422,39 @@ const LandingPage = () => {
               >
                 {landingCopy.about}
               </button>
-              <button
-                onClick={() => {
-                  handleGetStarted();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full bg-[#FAA802] text-[#08080A] py-3 rounded-xl text-sm font-extrabold shadow-[0_0_20px_rgba(250, 168, 2,0.35)] mt-3"
-              >
-                {landingCopy.signUp}
-              </button>
-              <button
-                onClick={() => {
-                  handleLogin();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full border border-black/10 dark:border-white/10 text-[#08080A] dark:text-white py-3 rounded-xl text-sm font-bold mt-2"
-              >
-                {landingCopy.signIn}
-              </button>
+              {isAuthenticated && supabaseUser?.id ? (
+                <button
+                  onClick={() => {
+                    navigate('/dashboard');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-[#FAA802] text-[#08080A] py-3 rounded-xl text-sm font-extrabold shadow-[0_0_20px_rgba(250, 168, 2,0.35)] mt-3 flex items-center justify-center gap-2"
+                >
+                  <Icon name="LayoutDashboard" size={18} />
+                  <span>{isAr ? 'لوحة التحكم' : 'Dashboard'}</span>
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      handleGetStarted();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-[#FAA802] text-[#08080A] py-3 rounded-xl text-sm font-extrabold shadow-[0_0_20px_rgba(250, 168, 2,0.35)] mt-3"
+                  >
+                    {landingCopy.signUp}
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleLogin();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full border border-black/10 dark:border-white/10 text-[#08080A] dark:text-white py-3 rounded-xl text-sm font-bold mt-2"
+                  >
+                    {landingCopy.signIn}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -480,9 +509,13 @@ const LandingPage = () => {
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
                 <button
                   onClick={handleGetStarted}
-                  className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(250, 168, 2,0.45)] hover:shadow-[0_0_50px_rgba(250, 168, 2,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-[#FAA802]/40"
+                  className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(250,168,2,0.45)] hover:shadow-[0_0_50px_rgba(250,168,2,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-[#FAA802]/40"
                 >
-                  <span>{landingCopy.start}</span>
+                  <span>
+                    {isAuthenticated && supabaseUser?.id
+                      ? (isAr ? 'الانتقال إلى لوحة التحكم' : 'Go to Dashboard')
+                      : landingCopy.start}
+                  </span>
                   <Icon 
                     name="ArrowRight" 
                     size={20} 
@@ -490,17 +523,19 @@ const LandingPage = () => {
                   />
                 </button>
 
-                <button
-                  onClick={handleLogin}
-                  className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-black/10 dark:border-white/10 hover:border-[#FAA802]/50 text-[#08080A] dark:text-[#FFFFFF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all"
-                >
-                  <Icon name="LogIn" size={18} className="text-[#FAA802]" />
-                  <span>{landingCopy.signIn}</span>
-                </button>
+                {!isAuthenticated && (
+                  <button
+                    onClick={handleLogin}
+                    className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-black/10 dark:border-white/10 hover:border-[#FAA802]/50 text-[#08080A] dark:text-[#FFFFFF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all"
+                  >
+                    <Icon name="LogIn" size={18} className="text-[#FAA802]" />
+                    <span>{landingCopy.signIn}</span>
+                  </button>
+                )}
 
                 <a
                   href="#how-it-works"
-                  className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-transparent hover:border-black/10 dark:hover:border-white/10 text-[#636779] dark:text-[#A8A8A8] hover:text-[#08080A] dark:hover:text-[#FFFFFF] transition-all"
+                  className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-transparent hover:border-black/10 dark:border-white/10 text-[#636779] dark:text-[#A8A8A8] hover:text-[#08080A] dark:hover:text-[#FFFFFF] transition-all"
                 >
                   <Icon name="Compass" size={18} className="text-[#FAA802]" />
                   <span>{landingCopy.howItWorks}</span>
@@ -767,13 +802,6 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
-
-      {/* Smart Seamless Authentication Modal */}
-      <AuthModal
-        isOpen={authModal.isOpen}
-        initialMode={authModal.mode}
-        onClose={() => setAuthModal({ isOpen: false, mode: 'login' })}
-      />
     </div>
   );
 };

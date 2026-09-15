@@ -10,33 +10,30 @@ import { useLanguage } from '../../contexts/LanguageContext';
 
 const RegisterScreen = () => {
   const [showWelcome, setShowWelcome] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, supabaseUser } = useAuth();
   const { isAr } = useLanguage();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
+    if (!authLoading && isAuthenticated && supabaseUser?.id) {
       const userData = localStorage.getItem('user');
+      let isCompleted = supabaseUser?.onboardingCompleted;
       if (userData) {
         try {
           const user = JSON.parse(userData);
-          if (user.onboardingCompleted) {
-            navigate('/dashboard', { replace: true });
-            return;
+          if (user.onboardingCompleted !== undefined) {
+            isCompleted = user.onboardingCompleted;
           }
         } catch {}
       }
-      navigate('/onboarding', { replace: true });
+      if (isCompleted) {
+        navigate('/dashboard', { replace: true });
+      } else {
+        navigate('/onboarding', { replace: true });
+      }
     }
-  }, [isAuthenticated, authLoading, navigate]);
-
-  // Trigger fade-in animation
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
+  }, [isAuthenticated, authLoading, supabaseUser, navigate]);
 
   const handleRegistrationSuccess = () => {
     setShowWelcome(true);
@@ -44,20 +41,20 @@ const RegisterScreen = () => {
 
   const handleWelcomeComplete = () => {
     setShowWelcome(false);
-    navigate('/onboarding');
+    navigate('/onboarding', { replace: true });
   };
 
-  // Show loading while auth is initializing
-  if (authLoading) {
+  // Show loading while auth is initializing or user is already authenticated
+  if (authLoading || (isAuthenticated && supabaseUser?.id)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen flex items-center justify-center bg-[#08080A]">
+        <div className="w-8 h-8 rounded-full border-2 border-[#FAA802] border-t-transparent animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className={`transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+    <div>
       <Helmet>
         <title>{isAr ? 'إنشاء حساب جديد - ATOS fit' : 'Create Account - ATOS fit'}</title>
         <meta name="description" content="Join ATOS fit and start your personalized fitness journey with AI-powered coaching, exercise tracking, and nutrition guidance." />

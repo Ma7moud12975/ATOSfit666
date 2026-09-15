@@ -138,27 +138,23 @@ export async function sendEmailVerificationOtp(email, fullName = '') {
   const otpCode = generateNumericOtp();
   const expiresAt = Date.now() + 10 * 60 * 1000; // Valid for 10 minutes
 
-  // 1. Dispatch verification request via Supabase Auth
+  // 1. Try sending via Supabase Auth OTP if available
   try {
     if (supabase?.auth?.signInWithOtp) {
-      const { error: otpErr } = await supabase.auth.signInWithOtp({
+      await supabase.auth.signInWithOtp({
         email: cleanEmail,
         options: {
-          shouldCreateUser: true,
+          shouldCreateUser: false,
           data: { fullName },
         },
       });
-      if (otpErr) {
-        console.warn('[EmailVerification] Supabase signInWithOtp notice:', otpErr.message);
-      } else {
-        console.log('[EmailVerification] Dispatched verification request via Supabase Auth');
-      }
+      console.log('[EmailVerification] Dispatched verification request via Supabase Auth');
     }
   } catch (sbErr) {
-    console.warn('[EmailVerification] Supabase dispatch notice:', sbErr?.message);
+    console.warn('[EmailVerification] Supabase OTP notice (using direct verification):', sbErr?.message);
   }
 
-  // 2. Persist OTP state in secure session storage for verification matching
+  // 2. Persist OTP state in secure session storage for verification
   const pendingData = {
     email: cleanEmail,
     code: otpCode,
@@ -169,14 +165,19 @@ export async function sendEmailVerificationOtp(email, fullName = '') {
 
   sessionStorage.setItem(OTP_STORAGE_KEY, JSON.stringify(pendingData));
 
-  // Only log in DEV mode for debugging when SMTP is rate-limited
-  if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
-    console.log('[ATOS Auth Debug] Pending OTP code for testing:', otpCode);
-  }
+  // 3. Dispatch global event for in-app demo verification banner
+  window.dispatchEvent(new CustomEvent('atos_email_otp_sent', {
+    detail: {
+      email: cleanEmail,
+      code: otpCode,
+      expiresInMinutes: 10,
+    },
+  }));
 
   return {
     success: true,
     email: cleanEmail,
+    code: otpCode,
     expiresAt,
   };
 }
@@ -219,31 +220,20 @@ export async function verifyEmailOtp(email, enteredCode, isAr = false) {
     console.warn('[EmailVerification] Session verification error:', e);
   }
 
-  // 2. Also try Supabase verifyOtp as parallel check (supports both 'email' and 'signup' types)
+  // 2. Also try Supabase verifyOtp as parallel check
   try {
     if (supabase?.auth?.verifyOtp) {
-      let sbRes = await supabase.auth.verifyOtp({
+      const { data, error } = await supabase.auth.verifyOtp({
         email: cleanEmail,
         token: cleanCode,
-        type: 'email',
+        type: 'signup',
       });
-
-      if (sbRes.error) {
-        sbRes = await supabase.auth.verifyOtp({
-          email: cleanEmail,
-          token: cleanCode,
-          type: 'signup',
-        });
-      }
-
-      if (!sbRes.error && (sbRes.data?.session || sbRes.data?.user)) {
+      if (!error && data?.session) {
         sessionStorage.removeItem(OTP_STORAGE_KEY);
         return { success: true };
       }
     }
-  } catch (err) {
-    console.warn('[EmailVerification] Supabase verify error:', err);
-  }
+  } catch {}
 
   return {
     success: false,

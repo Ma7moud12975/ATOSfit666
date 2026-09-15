@@ -94,40 +94,41 @@ export async function registerUser({ fullName, email, password, fitnessLevel = '
     registeredAt: now,
   };
 
-  // 2. Save account to Supabase users table
+  // 2. Save account to Supabase users table safely (no 42P10 onConflict bug)
   try {
     if (supabase && typeof supabase.from === 'function') {
-      const { error: insertErr } = await supabase
+      const { data: existingRow } = await supabase
         .from('users')
-        .insert({
-          id: userId,
-          email: cleanEmail,
-          full_name: fullName.trim(),
-          role: 'user',
-          fitness_level: fitnessLevel,
-          goals,
-          raw_user_meta_data: fullPayload,
-          date_joined: now,
-          last_login: now,
-        });
+        .select('id')
+        .eq('email', cleanEmail)
+        .maybeSingle();
 
-      if (insertErr) {
-        console.warn('[NativeAuth] Supabase insert notice:', insertErr.message);
-        // Fallback update if email exists
-        await supabase
+      const userDbRow = {
+        id: existingRow?.id || userId,
+        email: cleanEmail,
+        full_name: fullName.trim(),
+        role: 'user',
+        fitness_level: fitnessLevel,
+        goals: Array.isArray(goals) ? goals : [goals].filter(Boolean),
+        raw_user_meta_data: fullPayload,
+        date_joined: now,
+        last_login: now,
+      };
+
+      if (existingRow) {
+        const { error: updateErr } = await supabase
           .from('users')
-          .update({
-            full_name: fullName.trim(),
-            raw_user_meta_data: fullPayload,
-            last_login: now,
-          })
-          .eq('email', cleanEmail);
+          .update(userDbRow)
+          .eq('id', existingRow.id);
+        if (updateErr) console.warn('[NativeAuth] Supabase update notice:', updateErr.message);
       } else {
-        console.log('[NativeAuth] Account successfully created in Supabase:', cleanEmail);
+        const { error: insertErr } = await supabase
+          .from('users')
+          .insert(userDbRow);
+        if (insertErr) console.warn('[NativeAuth] Supabase insert notice:', insertErr.message);
       }
     }
   } catch (sbErr) {
-    if (sbErr.message && sbErr.message.includes('already registered')) throw sbErr;
     console.warn('[NativeAuth] Database save warning:', sbErr?.message);
   }
 
@@ -151,6 +152,8 @@ export async function registerUser({ fullName, email, password, fitnessLevel = '
     passwordHash,
     loggedInAt: now,
   }));
+
+  window.dispatchEvent(new CustomEvent('atos_user_profile_hydrated', { detail: userProfile }));
 
   return { success: true, user: userProfile, isNewUser: true };
 }
@@ -183,16 +186,32 @@ export async function loginUser({ email, password }) {
         const storedHash = storedMeta.passwordHash;
 
         // Verify password
-        if (storedHash && storedHash !== expectedHash) {
-          throw new Error('Incorrect password. Please try again.');
+        if (storedHash) {
+          if (storedHash !== expectedHash) {
+            throw new Error('Incorrect password. Please try again.');
+          }
+        } else {
+          // If no storedHash in raw_user_meta_data, test against Supabase Auth
+          let passwordValid = false;
+          if (supabase?.auth?.signInWithPassword) {
+            const { error: sbAuthErr } = await supabase.auth.signInWithPassword({
+              email: cleanEmail,
+              password,
+            });
+            if (!sbAuthErr) passwordValid = true;
+          }
+          if (!passwordValid) {
+            throw new Error('Incorrect password. Please try again.');
+          }
+          // Back-fill passwordHash in database so future logins are instant
+          storedMeta.passwordHash = expectedHash;
+          await supabase
+            .from('users')
+            .update({ raw_user_meta_data: storedMeta })
+            .eq('id', dbUser.id);
         }
 
         const profilePic = dbUser.profile_picture || storedMeta?.user?.profilePicture || storedMeta?.user?.avatar || '';
-        const isAlreadyOnboarded = Boolean(
-          storedMeta?.user?.onboardingCompleted === true ||
-          (dbUser.weight && dbUser.height)
-        );
-
         const baseUserObj = {
           ...(storedMeta.user || {}),
           id: dbUser.id,
@@ -206,7 +225,7 @@ export async function loginUser({ email, password }) {
           age: dbUser.age ?? storedMeta?.user?.age ?? '',
           height: dbUser.height ?? storedMeta?.user?.height ?? '',
           weight: dbUser.weight ?? storedMeta?.user?.weight ?? '',
-          onboardingCompleted: isAlreadyOnboarded,
+          onboardingCompleted: storedMeta?.user?.onboardingCompleted ?? true,
         };
         authenticatedUser = baseUserObj;
         cloudPayload = {

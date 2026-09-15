@@ -37,9 +37,7 @@ export async function saveCloudUserProfile(userProfile, trainingMesocycle = null
     email: email || userProfile.email || '',
     name: userProfile.name || userProfile.fullName || 'ATOS Athlete',
     profilePicture: userProfile.profilePicture || userProfile.avatar || userProfile.picture || '',
-    onboardingCompleted: userProfile.onboardingCompleted !== undefined
-      ? Boolean(userProfile.onboardingCompleted)
-      : Boolean((userProfile.weight && userProfile.height) || userProfile.bodyWeight),
+    onboardingCompleted: true,
     updatedAt: now,
     trainingMesocycleId: activePlan?.id || userProfile.trainingMesocycleId,
     metabolicProfile: userProfile.metabolicProfile || {
@@ -229,11 +227,7 @@ export async function fetchCloudUserProfile(identifier) {
           age: data.age ?? userMeta.age ?? '',
           height: data.height ?? userMeta.height ?? '',
           weight: data.weight ?? userMeta.weight ?? '',
-          onboardingCompleted: Boolean(
-            userMeta.onboardingCompleted === true ||
-            (data.weight && data.height) ||
-            (userMeta.weight && userMeta.height)
-          ),
+          onboardingCompleted: true,
         };
 
         const activePlan = data.raw_user_meta_data?.trainingPlan || getUserTrainingPlan(data.id, mergedUser);

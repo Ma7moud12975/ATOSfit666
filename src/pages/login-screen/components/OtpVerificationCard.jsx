@@ -7,6 +7,7 @@ import { verifyEmailOtp, sendEmailVerificationOtp } from '../../../utils/emailVe
 const OtpVerificationCard = ({
   email,
   fullName,
+  initialCode = '',
   onVerified,
   onBack,
 }) => {
@@ -16,6 +17,7 @@ const OtpVerificationCard = ({
   const [isLoading, setIsLoading] = useState(false);
   const [resendCountdown, setResendCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [activeCode, setActiveCode] = useState(initialCode);
   const inputRefs = useRef([]);
 
   // Setup countdown
@@ -28,32 +30,23 @@ const OtpVerificationCard = ({
     }
   }, [resendCountdown]);
 
+  // Listen for sent OTP event
+  useEffect(() => {
+    const handleOtpSent = (e) => {
+      if (e.detail?.code) {
+        setActiveCode(e.detail.code);
+      }
+    };
+    window.addEventListener('atos_email_otp_sent', handleOtpSent);
+    return () => window.removeEventListener('atos_email_otp_sent', handleOtpSent);
+  }, []);
+
   // Auto-focus first input
   useEffect(() => {
     if (inputRefs.current[0]) {
       inputRefs.current[0].focus();
     }
   }, []);
-
-  const triggerVerify = async (codeToVerify) => {
-    if (!codeToVerify || codeToVerify.length !== 6 || isLoading) return;
-    setIsLoading(true);
-    setError('');
-    try {
-      const res = await verifyEmailOtp(email, codeToVerify, isAr);
-      if (res.success) {
-        if (onVerified) await onVerified();
-      } else {
-        setError(res.error || (isAr ? 'رمز التحقق غير صحيح، يرجى التأكد وإعادة المحاولة' : 'Invalid verification code. Please try again.'));
-        inputRefs.current[0]?.focus();
-      }
-    } catch (err) {
-      setError(err.message || (isAr ? 'فشل التحقق من الرمز' : 'Verification failed'));
-      inputRefs.current[0]?.focus();
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleChange = (index, value) => {
     const char = value.slice(-1);
@@ -66,14 +59,6 @@ const OtpVerificationCard = ({
 
     if (char && index < 5 && inputRefs.current[index + 1]) {
       inputRefs.current[index + 1].focus();
-    }
-
-    // Auto-verify as soon as all 6 digits are typed
-    if (char && index === 5) {
-      const fullCode = newOtp.join('');
-      if (fullCode.length === 6 && newOtp.every((d) => d !== '')) {
-        triggerVerify(fullCode);
-      }
     }
   };
 
@@ -94,16 +79,24 @@ const OtpVerificationCard = ({
       setOtp(digits);
       inputRefs.current[5]?.focus();
       if (error) setError('');
-      triggerVerify(pasted);
+    }
+  };
+
+  const handleAutoFill = () => {
+    if (activeCode && activeCode.length === 6) {
+      setOtp(activeCode.split(''));
+      if (error) setError('');
+      inputRefs.current[5]?.focus();
     }
   };
 
   const handleResend = async () => {
-    if (!canResend || isLoading) return;
+    if (!canResend) return;
     setError('');
     setIsLoading(true);
     try {
-      await sendEmailVerificationOtp(email, fullName);
+      const res = await sendEmailVerificationOtp(email, fullName);
+      setActiveCode(res.code);
       setResendCountdown(60);
       setCanResend(false);
       setOtp(['', '', '', '', '', '']);
@@ -122,7 +115,21 @@ const OtpVerificationCard = ({
       setError(isAr ? 'يرجى إدخال رمز التحقق كاملاً (6 أرقام)' : 'Please enter all 6 digits of the code');
       return;
     }
-    await triggerVerify(fullCode);
+
+    setIsLoading(true);
+    setError('');
+    try {
+      const res = await verifyEmailOtp(email, fullCode, isAr);
+      if (res.success) {
+        if (onVerified) await onVerified();
+      } else {
+        setError(res.error || (isAr ? 'رمز التحقق غير صحيح' : 'Invalid verification code'));
+      }
+    } catch (err) {
+      setError(err.message || (isAr ? 'فشل التحقق من الرمز' : 'Verification failed'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -137,8 +144,8 @@ const OtpVerificationCard = ({
         </h3>
         <p className="text-xs text-gray-400 max-w-sm mx-auto leading-relaxed">
           {isAr
-            ? 'أدخل رمز التحقق المكون من 6 أرقام المرسل إلى بريدك الإلكتروني لتأكيد حسابك والانتقال للخطة:'
-            : 'Enter the 6-digit verification code sent to your email to verify your account and start your plan:'}
+            ? 'أدخل رمز التحقق المكون من 6 أرقام المرسل إلى بريدك لتأكيد حسابك الحقيقي:'
+            : 'Enter the 6-digit verification code sent to your email to activate your account:'}
         </p>
 
         {/* Email Badge & Edit Link */}
@@ -155,17 +162,27 @@ const OtpVerificationCard = ({
             <span>{isAr ? 'تعديل' : 'Edit'}</span>
           </button>
         </div>
-
-        {/* Security Inbox & Spam folder reminder */}
-        <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-400 pt-1">
-          <Icon name="ShieldCheck" size={13} className="text-emerald-400 flex-shrink-0" />
-          <span>
-            {isAr
-              ? 'يرجى مراجعة صندوق الوارد ومجلد الرسائل غير المرغوب فيها (Spam)'
-              : 'Please check your inbox and Spam / Junk folder'}
-          </span>
-        </div>
       </div>
+
+      {/* Demo / Rapid Testing Code Helper Banner */}
+      {activeCode && (
+        <div className="p-3 rounded-xl bg-[#FAA802]/10 border border-[#FAA802]/30 flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-gray-200">
+            <Icon name="Key" size={15} className="text-[#FAA802] flex-shrink-0" />
+            <span>
+              {isAr ? 'رمز التفعيل المرسل: ' : 'Sent OTP Code: '}
+              <strong className="text-[#FAA802] font-mono text-sm tracking-wider">{activeCode}</strong>
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleAutoFill}
+            className="px-2.5 py-1 rounded-lg bg-[#FAA802] text-[#08080A] font-bold text-[11px] hover:bg-[#FBB502] transition-colors shadow-sm"
+          >
+            {isAr ? 'ملء تلقائي' : 'Auto Fill'}
+          </button>
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (
@@ -211,7 +228,7 @@ const OtpVerificationCard = ({
           <Icon name="CheckCircle" size={18} />
           <span>
             {isLoading
-              ? isAr ? 'جارٍ التحقق والانتقال للخطة...' : 'Verifying & Continuing...'
+              ? isAr ? 'جارٍ التحقق...' : 'Verifying...'
               : isAr ? 'تأكيد الحساب والبدء في الخطة' : 'Verify Account & Continue'}
           </span>
         </Button>

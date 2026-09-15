@@ -78,12 +78,7 @@ export const AuthProvider = ({ children }) => {
 
             // Fetch existing cloud profile
             const cloudData = await fetchCloudUserProfile(rawUser.email);
-            const isAlreadyOnboarded = Boolean(
-              cloudData?.user?.onboardingCompleted === true ||
-              (cloudData?.user?.weight && cloudData?.user?.height)
-            );
-
-            if (isAlreadyOnboarded) {
+            if (cloudData?.user?.onboardingCompleted) {
               hydrateLocalSession(cloudData);
               setSupabaseUser(cloudData.user);
               setIsNewUser(false);
@@ -93,11 +88,10 @@ export const AuthProvider = ({ children }) => {
                 window.location.replace('/dashboard');
               }
             } else {
-              // New user or incomplete onboarding → pre-fill minimal profile and send to onboarding
+              // New user → pre-fill minimal profile and send to onboarding
               const minimalUser = {
                 id: googleProfile.id,
                 name: googleProfile.name,
-                fullName: googleProfile.name,
                 email: googleProfile.email,
                 picture: googleProfile.picture,
                 provider: 'google',
@@ -237,12 +231,7 @@ export const AuthProvider = ({ children }) => {
 
       // Check if existing profile with completed onboarding in cloud
       const cloudData = await fetchCloudUserProfile(googleProfile.email);
-      const isAlreadyOnboarded = Boolean(
-        cloudData?.user?.onboardingCompleted === true ||
-        (cloudData?.user?.weight && cloudData?.user?.height)
-      );
-
-      if (isAlreadyOnboarded) {
+      if (cloudData?.user?.onboardingCompleted) {
         hydrateLocalSession(cloudData);
         setSupabaseUser(cloudData.user);
         setIsNewUser(false);
@@ -250,13 +239,12 @@ export const AuthProvider = ({ children }) => {
       } else {
         const minimalUser = {
           ...googleProfile,
-          fullName: googleProfile.name,
           onboardingCompleted: false,
         };
         localStorage.setItem('user', JSON.stringify(minimalUser));
         setSupabaseUser(minimalUser);
         setIsNewUser(true);
-        // Save initial minimal record to Supabase with onboardingCompleted: false
+        // Only save initial minimal record to Supabase if brand new
         await saveCloudUserProfile(minimalUser);
         return { isNewUser: true, user: minimalUser };
       }

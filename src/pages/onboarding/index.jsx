@@ -276,38 +276,23 @@ const OnboardingScreen = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [currentTheme, setCurrentTheme] = useState('dark');
-  const [formData, setFormData] = useState(() => {
-    let localUser = null;
-    try {
-      const raw = localStorage.getItem('user');
-      if (raw) localUser = JSON.parse(raw);
-    } catch {}
-
-    if (!localUser) {
-      try {
-        const rawGoogle = localStorage.getItem('atos_google_session');
-        if (rawGoogle) localUser = JSON.parse(rawGoogle);
-      } catch {}
-    }
-
-    return {
-      name: localUser?.name || localUser?.fullName || '',
-      email: localUser?.email || '',
-      picture: localUser?.picture || '',
-      gender: localUser?.gender || '',
-      bodyWeight: Number(localUser?.bodyWeight || localUser?.weight) || 70,
-      alignmentScore: 0,
-      physique: localUser?.physique || '',
-      successMetrics: localUser?.successMetrics || [],
-      focusAreas: localUser?.focusAreas || [],
-      workoutTime: localUser?.workoutTime || '',
-      age: Number(localUser?.age) || 25,
-      height: Number(localUser?.height) || 175,
-      weight: Number(localUser?.weight || localUser?.bodyWeight) || 70,
-      fitnessLevel: localUser?.fitnessLevel || 'intermediate',
-      activityLevel: localUser?.activityLevel || 'moderate',
-      goals: localUser?.goals || [],
-    };
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    picture: '',
+    gender: '',
+    bodyWeight: 70,
+    alignmentScore: 0,
+    physique: '',
+    successMetrics: [],
+    focusAreas: [],
+    workoutTime: '',
+    age: 25,
+    height: 175,
+    weight: 70,
+    fitnessLevel: 'intermediate',
+    activityLevel: 'moderate',
+    goals: [],
   });
 
   const progressPercent = Math.round((currentStep / totalSteps) * 100);
@@ -322,22 +307,16 @@ const OnboardingScreen = () => {
   }, []);
 
   useEffect(() => {
-    // Pre-fill from existing user session, Supabase, or Google
+    // Pre-fill from existing user session or Supabase
     let localUser = null;
     try {
       const raw = localStorage.getItem('user');
       if (raw) localUser = JSON.parse(raw);
     } catch {}
 
-    let googleSession = null;
-    try {
-      const rawG = localStorage.getItem('atos_google_session');
-      if (rawG) googleSession = JSON.parse(rawG);
-    } catch {}
-
-    const emailToSet = localUser?.email || supabaseUser?.email || googleUser?.email || googleSession?.email || '';
-    const nameToSet = localUser?.name || localUser?.fullName || supabaseUser?.name || supabaseUser?.full_name || googleUser?.name || googleSession?.name || '';
-    const pictureToSet = localUser?.picture || supabaseUser?.picture || supabaseUser?.avatar_url || googleUser?.picture || googleSession?.picture || '';
+    const emailToSet = localUser?.email || supabaseUser?.email || '';
+    const nameToSet = localUser?.name || localUser?.fullName || supabaseUser?.name || supabaseUser?.full_name || '';
+    const pictureToSet = localUser?.picture || supabaseUser?.picture || supabaseUser?.avatar_url || '';
 
     if (localUser) {
       if (localUser.onboardingCompleted && !localUser.skippedOnboarding) {
@@ -347,19 +326,19 @@ const OnboardingScreen = () => {
       setFormData((prev) => ({
         ...prev,
         ...localUser,
-        name: localUser.name || localUser.fullName || nameToSet || prev.name,
-        email: localUser.email || emailToSet || prev.email,
-        picture: localUser.picture || pictureToSet || prev.picture,
+        name: localUser.name || prev.name || nameToSet,
+        email: localUser.email || prev.email || emailToSet,
+        picture: localUser.picture || prev.picture || pictureToSet,
       }));
     } else if (emailToSet || nameToSet) {
       setFormData((prev) => ({
         ...prev,
-        name: nameToSet || prev.name,
-        email: emailToSet || prev.email,
-        picture: pictureToSet || prev.picture,
+        name: prev.name || nameToSet,
+        email: prev.email || emailToSet,
+        picture: prev.picture || pictureToSet,
       }));
     }
-  }, [supabaseUser, googleUser, navigate]);
+  }, [supabaseUser, navigate]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });

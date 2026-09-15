@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Icon from '../AppIcon';
 
 const AuthenticationLayout = ({ 
@@ -8,6 +9,8 @@ const AuthenticationLayout = ({
   showLogo = true,
   className = ""
 }) => {
+  const navigate = useNavigate();
+
   return (
     <div
       className={`min-h-screen bg-[#08080A] text-white flex items-center justify-center p-4 relative overflow-hidden selection:bg-[#FAA802]/30 ${className}`}
@@ -25,8 +28,11 @@ const AuthenticationLayout = ({
       <div className="relative w-full max-w-md z-10">
         {/* Logo Section */}
         {showLogo && (
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 mb-3 shadow-[0_0_25px_rgba(250,168,2,0.3)]">
+          <div 
+            className="text-center mb-6 cursor-pointer group inline-block w-full"
+            onClick={() => navigate('/')}
+          >
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 mb-3 shadow-[0_0_25px_rgba(250,168,2,0.3)] group-hover:scale-105 transition-transform">
               <img src="/assets/images/atosfit.png" alt="ATOS fit Logo" className="w-9 h-9 object-contain" />
             </div>
             <h1 className="text-2xl font-black text-white tracking-tight">ATOS <span className="text-[#FAA802]">fit</span></h1>
@@ -63,9 +69,9 @@ const AuthenticationLayout = ({
         <div className="text-center mt-6">
           <p className="text-xs text-gray-500">
             By continuing, you agree to our{' '}
-            <button className="text-[#FAA802] hover:underline">Terms of Service</button>
+            <button type="button" onClick={() => navigate('/privacy')} className="text-[#FAA802] hover:underline">Terms of Service</button>
             {' '}and{' '}
-            <button className="text-[#FAA802] hover:underline">Privacy Policy</button>
+            <button type="button" onClick={() => navigate('/privacy')} className="text-[#FAA802] hover:underline">Privacy Policy</button>
           </p>
         </div>
       </div>
