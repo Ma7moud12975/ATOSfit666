@@ -1,23 +1,27 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from '../AppIcon';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const NavItem = ({ label, icon, path, isActive, onClick }) => (
   <button
+    type="button"
     onClick={() => onClick(path)}
-    className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all duration-300 ${
-      isActive ? 'text-[#FAA802]' : 'text-[#A8A8A8]'
+    className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all duration-300 select-none ${
+      isActive ? 'text-[#FAA802]' : 'text-[#A8A8A8] hover:text-white/80'
     }`}
   >
     <div className={`relative flex items-center justify-center p-2 rounded-xl transition-all ${
-      isActive ? 'bg-[rgba(250, 168, 2,0.14)]' : 'bg-transparent'
+      isActive ? 'bg-[rgba(250,168,2,0.16)] shadow-[0_0_12px_rgba(250,168,2,0.2)]' : 'bg-transparent'
     }`}>
       <Icon name={icon} size={22} strokeWidth={isActive ? 2.5 : 2} />
       {isActive && (
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-[#FAA802] rounded-full blur-[1px] shadow-[0_0_6px_#FAA802]" />
+        <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#FAA802] rounded-full blur-[0.5px] shadow-[0_0_8px_#FAA802]" />
       )}
     </div>
-    <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'opacity-100 font-extrabold text-[#FAA802]' : 'opacity-70'}`}>
+    <span className={`text-[10px] tracking-wider transition-all ${
+      isActive ? 'font-black text-[#FAA802] scale-105' : 'font-semibold opacity-70'
+    }`}>
       {label}
     </span>
   </button>
@@ -26,13 +30,15 @@ const NavItem = ({ label, icon, path, isActive, onClick }) => (
 const MobileBottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { language } = useLanguage();
+  const ar = language === 'ar';
 
   const navItems = [
-    { label: 'Home', icon: 'Home', path: '/dashboard' },
-    { label: 'Workouts', icon: 'Activity', path: '/exercise-library' },
-    { label: 'Scan', icon: 'Zap', path: '/food-scanner' },
-    { label: 'Coach', icon: 'MessageCircle', path: '/ai-chat' },
-    { label: 'Profile', icon: 'User', path: '/user-profile' }
+    { label: ar ? 'الرئيسية' : 'Home', icon: 'Home', path: '/dashboard' },
+    { label: ar ? 'التمارين' : 'Workouts', icon: 'Activity', path: '/exercise-library' },
+    { label: ar ? 'سكان' : 'Scan', icon: 'Zap', path: '/food-scanner' },
+    { label: ar ? 'المدرب' : 'Coach', icon: 'MessageCircle', path: '/ai-chat' },
+    { label: ar ? 'حسابي' : 'Profile', icon: 'User', path: '/user-profile' }
   ];
 
   const handleNav = (path) => {
