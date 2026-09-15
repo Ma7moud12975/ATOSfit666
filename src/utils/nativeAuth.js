@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ATOSfit Native Authentication Service
  * --------------------------------------
  * Direct, secure Email & Password authentication backed by Supabase database.
@@ -177,19 +177,24 @@ export async function loginUser({ email, password }) {
           throw new Error('Incorrect password. Please try again.');
         }
 
-        cloudPayload = storedMeta.user ? storedMeta : null;
-        authenticatedUser = storedMeta.user || {
+        const baseUserObj = storedMeta.user ? { ...storedMeta.user } : {
           id: dbUser.id,
           email: dbUser.email,
           name: dbUser.full_name,
           fullName: dbUser.full_name,
           fitnessLevel: dbUser.fitness_level,
           goals: dbUser.goals || [],
+          profilePicture: dbUser.profile_picture || '',
           age: dbUser.age,
           height: dbUser.height,
           weight: dbUser.weight,
           onboardingCompleted: true,
         };
+        if (!baseUserObj.profilePicture && dbUser.profile_picture) {
+          baseUserObj.profilePicture = dbUser.profile_picture;
+        }
+        authenticatedUser = baseUserObj;
+        cloudPayload = storedMeta.user ? { ...storedMeta, user: baseUserObj } : null;
 
         // Update last login in database
         supabase

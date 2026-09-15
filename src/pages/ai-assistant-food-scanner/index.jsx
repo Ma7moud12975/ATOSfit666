@@ -24,6 +24,7 @@ import {
   formatUserTurnWithLanguageGuidance,
   callGeminiWithFallback
 } from '../../utils/aiConfig';
+import { saveConversationTurn, getConversations, getConversationMessages } from '../../utils/api/chatApi';
 
 const AIAssistantFoodScanner = ({ chatOnly = false }) => {
   const navigate = useNavigate();
@@ -263,6 +264,11 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
       };
       setMessages(prev => [...prev, aiMessage]);
       setIsTyping(false);
+
+      const userId = userProfile?.id || userProfile?.email;
+      if (userId) {
+        saveConversationTurn(userId, message, refusalText, chatSessionId).catch(() => {});
+      }
       return;
     }
 
@@ -328,6 +334,17 @@ const AIAssistantFoodScanner = ({ chatOnly = false }) => {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiMessage]);
+
+      const userId = currentUserProfile?.id || currentUserProfile?.email;
+      if (userId) {
+        saveConversationTurn(userId, message, aiText, chatSessionId).then(res => {
+          if (!chatSessionId && res?.conversationId) {
+            setChatSessionId(res.conversationId);
+          }
+        }).catch(err => {
+          console.warn('Chat turn could not be synced to cloud:', err);
+        });
+      }
     } catch (error) {
       console.error('AI chat error:', error);
       const isTemporary =

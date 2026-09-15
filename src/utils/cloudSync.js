@@ -36,6 +36,7 @@ export async function saveCloudUserProfile(userProfile, trainingMesocycle = null
     id: userId,
     email: email || userProfile.email || '',
     name: userProfile.name || userProfile.fullName || 'ATOS Athlete',
+    profilePicture: userProfile.profilePicture || userProfile.avatar || userProfile.picture || '',
     onboardingCompleted: true,
     updatedAt: now,
     trainingMesocycleId: activePlan?.id || userProfile.trainingMesocycleId,
@@ -93,11 +94,15 @@ export async function saveCloudUserProfile(userProfile, trainingMesocycle = null
         try {
           const { data: existingRow } = await supabase
             .from('users')
-            .select('raw_user_meta_data')
+            .select('raw_user_meta_data, profile_picture')
             .eq('email', email)
             .maybeSingle();
           if (existingRow?.raw_user_meta_data?.passwordHash) {
             fullPayload.passwordHash = existingRow.raw_user_meta_data.passwordHash;
+          }
+          if (!enrichedProfile.profilePicture && existingRow?.profile_picture) {
+            enrichedProfile.profilePicture = existingRow.profile_picture;
+            fullPayload.user.profilePicture = existingRow.profile_picture;
           }
         } catch {}
       }
@@ -109,6 +114,7 @@ export async function saveCloudUserProfile(userProfile, trainingMesocycle = null
         role: 'user',
         fitness_level: enrichedProfile.fitnessLevel || 'intermediate',
         goals: Array.isArray(enrichedProfile.goals) ? enrichedProfile.goals : [enrichedProfile.primaryGoal].filter(Boolean),
+        profile_picture: enrichedProfile.profilePicture || null,
         age: Number(enrichedProfile.age) || null,
         height: Number(enrichedProfile.height) || null,
         weight: Number(enrichedProfile.weight) || null,
@@ -185,8 +191,12 @@ export async function fetchCloudUserProfile(identifier) {
       const { data, error } = await query.maybeSingle();
       if (!error && data) {
         if (data.raw_user_meta_data && data.raw_user_meta_data.user) {
+          const userMeta = { ...data.raw_user_meta_data.user };
+          if (!userMeta.profilePicture && data.profile_picture) {
+            userMeta.profilePicture = data.profile_picture;
+          }
           console.log('[CloudSync] Found full profile in Supabase raw_user_meta_data');
-          return data.raw_user_meta_data;
+          return { ...data.raw_user_meta_data, user: userMeta };
         }
 
         // Reconstruct from columns if raw_user_meta_data is not set
@@ -196,6 +206,7 @@ export async function fetchCloudUserProfile(identifier) {
           email: data.email,
           fitnessLevel: data.fitness_level,
           goals: data.goals || [],
+          profilePicture: data.profile_picture || '',
           age: data.age,
           height: data.height,
           weight: data.weight,

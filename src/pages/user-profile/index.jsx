@@ -14,6 +14,7 @@ import { applyTheme, getSavedTheme } from '../../utils/theme';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { calculateMetabolicTargets } from '../../utils/metabolism';
 import { emitDashboardDataUpdated } from '../../utils/dashboardStatsService';
+import { saveCloudUserProfile } from '../../utils/cloudSync';
 // Achievements tab removed per request
 
 const UserProfile = () => {
@@ -134,14 +135,17 @@ const UserProfile = () => {
 
   const handleUpdateUser = async (updatedUser) => {
     setUser(updatedUser);
-    
-    // Update localStorage
     localStorage.setItem('user', JSON.stringify(updatedUser));
+    emitDashboardDataUpdated({ type: 'PROFILE_UPDATED', user: updatedUser });
+    window.dispatchEvent(new CustomEvent('atos_user_profile_hydrated', { detail: updatedUser }));
     
     try {
+      await saveCloudUserProfile(updatedUser);
       const { updateUserProfile } = await import('../../utils/db');
       await updateUserProfile(updatedUser.id, updatedUser);
-    } catch {}
+    } catch (e) {
+      console.warn('Error saving profile changes to cloud:', e);
+    }
   };
 
   const handleUpdateMetrics = async (metrics) => {
@@ -163,12 +167,14 @@ const UserProfile = () => {
     };
     setUser(updatedUser);
     
-    // Update localStorage
+    // Update localStorage & broadcast
     localStorage.setItem('user', JSON.stringify(updatedUser));
     emitDashboardDataUpdated({ type: 'PROFILE_UPDATED', user: updatedUser });
+    window.dispatchEvent(new CustomEvent('atos_user_profile_hydrated', { detail: updatedUser }));
     
-    // Update Supabase
+    // Update Supabase Cloud & DB
     try {
+      await saveCloudUserProfile(updatedUser);
       const supabaseUpdates = {};
       if (metrics.age !== undefined) supabaseUpdates.age = metrics.age;
       if (metrics.height !== undefined) supabaseUpdates.height = metrics.height;
@@ -177,9 +183,7 @@ const UserProfile = () => {
       if (metrics.goals !== undefined) supabaseUpdates.goals = metrics.goals;
       
       if (Object.keys(supabaseUpdates).length > 0 && user?.id) {
-        console.log('📤 Updating Supabase with metrics:', supabaseUpdates);
         await updateUser(user.id, supabaseUpdates);
-        console.log('✅ Supabase updated successfully');
       }
     } catch (error) {
       console.error('❌ Error updating Supabase:', error);
@@ -191,12 +195,20 @@ const UserProfile = () => {
     const updatedUser = { ...user, profilePicture: newPicture };
     setUser(updatedUser);
     
-    // Update localStorage
+    // Update localStorage & broadcast
     localStorage.setItem('user', JSON.stringify(updatedUser));
+    window.dispatchEvent(new CustomEvent('atos_user_profile_hydrated', { detail: updatedUser }));
     
+    // Sync to Supabase Cloud & DB
     try {
-      if (user?.id) await updateUserProfile(user.id, { profilePicture: newPicture });
-    } catch {}
+      await saveCloudUserProfile(updatedUser);
+      if (user?.id) {
+        await updateUser(user.id, { profile_picture: newPicture });
+        await updateUserProfile(user.id, { profilePicture: newPicture });
+      }
+    } catch (e) {
+      console.warn('Profile picture cloud sync warning:', e);
+    }
   };
 
   const tabs = [

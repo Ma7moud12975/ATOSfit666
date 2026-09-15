@@ -13,9 +13,38 @@ const ProfileHeader = ({ user, onProfilePictureUpdate }) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        onProfilePictureUpdate(e?.target?.result);
+        const rawData = e?.target?.result;
+        if (!rawData) return;
+
+        const img = new window.Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 320;
+          let w = img.width;
+          let h = img.height;
+
+          if (w > h) {
+            if (w > MAX_SIZE) {
+              h = Math.round((h * MAX_SIZE) / w);
+              w = MAX_SIZE;
+            }
+          } else {
+            if (h > MAX_SIZE) {
+              w = Math.round((w * MAX_SIZE) / h);
+              h = MAX_SIZE;
+            }
+          }
+
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          onProfilePictureUpdate(compressedDataUrl);
+        };
+        img.src = rawData;
       };
-      reader?.readAsDataURL(file);
+      reader.readAsDataURL(file);
     }
     setShowImageOptions(false);
   };
