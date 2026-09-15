@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Icon from '../AppIcon';
 import logoImage from '../../assets/logo.png';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { logoutUser } from '../../utils/nativeAuth';
 
 const SidebarNavigation = ({ isOpen = false, onClose }) => {
   const location = useLocation();
@@ -24,25 +25,40 @@ const SidebarNavigation = ({ isOpen = false, onClose }) => {
     if (onClose) onClose();
   };
 
+  const handleLogout = async () => {
+    onClose?.();
+    try {
+      await logoutUser();
+    } catch {}
+    try {
+      localStorage.removeItem('user');
+      localStorage.removeItem('atos_native_session');
+      localStorage.removeItem('atos_auth_token');
+      localStorage.removeItem('atos_auth_token_exp');
+      localStorage.removeItem('atos_google_session');
+      sessionStorage.clear();
+    } catch {}
+    window.location.href = '/login-screen';
+  };
+
   return (
     <>
       {/* Mobile Backdrop */}
       {isOpen && (
         <div 
-          onClick={onClose}
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 190 }}
-          className="lg:hidden"
+          onClick={onClose} 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[190] lg:hidden transition-opacity"
         />
       )}
 
-      {/* Floating Sidebar */}
+      {/* Modern Floating Bento Sidebar */}
       <aside 
         style={{
           position: 'fixed',
           top: 16,
+          bottom: 16,
           [isRTL ? 'right' : 'left']: 16,
-          height: 'calc(100vh - 32px)',
-          width: 252,
+          width: '260px',
           background: 'var(--bento-card)',
           backdropFilter: 'blur(22px)',
           WebkitBackdropFilter: 'blur(22px)',
@@ -103,12 +119,36 @@ const SidebarNavigation = ({ isOpen = false, onClose }) => {
           </div>
         </nav>
 
-        {/* Footer Badge */}
-        <div style={{ padding: '1.25rem', borderTop: '1px solid var(--bento-border)' }}>
-          <div style={{ background: 'rgba(250, 168, 2, 0.10)', border: '1px solid rgba(250, 168, 2, 0.25)', borderRadius: '14px', padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {/* Footer: Free Plan Badge & Sign Out */}
+        <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--bento-border)', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+          <div style={{ background: 'rgba(250, 168, 2, 0.10)', border: '1px solid rgba(250, 168, 2, 0.25)', borderRadius: '14px', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Icon name="Crown" size={16} color="#FAA802" />
             <span style={{ fontSize: '0.78rem', color: '#FAA802', fontWeight: 600 }}>{t('nav.freePlan')}</span>
           </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '0.65rem 1rem',
+              borderRadius: '12px',
+              border: 'none',
+              cursor: 'pointer',
+              background: 'transparent',
+              color: '#FAA802',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              transition: 'background 0.2s',
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'rgba(250, 168, 2, 0.12)')}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+          >
+            <Icon name="LogOut" size={16} />
+            <span>{t('header.signOut')}</span>
+          </button>
         </div>
       </aside>
     </>

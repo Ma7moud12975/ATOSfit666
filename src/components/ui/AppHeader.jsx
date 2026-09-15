@@ -5,6 +5,7 @@ import logoImage from '../../assets/logo.png';
 import { applyTheme, getSavedTheme } from '../../utils/theme';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { isNative } from '../../utils/platform';
+import { logoutUser, getCurrentUser } from '../../utils/nativeAuth';
 
 const AppHeader = ({ onSidebarToggle, isSidebarOpen, user, onLogout }) => {
   const navigate = useNavigate();
@@ -27,9 +28,40 @@ const AppHeader = ({ onSidebarToggle, isSidebarOpen, user, onLogout }) => {
     return t('header.evening');
   };
 
-  const handleLogout = () => {
+  const activeUser = (user?.email && user?.name) ? user : (getCurrentUser() || user || {});
+
+  const handleLogout = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setShowProfileMenu(false);
-    if (onLogout) onLogout();
+
+    try {
+      if (onLogout) {
+        const res = onLogout();
+        if (res && typeof res.then === 'function') {
+          await Promise.race([res, new Promise((r) => setTimeout(r, 400))]);
+        }
+      }
+    } catch (err) {
+      console.warn('[AppHeader] onLogout warning:', err);
+    }
+
+    try {
+      await logoutUser();
+    } catch {}
+
+    try {
+      localStorage.removeItem('user');
+      localStorage.removeItem('atos_native_session');
+      localStorage.removeItem('atos_auth_token');
+      localStorage.removeItem('atos_auth_token_exp');
+      localStorage.removeItem('atos_google_session');
+      sessionStorage.clear();
+    } catch {}
+
+    window.location.href = '/login-screen';
   };
 
   return (
@@ -190,14 +222,14 @@ const AppHeader = ({ onSidebarToggle, isSidebarOpen, user, onLogout }) => {
             {showProfileMenu && (
               <div style={{ position: 'absolute', top: '54px', [isRTL ? 'left' : 'right']: 0, width: '220px', background: 'var(--bento-card-strong)', backdropFilter: 'blur(20px)', border: '1px solid var(--bento-border)', borderRadius: '20px', overflow: 'hidden', boxShadow: 'var(--bento-shadow)' }}>
                 <div style={{ padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                  <p style={{ fontWeight: 700, color: 'var(--bento-text)', fontSize: '0.95rem', margin: '0 0 2px 0' }}>{user?.name || 'Mahmoud Ayman'}</p>
-                  <p style={{ color: 'var(--bento-muted)', fontSize: '0.75rem', margin: 0 }}>{user?.email || 'user@example.com'}</p>
+                  <p style={{ fontWeight: 700, color: 'var(--bento-text)', fontSize: '0.95rem', margin: '0 0 2px 0' }}>{activeUser?.name || 'Mahmoud Ayman'}</p>
+                  <p style={{ color: 'var(--bento-muted)', fontSize: '0.75rem', margin: 0 }}>{activeUser?.email || 'user@example.com'}</p>
                 </div>
                 <div style={{ padding: '0.5rem' }}>
-                  <button onClick={() => { navigate('/user-profile'); setShowProfileMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: 'var(--bento-soft-text)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', borderRadius: '12px', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'var(--bento-chip)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <button type="button" onClick={() => { navigate('/user-profile'); setShowProfileMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: 'var(--bento-soft-text)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', borderRadius: '12px', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'var(--bento-chip)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                     <Icon name="User" size={16} /> {t('header.profile')}
                   </button>
-                  <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#FAA802', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', borderRadius: '12px', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(250, 168, 2, 0.12)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <button type="button" onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#FAA802', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', borderRadius: '12px', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(250, 168, 2, 0.12)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                     <Icon name="LogOut" size={16} /> {t('header.signOut')}
                   </button>
                 </div>

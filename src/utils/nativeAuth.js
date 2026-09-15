@@ -633,12 +633,21 @@ export async function logoutUser() {
   localStorage.removeItem('atos_google_session');
 
   try {
-    if (supabase?.auth?.signOut) {
-      await supabase.auth.signOut();
-    }
+    sessionStorage.clear();
   } catch {}
 
+  // Dispatch event immediately so all components update without waiting for network
   window.dispatchEvent(new CustomEvent('atos_user_logged_out'));
+
+  // Non-blocking signOut with max 800ms race timeout
+  try {
+    if (supabase?.auth?.signOut) {
+      await Promise.race([
+        supabase.auth.signOut(),
+        new Promise((resolve) => setTimeout(resolve, 800)),
+      ]);
+    }
+  } catch {}
 }
 
 /**

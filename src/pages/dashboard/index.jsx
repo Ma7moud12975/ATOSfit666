@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { logoutUser } from '../../utils/nativeAuth';
 import AppHeader from '../../components/ui/AppHeader';
 import SidebarNavigation from '../../components/ui/SidebarNavigation';
 import CoachPulse from '../../components/CoachPulse';
@@ -298,9 +299,17 @@ export default function Dashboard() {
 
   const handleLogout = useCallback(async () => {
     try { await logout(); } catch {}
-    localStorage.removeItem('user');
-    navigate('/login-screen');
-  }, [logout, navigate]);
+    try { await logoutUser(); } catch {}
+    try {
+      localStorage.removeItem('user');
+      localStorage.removeItem('atos_native_session');
+      localStorage.removeItem('atos_auth_token');
+      localStorage.removeItem('atos_auth_token_exp');
+      localStorage.removeItem('atos_google_session');
+      sessionStorage.clear();
+    } catch {}
+    window.location.href = '/login-screen';
+  }, [logout]);
 
   const exercises = language === 'ar'
     ? ['ضغط', 'ضغط واسع', 'سكوات', 'بلانك', 'اندفاع', 'متسلق الجبل']
