@@ -6,6 +6,10 @@ import Input from '../../../components/ui/Input';
 import GoogleSignInButton from '../../../components/auth/GoogleSignInButton';
 import { useSupabaseAuth } from '../../../contexts/SupabaseAuthContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import {
+  validateCredentialsFormally,
+  getAccountSecurityState,
+} from '../../../utils/nativeAuth';
 
 const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: externalLoading = false }) => {
   const navigate = useNavigate();
@@ -20,6 +24,8 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lockCountdown, setLockCountdown] = useState(0);
+  const [attemptsRemaining, setAttemptsRemaining] = useState(null);
 
   useEffect(() => {
     if (initialMode && initialMode !== mode) {
@@ -28,7 +34,36 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
     }
   }, [initialMode]);
 
+  // Live check account security state when email changes
+  useEffect(() => {
+    if (mode === 'login' && formData.email && formData.email.includes('@')) {
+      const secState = getAccountSecurityState(formData.email);
+      if (secState.isLocked && secState.remainingSeconds > 0) {
+        setLockCountdown(secState.remainingSeconds);
+      } else {
+        setLockCountdown(0);
+      }
+    }
+  }, [formData.email, mode]);
+
+  // Lockout Countdown Timer (Branch B)
+  useEffect(() => {
+    if (lockCountdown <= 0) return;
+    const interval = setInterval(() => {
+      setLockCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setError('');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lockCountdown]);
+
   const isLoading = externalLoading || isSubmitting;
+  const isAccountLocked = lockCountdown > 0;
 
   const handleModeSwitch = (newMode) => {
     setMode(newMode);
@@ -42,32 +77,45 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
       ...prev,
       [name]: value,
     }));
-    if (error) setError('');
+    if (error && !isAccountLocked) setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    const cleanEmail = formData.email.trim().toLowerCase();
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      setError(isAr ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Please enter a valid email address');
+    // If account currently locked, prevent submission
+    if (isAccountLocked) {
+      setError(
+        isAr
+          ? `الحساب مقفل مؤقتًا لحمايتك. يرجى الانتظار ${lockCountdown} ثانية.`
+          : `Account is temporarily locked. Please wait ${lockCountdown}s.`
+      );
       return;
     }
 
-    if (!formData.password || formData.password.length < 6) {
-      setError(isAr ? 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' : 'Password must be at least 6 characters');
-      return;
-    }
-
-    if (mode === 'register') {
-      const cleanName = formData.fullName.trim();
-      if (!cleanName) {
+    // Stage 2: Validate Credentials Formally
+    try {
+      validateCredentialsFormally(
+        formData.email,
+        formData.password,
+        mode === 'register',
+        formData.fullName
+      );
+    } catch (valErr) {
+      if (valErr.field === 'email') {
+        setError(isAr ? 'يرجى إدخال بريد إلكتروني صحيح (مثال: name@example.com)' : 'Please enter a valid email address');
+      } else if (valErr.field === 'password') {
+        setError(isAr ? 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' : 'Password must be at least 6 characters');
+      } else if (valErr.field === 'fullName') {
         setError(isAr ? 'يرجى إدخال اسمك الكامل' : 'Please enter your full name');
-        return;
+      } else {
+        setError(valErr.message);
       }
+      return;
     }
 
+    const cleanEmail = formData.email.trim().toLowerCase();
     setIsSubmitting(true);
 
     try {
@@ -79,6 +127,7 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
           navigate('/onboarding', { replace: true });
         }
       } else {
+        // Stage 3 to 10: Run full sign-in pipeline
         const data = await signIn(cleanEmail, formData.password);
         if (data?.user) {
           if (onSubmit) await onSubmit({ ...formData, email: cleanEmail, mode });
@@ -90,16 +139,42 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
         }
       }
     } catch (err) {
-      console.error('Auth error:', err);
-      const msg = err?.message || '';
-      if (msg.includes('already registered')) {
+      console.error('Sign-in pipeline error:', err);
+      const isLocked = err?.code === 'ACCOUNT_LOCKED' || err?.message?.includes('temporarily locked');
+      const isInvalidCreds = err?.code === 'INVALID_CREDENTIALS' || err?.message?.includes('Invalid email or password');
+
+      if (isLocked) {
+        // Branch B: Account Locked
+        const seconds = err.remainingSeconds || 300;
+        setLockCountdown(seconds);
+        setError(
+          isAr
+            ? `تم قفل الحساب مؤقتًا لحمايتك بعد 5 محاولات خاطئة متتالية.`
+            : `Account locked for 5 minutes after 5 failed attempts.`
+        );
+      } else if (isInvalidCreds) {
+        // Branch A: Invalid Email/Password
+        const left = typeof err.attemptsLeft === 'number' ? err.attemptsLeft : null;
+        setAttemptsRemaining(left);
+        if (left !== null) {
+          setError(
+            isAr
+              ? `كلمة المرور أو البريد الإلكتروني غير صحيح. (المحاولات المتبقية: ${left} من 5)`
+              : `Invalid email or password. (${left} attempt${left === 1 ? '' : 's'} remaining)`
+          );
+        } else {
+          setError(isAr ? 'كلمة المرور أو البريد الإلكتروني غير صحيح' : 'Invalid email or password');
+        }
+      } else if (err?.code === 'EMAIL_EXISTS' || err?.message?.includes('already registered')) {
         setError(isAr ? 'هذا البريد مسجل بالفعل، يرجى تسجيل الدخول' : 'This email is already registered. Please sign in.');
-      } else if (msg.includes('Invalid login credentials') || msg.includes('Incorrect password')) {
-        setError(isAr ? 'كلمة المرور أو البريد الإلكتروني غير صحيح' : 'Invalid email or password');
-      } else if (msg.includes('No account found')) {
-        setError(isAr ? 'لا يوجد حساب مسجل بهذا البريد. يمكنك الضغط على "إنشاء حساب جديد"' : 'No account found with this email. You can create a new account.');
+      } else if (err?.message?.includes('No account found')) {
+        setError(
+          isAr
+            ? 'لا يوجد حساب مسجل بهذا البريد. يمكنك الضغط على "إنشاء حساب جديد"'
+            : 'No account found with this email. You can create a new account.'
+        );
       } else {
-        setError(msg || (isAr ? 'فشلت العملية، يرجى المحاولة ثانية' : 'Authentication failed. Please try again.'));
+        setError(err?.message || (isAr ? 'فشلت العملية، يرجى المحاولة ثانية' : 'Authentication failed. Please try again.'));
       }
     } finally {
       setIsSubmitting(false);
@@ -139,12 +214,36 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Error Alert */}
-        {error && (
-          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-2.5 text-red-400 text-xs font-semibold">
-            <Icon name="AlertCircle" size={16} className="flex-shrink-0" />
-            <span>{error}</span>
+        {/* Branch B: Account Locked Warning with Real-Time Countdown */}
+        {isAccountLocked ? (
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/40 text-red-300 space-y-2.5">
+            <div className="flex items-center gap-2.5 font-bold text-sm text-red-400">
+              <Icon name="ShieldAlert" size={20} className="text-red-400 animate-pulse flex-shrink-0" />
+              <span>{isAr ? 'الحساب مقفل مؤقتًا (حماية أمنية)' : 'Account Locked (Security Shield)'}</span>
+            </div>
+            <p className="text-xs text-gray-300 leading-relaxed">
+              {isAr
+                ? 'تم تجاوز الحد الأقصى للمحاولات (5 محاولات متتالية). تم تفعيل بروتوكول قفل الحساب مؤقتًا لحمايتك.'
+                : 'Maximum attempts exceeded (5 failed attempts). Security lockout is actively enforced.'}
+            </p>
+            <div className="flex items-center justify-between pt-2 border-t border-red-500/20 text-xs">
+              <span className="text-gray-400 flex items-center gap-1.5">
+                <Icon name="Clock" size={14} className="text-amber-400" />
+                {isAr ? 'الوقت المتبقي لفتح الحساب:' : 'Time until unlock:'}
+              </span>
+              <span className="font-mono font-black text-amber-400 bg-black/50 px-2.5 py-1 rounded-lg border border-amber-500/30 text-sm tracking-wider">
+                {Math.floor(lockCountdown / 60)}:{(lockCountdown % 60).toString().padStart(2, '0')}
+              </span>
+            </div>
           </div>
+        ) : (
+          /* Error Alert (e.g. Branch A: Invalid Credentials with Attempts Left) */
+          error && (
+            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 flex items-start gap-2.5 text-red-400 text-xs font-semibold">
+              <Icon name="AlertCircle" size={17} className="flex-shrink-0 mt-0.5" />
+              <span className="leading-relaxed">{error}</span>
+            </div>
+          )
         )}
 
         {/* Full Name Field (Register Mode Only) */}
@@ -158,7 +257,7 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
             onChange={handleInputChange}
             required
             autoFocus
-            disabled={isLoading}
+            disabled={isLoading || isAccountLocked}
             prefix={<Icon name="User" size={17} className="text-[#FAA802]" />}
             className="bg-white/[0.04] border-white/10 text-white placeholder:text-gray-500"
           />
@@ -174,7 +273,7 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
           onChange={handleInputChange}
           required
           autoFocus={mode === 'login'}
-          disabled={isLoading}
+          disabled={isLoading || isAccountLocked}
           prefix={<Icon name="Mail" size={17} className="text-[#FAA802]" />}
           className="bg-white/[0.04] border-white/10 text-white placeholder:text-gray-500"
         />
@@ -188,7 +287,7 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
           value={formData.password}
           onChange={handleInputChange}
           required
-          disabled={isLoading}
+          disabled={isLoading || isAccountLocked}
           prefix={<Icon name="Lock" size={17} className="text-[#FAA802]" />}
           suffix={
             <button
@@ -196,6 +295,7 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
               onClick={() => setShowPassword(!showPassword)}
               className="my-auto text-gray-400 hover:text-white"
               tabIndex={-1}
+              disabled={isAccountLocked}
             >
               <Icon name={showPassword ? 'EyeOff' : 'Eye'} size={17} />
             </button>
@@ -209,22 +309,30 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
           variant="default"
           fullWidth
           loading={isLoading}
-          disabled={isLoading}
-          className="h-12 bg-gradient-to-r from-[#FAA802] to-[#FB9202] hover:from-[#FBB502] hover:to-[#FAA802] text-[#08080A] font-black text-sm rounded-xl shadow-[0_0_25px_rgba(250,168,2,0.35)] mt-2"
+          disabled={isLoading || isAccountLocked}
+          className={`h-12 font-black text-sm rounded-xl transition-all mt-2 ${
+            isAccountLocked
+              ? 'bg-gray-800 text-gray-400 border border-gray-700 cursor-not-allowed shadow-none'
+              : 'bg-gradient-to-r from-[#FAA802] to-[#FB9202] hover:from-[#FBB502] hover:to-[#FAA802] text-[#08080A] shadow-[0_0_25px_rgba(250,168,2,0.35)]'
+          }`}
         >
           <Icon
-            name={mode === 'login' ? 'LogIn' : 'ArrowRight'}
+            name={isAccountLocked ? 'ShieldAlert' : mode === 'login' ? 'LogIn' : 'ArrowRight'}
             size={18}
-            className={isAr && mode !== 'login' ? 'rotate-180' : ''}
+            className={isAr && mode !== 'login' && !isAccountLocked ? 'rotate-180' : ''}
           />
           <span>
-            {isLoading
+            {isAccountLocked
+              ? isAr
+                ? `الحساب مقفل (${lockCountdown} ثانية)`
+                : `Locked (${lockCountdown}s remaining)`
+              : isLoading
               ? isAr
                 ? mode === 'login'
-                  ? 'جارٍ تسجيل الدخول...'
+                  ? 'جارٍ التحقق وتأكيد الجلسة...'
                   : 'جارٍ إنشاء الحساب...'
                 : mode === 'login'
-                ? 'Signing In...'
+                ? 'Verifying & Authenticating...'
                 : 'Creating Account...'
               : isAr
               ? mode === 'login'
