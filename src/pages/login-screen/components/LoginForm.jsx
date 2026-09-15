@@ -14,57 +14,40 @@ const LoginForm = ({ onSubmit, isLoading: externalLoading = false }) => {
     email: '',
     password: ''
   });
-  const [errors, setErrors] = useState({});
+  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isLoading = externalLoading || authLoading || isSubmitting;
 
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData?.email) {
-      newErrors.email = isAr ? 'البريد الإلكتروني مطلوب' : 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData?.email)) {
-      newErrors.email = isAr ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Please enter a valid email address';
-    }
-
-    if (!formData?.password) {
-      newErrors.password = isAr ? 'كلمة المرور مطلوبة' : 'Password is required';
-    } else if (formData?.password?.length < 6) {
-      newErrors.password = isAr ? 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' : 'Password must be at least 6 characters';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors)?.length === 0;
-  };
-
   const handleInputChange = (e) => {
-    const { name, value } = e?.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-
-    if (errors?.[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
+    if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
-    e?.preventDefault();
+    e.preventDefault();
+    setError('');
 
-    if (!validateForm()) return;
+    const cleanEmail = formData.email.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      setError(isAr ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Please enter a valid email address');
+      return;
+    }
+
+    if (!formData.password || formData.password.length < 6) {
+      setError(isAr ? 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' : 'Password must be at least 6 characters');
+      return;
+    }
 
     setIsSubmitting(true);
-    setErrors({});
 
     try {
-      // Use Supabase Auth
-      const data = await signIn(formData.email, formData.password);
+      const data = await signIn(cleanEmail, formData.password);
       
       if (data?.user) {
         if (onSubmit) await onSubmit(formData);
@@ -74,95 +57,68 @@ const LoginForm = ({ onSubmit, isLoading: externalLoading = false }) => {
           navigate('/dashboard', { replace: true });
         }
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      
-      // Handle specific error messages
-      if (error.message?.includes('Invalid login credentials')) {
-        setErrors({ general: 'Invalid email or password' });
-      } else if (error.message?.includes('Email not confirmed')) {
-        setErrors({ general: 'Please verify your email before logging in' });
+    } catch (err) {
+      console.error('Login error:', err);
+      const msg = err?.message || '';
+      if (msg.includes('Invalid login credentials') || msg.includes('Incorrect password')) {
+        setError(isAr ? 'كلمة المرور أو البريد الإلكتروني غير صحيح' : 'Invalid email or password');
+      } else if (msg.includes('No account found')) {
+        setError(isAr ? 'لا يوجد حساب مسجل بهذا البريد' : 'No account found with this email');
       } else {
-        setErrors({ general: error.message || 'Login failed. Please try again.' });
+        setError(msg || (isAr ? 'فشل تسجيل الدخول، يرجى المحاولة ثانية' : 'Login failed. Please try again.'));
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!formData.email) {
-      setErrors({ email: 'Please enter your email first' });
-      return;
-    }
-
-    try {
-      const { supabase } = await import('../../../utils/supabase');
-      const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
-        redirectTo: `${window.location.origin}/reset-password`
-      });
-      
-      if (error) throw error;
-      alert('Password reset link has been sent to your email');
-    } catch (error) {
-      setErrors({ general: 'Failed to send reset email. Please try again.' });
-    }
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* General Error Message */}
-      {errors?.general && (
-        <div className="bg-error/10 border border-error/20 rounded-lg p-3">
-          <div className="flex items-center space-x-2">
-            <Icon name="AlertCircle" size={16} className="text-error" />
-            <p className="text-sm text-error">{errors?.general}</p>
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Error Message */}
+      {error && (
+        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-2.5 text-red-400 text-xs font-semibold">
+          <Icon name="AlertCircle" size={16} className="flex-shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
       {/* Email Field */}
       <Input
-        label={isAr ? "البريد الإلكتروني" : "Email Address"}
+        label={isAr ? 'البريد الإلكتروني' : 'Email Address'}
         type="email"
         name="email"
-        placeholder={isAr ? "أدخل بريدك الإلكتروني" : "Enter your email"}
-        value={formData?.email}
+        placeholder={isAr ? 'name@example.com' : 'name@example.com'}
+        value={formData.email}
         onChange={handleInputChange}
-        error={errors?.email}
         required
         autoFocus
         disabled={isLoading}
-        prefix={<Icon name="Mail" size={18} className="text-[#edad45]" />}
+        prefix={<Icon name="Mail" size={17} className="text-[#FAA802]" />}
+        className="bg-white/[0.04] border-white/10 text-white placeholder:text-gray-500"
       />
 
       {/* Password Field */}
       <Input
-        label={isAr ? "كلمة المرور" : "Password"}
+        label={isAr ? 'كلمة المرور' : 'Password'}
         type={showPassword ? 'text' : 'password'}
         name="password"
-        placeholder={isAr ? "أدخل كلمة المرور" : "Enter your password"}
-        value={formData?.password}
+        placeholder={isAr ? '••••••••' : '••••••••'}
+        value={formData.password}
         onChange={handleInputChange}
-        error={errors?.password}
         required
         disabled={isLoading}
-        prefix={<Icon name="Lock" size={18} className="text-[#edad45]" />}
+        prefix={<Icon name="Lock" size={17} className="text-[#FAA802]" />}
         suffix={
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="my-auto"
-            disabled={isLoading}
-            aria-label="Toggle password visibility"
+            className="my-auto text-gray-400 hover:text-white"
+            tabIndex={-1}
           >
-            <Icon
-              name={showPassword ? 'EyeOff' : 'Eye'}
-              size={18}
-              className="text-[#edad45]"
-            />
+            <Icon name={showPassword ? 'EyeOff' : 'Eye'} size={17} />
           </button>
         }
+        className="bg-white/[0.04] border-white/10 text-white placeholder:text-gray-500"
       />
 
       {/* Sign In Button */}
@@ -172,32 +128,20 @@ const LoginForm = ({ onSubmit, isLoading: externalLoading = false }) => {
         fullWidth
         loading={isLoading}
         disabled={isLoading}
-        className="h-12 flex items-center justify-center space-x-2"
+        className="h-12 bg-gradient-to-r from-[#FAA802] to-[#FB9202] hover:from-[#FBB502] hover:to-[#FAA802] text-[#08080A] font-black text-sm rounded-xl shadow-[0_0_25px_rgba(250,168,2,0.35)] mt-2"
       >
-        <Icon name="LogIn" size={18} className="text-[#edad45]" />
+        <Icon name="LogIn" size={18} />
         <span>{isLoading ? (isAr ? 'جارٍ تسجيل الدخول...' : 'Signing In...') : (isAr ? 'تسجيل الدخول' : 'Sign In')}</span>
       </Button>
 
-      {/* Forgot Password Link */}
-      <div className="text-center">
-        <button
-          type="button"
-          onClick={handleForgotPassword}
-          className="text-sm text-primary hover:text-primary/80 transition-colors"
-          disabled={isLoading}
-        >
-          {isAr ? 'هل نسيت كلمة المرور؟' : 'Forgot your password?'}
-        </button>
-      </div>
-
       {/* Sign Up Link */}
-      <div className="text-center pt-4 border-t border-border">
-        <p className="text-sm text-muted-foreground">
-          {isAr ? 'ليس لديك حساب؟ ' : "Don't have an account? "}
+      <div className="text-center pt-4 border-t border-white/10">
+        <p className="text-xs text-gray-400">
+          {isAr ? 'ليس لديك حساب بعد؟ ' : "Don't have an account? "}
           <button
             type="button"
             onClick={() => navigate('/register-screen')}
-            className="text-primary hover:text-primary/80 font-medium transition-colors"
+            className="text-[#FAA802] hover:underline font-bold transition-colors"
             disabled={isLoading}
           >
             {isAr ? 'إنشاء حساب جديد' : 'Sign Up'}

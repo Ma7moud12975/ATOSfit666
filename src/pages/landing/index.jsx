@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import InteractiveImage from '../../components/InteractiveImage';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { applyTheme, getSavedTheme } from '../../utils/theme';
+import AuthModal from '../../components/auth/AuthModal';
 import '../../styles/bento-dashboard.css';
 
 const LandingPage = () => {
@@ -14,6 +15,7 @@ const LandingPage = () => {
   const [theme, setTheme] = useState(getSavedTheme);
   const [isVisible, setIsVisible] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [authModal, setAuthModal] = useState({ isOpen: false, mode: 'login' });
 
   useEffect(() => {
     setIsVisible(true);
@@ -239,11 +241,24 @@ const LandingPage = () => {
         }
       } catch {}
     }
-    navigate('/register-screen');
+    setAuthModal({ isOpen: true, mode: 'register' });
   };
 
   const handleLogin = () => {
-    navigate('/login-screen');
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        if (user.onboardingCompleted) {
+          navigate('/dashboard');
+          return;
+        } else {
+          navigate('/onboarding');
+          return;
+        }
+      } catch {}
+    }
+    setAuthModal({ isOpen: true, mode: 'login' });
   };
 
   return (
@@ -342,7 +357,7 @@ const LandingPage = () => {
               {landingCopy.signIn}
             </button>
             <button
-              onClick={() => navigate('/register-screen')}
+              onClick={handleGetStarted}
               className="inline-flex items-center justify-center bg-gradient-to-r from-[#FAA802] to-[#FB9202] hover:from-[#FBB502] hover:to-[#FAA802] text-[#08080A] px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold shadow-[0_0_20px_rgba(250, 168, 2,0.35)] hover:shadow-[0_0_25px_rgba(250, 168, 2,0.5)] transition-all"
             >
               {landingCopy.signUp}
@@ -421,7 +436,7 @@ const LandingPage = () => {
               </button>
               <button
                 onClick={() => {
-                  navigate('/register-screen');
+                  handleGetStarted();
                   setIsMobileMenuOpen(false);
                 }}
                 className="w-full bg-[#FAA802] text-[#08080A] py-3 rounded-xl text-sm font-extrabold shadow-[0_0_20px_rgba(250, 168, 2,0.35)] mt-3"
@@ -778,6 +793,13 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+
+      {/* Smart Seamless Authentication Modal */}
+      <AuthModal
+        isOpen={authModal.isOpen}
+        initialMode={authModal.mode}
+        onClose={() => setAuthModal({ isOpen: false, mode: 'login' })}
+      />
     </div>
   );
 };
