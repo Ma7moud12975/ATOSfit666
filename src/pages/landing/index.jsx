@@ -3,14 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 import { useAuth } from '../../contexts/AuthContext';
 import InteractiveImage from '../../components/InteractiveImage';
-import GoogleSignInButton from '../../components/auth/GoogleSignInButton';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { applyTheme, getSavedTheme } from '../../utils/theme';
 import '../../styles/bento-dashboard.css';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const { login, loading: authLoading } = useAuth();
+  const { loading: authLoading } = useAuth();
   const { language, toggleLanguage } = useLanguage();
   const [theme, setTheme] = useState(getSavedTheme);
   const [isVisible, setIsVisible] = useState(false);
@@ -38,9 +37,10 @@ const LandingPage = () => {
     privacy: 'الخصوصية',
     about: 'من نحن',
     signIn: 'تسجيل الدخول',
-    signingIn: 'جارٍ تسجيل الدخول...',
+    signUp: 'إنشاء حساب',
+    signingIn: 'جارٍ التحميل...',
     start: 'ابدأ تمرينك الآن',
-    starting: 'جارٍ البدء...',
+    starting: 'جارٍ التحميل...',
     badge: 'تتبع حركي متقدم بالرؤية الحاسوبية',
     form: 'تدرّب بدقة احترافية.',
     results: 'أتقن كل حركة.',
@@ -107,6 +107,7 @@ const LandingPage = () => {
     privacy: 'Privacy',
     about: 'About Us',
     signIn: 'Sign In',
+    signUp: 'Get Started',
     signingIn: 'Signing in...',
     start: 'Start Workout',
     starting: 'Starting...',
@@ -224,23 +225,21 @@ const LandingPage = () => {
     }
   ];
 
-  const handleGetStarted = async () => {
-    try {
-      await login();
-      const userData = localStorage.getItem('user');
-      if (userData) {
+  const handleGetStarted = () => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
         const user = JSON.parse(userData);
-        if (user.name && user.email) {
-          navigate('/dashboard', { replace: true });
+        if (user.onboardingCompleted) {
+          navigate('/dashboard');
+          return;
         } else {
-          navigate('/onboarding', { replace: true });
+          navigate('/onboarding');
+          return;
         }
-      } else {
-        navigate('/onboarding', { replace: true });
-      }
-    } catch (e) {
-      navigate('/login-screen');
+      } catch {}
     }
+    navigate('/register-screen');
   };
 
   const handleLogin = () => {
@@ -336,18 +335,17 @@ const LandingPage = () => {
               <Icon name="Languages" size={16} />
               <span className="font-bold">{isAr ? 'EN' : 'AR'}</span>
             </button>
-            <GoogleSignInButton
-              text={isAr ? 'تسجيل بـ Google' : 'Google'}
-              fullWidth={false}
-              size="sm"
-              className="px-4 py-2 rounded-full text-xs font-bold"
-            />
             <button
               onClick={handleLogin}
-              disabled={authLoading}
+              className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-semibold transition-colors text-xs sm:text-sm px-3 py-2"
+            >
+              {landingCopy.signIn}
+            </button>
+            <button
+              onClick={() => navigate('/register-screen')}
               className="inline-flex items-center justify-center bg-gradient-to-r from-[#FAA802] to-[#FB9202] hover:from-[#FBB502] hover:to-[#FAA802] text-[#08080A] px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold shadow-[0_0_20px_rgba(250, 168, 2,0.35)] hover:shadow-[0_0_25px_rgba(250, 168, 2,0.5)] transition-all"
             >
-              {authLoading ? landingCopy.signingIn : landingCopy.signIn}
+              {landingCopy.signUp}
             </button>
           </div>
 
@@ -421,21 +419,23 @@ const LandingPage = () => {
               >
                 {landingCopy.about}
               </button>
-              <GoogleSignInButton
-                text={isAr ? 'الدخول عبر Google' : 'Sign in with Google'}
-                fullWidth
-                size="lg"
-                className="mt-3"
-              />
+              <button
+                onClick={() => {
+                  navigate('/register-screen');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full bg-[#FAA802] text-[#08080A] py-3 rounded-xl text-sm font-extrabold shadow-[0_0_20px_rgba(250, 168, 2,0.35)] mt-3"
+              >
+                {landingCopy.signUp}
+              </button>
               <button
                 onClick={() => {
                   handleLogin();
                   setIsMobileMenuOpen(false);
                 }}
-                disabled={authLoading}
-                className="w-full bg-[#FAA802] text-[#08080A] py-3 rounded-xl text-sm font-extrabold shadow-[0_0_20px_rgba(250, 168, 2,0.35)] mt-3"
+                className="w-full border border-black/10 dark:border-white/10 text-[#08080A] dark:text-white py-3 rounded-xl text-sm font-bold mt-2"
               >
-                {authLoading ? landingCopy.signingIn : landingCopy.signIn}
+                {landingCopy.signIn}
               </button>
             </div>
           </div>
@@ -491,10 +491,9 @@ const LandingPage = () => {
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
                 <button
                   onClick={handleGetStarted}
-                  disabled={authLoading}
-                  className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(250, 168, 2,0.45)] hover:shadow-[0_0_50px_rgba(250, 168, 2,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-[#FAA802]/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(250, 168, 2,0.45)] hover:shadow-[0_0_50px_rgba(250, 168, 2,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-[#FAA802]/40"
                 >
-                  <span>{authLoading ? landingCopy.starting : landingCopy.start}</span>
+                  <span>{landingCopy.start}</span>
                   <Icon 
                     name="ArrowRight" 
                     size={20} 
@@ -502,16 +501,17 @@ const LandingPage = () => {
                   />
                 </button>
 
-                <GoogleSignInButton
-                  text={isAr ? 'الدخول عبر Google' : 'Continue with Google'}
-                  fullWidth={false}
-                  size="xl"
-                  className="px-6 py-4 rounded-2xl text-base font-bold"
-                />
+                <button
+                  onClick={handleLogin}
+                  className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-black/10 dark:border-white/10 hover:border-[#FAA802]/50 text-[#08080A] dark:text-[#FFFFFF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all"
+                >
+                  <Icon name="LogIn" size={18} className="text-[#FAA802]" />
+                  <span>{landingCopy.signIn}</span>
+                </button>
 
                 <a
                   href="#how-it-works"
-                  className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-black/10 dark:border-white/10 hover:border-[#FAA802]/50 text-[#08080A] dark:text-[#FFFFFF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all"
+                  className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-transparent hover:border-black/10 dark:hover:border-white/10 text-[#636779] dark:text-[#A8A8A8] hover:text-[#08080A] dark:hover:text-[#FFFFFF] transition-all"
                 >
                   <Icon name="Compass" size={18} className="text-[#FAA802]" />
                   <span>{landingCopy.howItWorks}</span>

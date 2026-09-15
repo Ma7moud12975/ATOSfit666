@@ -14,6 +14,12 @@ import {
   hydrateLocalSession,
   saveCloudUserProfile,
 } from '../utils/cloudSync';
+import {
+  registerUser as nativeRegister,
+  loginUser as nativeLogin,
+  logoutUser as nativeLogout,
+  getCurrentUser as getNativeUser,
+} from '../utils/nativeAuth';
 
 const AuthContext = createContext(null);
 
@@ -236,48 +242,80 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const loginWithGoogle = useCallback(async (options = {}) => {
-    return await initiateGoogleSignIn(options);
+  const signInWithCredentials = useCallback(async (email, password) => {
+    setLoading(true);
+    try {
+      const res = await nativeLogin({ email, password });
+      setSupabaseUser(res.user);
+      setIsAuthenticated(true);
+      setIsNewUser(res.isNewUser);
+      return res;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const signUpWithCredentials = useCallback(async ({ fullName, email, password, fitnessLevel, goals }) => {
+    setLoading(true);
+    try {
+      const res = await nativeRegister({ fullName, email, password, fitnessLevel, goals });
+      setSupabaseUser(res.user);
+      setIsAuthenticated(true);
+      setIsNewUser(true);
+      return res;
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const logout = useCallback(async () => {
     setLoading(true);
     try {
+      await nativeLogout();
       clearGoogleSession();
       setGoogleUser(null);
-
-      if (supabase && typeof supabase.auth?.signOut === 'function') {
-        try { await supabase.auth.signOut(); } catch {}
-      }
-
-      if (authClient) {
-        try { await authClient.logout(); } catch {}
-      }
-
       setIdentity(null);
       setPrincipal(null);
       setIsAuthenticated(false);
       setSupabaseUser(null);
       setUserStats(null);
       setIsNewUser(false);
-
-      localStorage.removeItem('user');
-      localStorage.removeItem('atos_google_session');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       setLoading(false);
     }
-  }, [authClient]);
-
-  // Legacy ICP fallback
-  const login = useCallback(async () => {
-    const fakePrincipal = Principal.fromText('2vxsx-fae');
-    setIdentity({ getPrincipal: () => fakePrincipal });
-    setPrincipal(fakePrincipal);
-    setIsAuthenticated(true);
-    setLoading(false);
   }, []);
+
+  // Listen to native auth hydration events
+  useEffect(() => {
+    const handleHydrated = (e) => {
+      if (e.detail) {
+        setSupabaseUser(e.detail);
+        setIsAuthenticated(true);
+        setIsNewUser(!e.detail.onboardingCompleted);
+      }
+    };
+    const handleLoggedOut = () => {
+      setSupabaseUser(null);
+      setIsAuthenticated(false);
+      setIsNewUser(false);
+    };
+
+    window.addEventListener('atos_user_profile_hydrated', handleHydrated);
+    window.addEventListener('atos_user_logged_out', handleLoggedOut);
+    return () => {
+      window.removeEventListener('atos_user_profile_hydrated', handleHydrated);
+      window.removeEventListener('atos_user_logged_out', handleLoggedOut);
+    };
+  }, []);
+
+  // Legacy fallback
+  const login = useCallback(async (email, password) => {
+    if (email && password) {
+      return await signInWithCredentials(email, password);
+    }
+  }, [signInWithCredentials]);
 
   return (
     <AuthContext.Provider
@@ -288,9 +326,14 @@ export const AuthProvider = ({ children }) => {
         googleUser,
         authClient,
         login,
+        signInWithCredentials,
+        signUpWithCredentials,
+        signIn: signInWithCredentials,
+        signUp: signUpWithCredentials,
         loginWithGoogle,
         logout,
         loading,
+        user: supabaseUser,
         supabaseUser,
         userStats,
         isNewUser,

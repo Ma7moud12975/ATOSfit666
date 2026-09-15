@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import * as userApi from '../utils/api/userApi';
 import syncService from '../utils/syncService';
+import { registerUser, loginUser, logoutUser } from '../utils/nativeAuth';
 
 const SupabaseAuthContext = createContext(null);
 
@@ -83,12 +84,15 @@ export const SupabaseAuthProvider = ({ children }) => {
     }
   };
 
-  const signUp = async (email, password, fullName) => {
+  const signUp = async (email, password, fullName, extra = {}) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await userApi.signUp(email, password, fullName);
-      return data;
+      const res = await registerUser({ fullName, email, password, ...extra });
+      setUser(res.user);
+      setProfile(res.user);
+      setIsAuthenticated(true);
+      return res;
     } catch (err) {
       setError(err.message);
       throw err;
@@ -101,8 +105,11 @@ export const SupabaseAuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await userApi.signIn(email, password);
-      return data;
+      const res = await loginUser({ email, password });
+      setUser(res.user);
+      setProfile(res.user);
+      setIsAuthenticated(true);
+      return res;
     } catch (err) {
       setError(err.message);
       throw err;
@@ -115,7 +122,7 @@ export const SupabaseAuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      await userApi.signOut();
+      await logoutUser();
       setUser(null);
       setProfile(null);
       setStats(null);

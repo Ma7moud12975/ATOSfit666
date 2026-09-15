@@ -8,9 +8,7 @@ import Icon from '../../components/AppIcon';
 import { updateUserProfile } from '../../utils/db';
 import { calculateMetabolicTargets, calculateBMI, calculateBMR, calculateTDEE } from '../../utils/metabolism';
 import { generateMonthlyMesocycle, saveUserTrainingPlan, determineSplitStrategy } from '../../utils/trainingPlanEngine';
-import { getSavedGoogleUser } from '../../utils/googleAuth';
 import { saveCloudUserProfile } from '../../utils/cloudSync';
-import GoogleSignInButton from '../../components/auth/GoogleSignInButton';
 import fullBodyImg from './full body.png';
 import shouldersImg from './shoulders.png';
 import bicepsImg from './biceps.png';
@@ -309,16 +307,30 @@ const OnboardingScreen = () => {
   }, []);
 
   useEffect(() => {
-    // Pre-fill from Google session or AuthContext
-    const savedGoogle = getSavedGoogleUser();
-    const activeGoogle = googleUser || savedGoogle;
-    const activeSupabase = supabaseUser;
+    // Pre-fill from existing user session or Supabase
+    let localUser = null;
+    try {
+      const raw = localStorage.getItem('user');
+      if (raw) localUser = JSON.parse(raw);
+    } catch {}
 
-    const emailToSet = activeGoogle?.email || activeSupabase?.email || '';
-    const nameToSet = activeGoogle?.name || activeSupabase?.name || activeSupabase?.full_name || '';
-    const pictureToSet = activeGoogle?.picture || activeSupabase?.picture || activeSupabase?.avatar_url || '';
+    const emailToSet = localUser?.email || supabaseUser?.email || '';
+    const nameToSet = localUser?.name || localUser?.fullName || supabaseUser?.name || supabaseUser?.full_name || '';
+    const pictureToSet = localUser?.picture || supabaseUser?.picture || supabaseUser?.avatar_url || '';
 
-    if (emailToSet || nameToSet) {
+    if (localUser) {
+      if (localUser.onboardingCompleted && !localUser.skippedOnboarding) {
+        navigate('/dashboard', { replace: true });
+        return;
+      }
+      setFormData((prev) => ({
+        ...prev,
+        ...localUser,
+        name: localUser.name || prev.name || nameToSet,
+        email: localUser.email || prev.email || emailToSet,
+        picture: localUser.picture || prev.picture || pictureToSet,
+      }));
+    } else if (emailToSet || nameToSet) {
       setFormData((prev) => ({
         ...prev,
         name: prev.name || nameToSet,
@@ -326,27 +338,7 @@ const OnboardingScreen = () => {
         picture: prev.picture || pictureToSet,
       }));
     }
-
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        if (user.onboardingCompleted && !user.skippedOnboarding) {
-          navigate('/dashboard', { replace: true });
-          return;
-        }
-        setFormData((prev) => ({
-          ...prev,
-          ...user,
-          name: user.name || prev.name || nameToSet,
-          email: user.email || prev.email || emailToSet,
-          picture: user.picture || prev.picture || pictureToSet,
-        }));
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-      }
-    }
-  }, [googleUser, supabaseUser, navigate]);
+  }, [supabaseUser, navigate]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -378,19 +370,24 @@ const OnboardingScreen = () => {
   };
 
   const saveAndExit = (skippedOnboarding = false) => {
-    const googleUser = getSavedGoogleUser();
-    const principalId = googleUser?.id || principal?.toString() || `user_${Date.now()}`;
+    let existingUser = null;
+    try {
+      const localUserRaw = localStorage.getItem('user');
+      if (localUserRaw) existingUser = JSON.parse(localUserRaw);
+    } catch {}
+
+    const principalId = existingUser?.id || supabaseUser?.id || principal?.toString() || `user_${Date.now()}`;
     const now = new Date().toISOString();
     const calculatedMetabolic = calculateMetabolicTargets(formData);
     const userProfile = {
+      ...existingUser,
       ...formData,
       id: principalId,
       principalId,
-      googleId: googleUser?.googleId || null,
-      name: formData.name || googleUser?.name || 'New User',
-      email: formData.email || googleUser?.email || '',
-      picture: googleUser?.picture || null,
-      createdAt: now,
+      name: formData.name || existingUser?.name || 'ATOS Athlete',
+      email: formData.email || existingUser?.email || '',
+      picture: formData.picture || existingUser?.picture || null,
+      createdAt: existingUser?.createdAt || now,
       updatedAt: now,
       onboardingCompleted: !skippedOnboarding,
       skippedOnboarding,
@@ -457,25 +454,25 @@ const OnboardingScreen = () => {
       case 1:
         return (
           <div className="mx-auto max-w-2xl space-y-5">
-            {/* Quick Google Sign In or Connected Google Badge */}
-            {formData.email ? (
+            {/* User Account Verification Badge */}
+            {formData.email && (
               <div className="flex items-center gap-3.5 p-4 rounded-xl border border-primary/35 bg-primary/10 shadow-[0_4px_20px_rgba(250,168,2,0.12)]">
                 {formData.picture ? (
                   <img
                     src={formData.picture}
-                    alt="Google Profile"
+                    alt="Profile"
                     className="w-12 h-12 rounded-full border-2 border-primary object-cover shadow-sm"
                   />
                 ) : (
                   <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold border border-primary/40">
-                    <Icon name="Mail" size={22} />
+                    <Icon name="UserCheck" size={22} />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5">
                     <Icon name="CheckCircle2" size={15} className="text-primary" />
                     <span className="text-xs font-bold text-primary uppercase tracking-wider">
-                      {isAr ? 'حساب Google متصل وموثق' : 'Verified Google Account'}
+                      {isAr ? 'الحساب المسجل في السحابة' : 'Registered Cloud Account'}
                     </span>
                   </div>
                   <p className="text-sm font-black text-foreground truncate">{formData.email}</p>
@@ -483,32 +480,6 @@ const OnboardingScreen = () => {
                     <p className="text-xs text-muted-foreground truncate">{formData.name}</p>
                   )}
                 </div>
-              </div>
-            ) : (
-              <div className="p-4 rounded-xl border border-border/80 bg-white/[0.04] space-y-2">
-                <div>
-                  <div className="text-xs font-bold text-foreground">
-                    {isAr ? 'تسجيل الدخول عبر Google' : 'Sign in with Google'}
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">
-                    {isAr
-                      ? 'لربط بريدك الإلكتروني ومزامنة خطتك التدريبية عبر السحابة'
-                      : 'Pre-fill info and synchronize your mesocycle to the cloud'}
-                  </div>
-                </div>
-                <GoogleSignInButton
-                  text={isAr ? 'ربط حساب Google' : 'Link Google Account'}
-                  size="md"
-                  fullWidth
-                  onSuccess={(u) =>
-                    setFormData((p) => ({
-                      ...p,
-                      name: u.name || p.name,
-                      email: u.email || p.email,
-                      picture: u.picture || p.picture,
-                    }))
-                  }
-                />
               </div>
             )}
 

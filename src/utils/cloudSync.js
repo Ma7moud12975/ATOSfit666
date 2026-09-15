@@ -51,9 +51,22 @@ export async function saveCloudUserProfile(userProfile, trainingMesocycle = null
     }
   };
 
+  // Ensure passwordHash is preserved from native session or existing DB profile
+  let passwordHash = userProfile.passwordHash;
+  if (!passwordHash) {
+    try {
+      const nativeToken = localStorage.getItem('atos_native_session');
+      if (nativeToken) {
+        const parsed = JSON.parse(nativeToken);
+        if (parsed.passwordHash) passwordHash = parsed.passwordHash;
+      }
+    } catch {}
+  }
+
   const fullPayload = {
     user: enrichedProfile,
     trainingPlan: activePlan,
+    ...(passwordHash ? { passwordHash } : {}),
     syncedAt: now,
   };
 
@@ -75,6 +88,20 @@ export async function saveCloudUserProfile(userProfile, trainingMesocycle = null
   let supabaseSuccess = false;
   try {
     if (supabase && typeof supabase.from === 'function') {
+      // If passwordHash still not present, read it from existing user in DB
+      if (!fullPayload.passwordHash && email) {
+        try {
+          const { data: existingRow } = await supabase
+            .from('users')
+            .select('raw_user_meta_data')
+            .eq('email', email)
+            .maybeSingle();
+          if (existingRow?.raw_user_meta_data?.passwordHash) {
+            fullPayload.passwordHash = existingRow.raw_user_meta_data.passwordHash;
+          }
+        } catch {}
+      }
+
       const basePayload = {
         id: userId,
         email: enrichedProfile.email,
@@ -93,7 +120,7 @@ export async function saveCloudUserProfile(userProfile, trainingMesocycle = null
         .upsert({
           ...basePayload,
           raw_user_meta_data: fullPayload
-        }, { onConflict: 'id' })
+        }, { onConflict: 'email' })
         .select()
         .single();
 
@@ -101,10 +128,10 @@ export async function saveCloudUserProfile(userProfile, trainingMesocycle = null
         supabaseSuccess = true;
         console.log('[CloudSync] Successfully saved to Supabase:', userId);
       } else {
-        // Fallback without raw_user_meta_data in case column doesn't exist
+        // Fallback without raw_user_meta_data in case of schema discrepancy
         const { error: fallbackErr } = await supabase
           .from('users')
-          .upsert(basePayload, { onConflict: 'id' });
+          .upsert(basePayload, { onConflict: 'email' });
         if (!fallbackErr) {
           supabaseSuccess = true;
           console.log('[CloudSync] Successfully saved base profile to Supabase:', userId);

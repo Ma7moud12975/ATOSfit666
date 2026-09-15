@@ -2,21 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import AuthenticationLayout from '../../components/ui/AuthenticationLayout';
-import InternetIdentityRegister from './components/InternetIdentityRegister';
+import RegistrationForm from './components/RegistrationForm';
 import WelcomeAnimation from './components/WelcomeAnimation';
 import { useAuth } from '../../contexts/AuthContext';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import GoogleSignInButton from '../../components/auth/GoogleSignInButton';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const RegisterScreen = () => {
   const [showWelcome, setShowWelcome] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAr } = useLanguage();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          if (user.onboardingCompleted) {
+            navigate('/dashboard', { replace: true });
+            return;
+          }
+        } catch {}
+      }
       navigate('/onboarding', { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate]);
@@ -26,7 +37,6 @@ const RegisterScreen = () => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
-
 
   const handleRegistrationSuccess = () => {
     setShowWelcome(true);
@@ -49,36 +59,19 @@ const RegisterScreen = () => {
   return (
     <div className={`transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
       <Helmet>
-        <title>Create Account - ATOS fit</title>
+        <title>{isAr ? 'إنشاء حساب جديد - ATOS fit' : 'Create Account - ATOS fit'}</title>
         <meta name="description" content="Join ATOS fit and start your personalized fitness journey with AI-powered coaching, exercise tracking, and nutrition guidance." />
         <meta name="keywords" content="fitness registration, AI fitness coach, workout tracker, health app signup" />
       </Helmet>
 
       <AuthenticationLayout
-        title="Create Your Account"
-        subtitle="Join thousands of users achieving their fitness goals with AI-powered coaching"
+        title={isAr ? 'إنشاء حساب جديد' : 'Create Your Account'}
+        subtitle={isAr ? 'انضم إلى منصة ATOS fit وابدأ رحلتك التدريبية المتكاملة' : 'Join thousands of users achieving their fitness goals with AI-powered coaching'}
         showLogo={true}
       >
-        <div className="mb-6 space-y-4">
-          <GoogleSignInButton
-            text="Sign up with Google"
-            fullWidth
-            size="lg"
-          />
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border"></div>
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="px-3 bg-card text-muted-foreground uppercase tracking-wider">
-                Or with Internet Identity
-              </span>
-            </div>
-          </div>
+        <div className="w-full max-w-md mx-auto">
+          <RegistrationForm onSuccess={handleRegistrationSuccess} />
         </div>
-
-        <InternetIdentityRegister onSuccess={handleRegistrationSuccess} />
       </AuthenticationLayout>
 
       <WelcomeAnimation 

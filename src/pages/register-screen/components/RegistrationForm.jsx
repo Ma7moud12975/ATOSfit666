@@ -6,10 +6,12 @@ import Select from '../../../components/ui/Select';
 import { Checkbox } from '../../../components/ui/Checkbox';
 import Icon from '../../../components/AppIcon';
 import { useSupabaseAuth } from '../../../contexts/SupabaseAuthContext';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 const RegistrationForm = ({ onSuccess }) => {
   const navigate = useNavigate();
   const { signUp } = useSupabaseAuth();
+  const { isAr } = useLanguage();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -18,8 +20,8 @@ const RegistrationForm = ({ onSuccess }) => {
     fitnessLevel: '',
     workoutDuration: '30',
     goals: [],
-    agreeToTerms: false,
-    agreeToPrivacy: false
+    agreeToTerms: true,
+    agreeToPrivacy: true
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -47,17 +49,16 @@ const RegistrationForm = ({ onSuccess }) => {
   ];
 
   const validatePassword = (password) => {
-    const minLength = password?.length >= 8;
+    const minLength = password?.length >= 6;
     const hasUpper = /[A-Z]/?.test(password);
     const hasLower = /[a-z]/?.test(password);
     const hasNumber = /\d/?.test(password);
-    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/?.test(password);
     
-    const score = [minLength, hasUpper, hasLower, hasNumber, hasSpecial]?.filter(Boolean)?.length;
+    const score = [minLength, hasUpper, hasLower, hasNumber]?.filter(Boolean)?.length;
     
     return {
-      isValid: score >= 3 && minLength,
-      strength: score <= 2 ? 'weak' : score <= 3 ? 'medium' : score <= 4 ? 'strong' : 'very-strong',
+      isValid: minLength,
+      strength: score <= 1 ? 'weak' : score <= 2 ? 'medium' : score <= 3 ? 'strong' : 'very-strong',
       score
     };
   };
@@ -82,34 +83,34 @@ const RegistrationForm = ({ onSuccess }) => {
     const newErrors = {};
 
     if (!formData?.fullName?.trim()) {
-      newErrors.fullName = 'Full name is required';
+      newErrors.fullName = isAr ? 'الاسم الكامل مطلوب' : 'Full name is required';
     }
 
     if (!formData?.email?.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = isAr ? 'البريد الإلكتروني مطلوب' : 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/?.test(formData?.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = isAr ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Please enter a valid email address';
     }
 
     const passwordValidation = validatePassword(formData?.password);
     if (!formData?.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = isAr ? 'كلمة المرور مطلوبة' : 'Password is required';
     } else if (!passwordValidation?.isValid) {
-      newErrors.password = 'Password must be at least 8 characters with uppercase, lowercase, and number';
+      newErrors.password = isAr ? 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' : 'Password must be at least 6 characters';
     }
 
     if (!formData?.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = isAr ? 'يرجى تأكيد كلمة المرور' : 'Please confirm your password';
     } else if (formData?.password !== formData?.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = isAr ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match';
     }
 
     if (!formData?.agreeToTerms) {
-      newErrors.agreeToTerms = 'You must agree to the Terms of Service';
+      newErrors.agreeToTerms = isAr ? 'يجب الموافقة على شروط الاستخدام' : 'You must agree to the Terms of Service';
     }
 
     if (!formData?.agreeToPrivacy) {
-      newErrors.agreeToPrivacy = 'You must agree to the Privacy Policy';
+      newErrors.agreeToPrivacy = isAr ? 'يجب الموافقة على سياسة الخصوصية' : 'You must agree to the Privacy Policy';
     }
 
     setErrors(newErrors);
@@ -125,18 +126,14 @@ const RegistrationForm = ({ onSuccess }) => {
     setErrors({});
 
     try {
-      // Register with Supabase
-      const data = await signUp(formData.email, formData.password, formData.fullName);
+      // Register with Supabase / Native Auth
+      const data = await signUp(formData.email, formData.password, formData.fullName, {
+        fitnessLevel: formData.fitnessLevel || 'intermediate',
+        goals: formData.goals || [],
+      });
       
       if (data?.user) {
-        // Store user info in localStorage
-        localStorage.setItem('user', JSON.stringify({ 
-          id: data.user.id, 
-          email: data.user.email, 
-          name: formData.fullName 
-        }));
-        
-        // Clear old data for fresh start
+        // Clear old cached workout plans for a fresh start
         localStorage.removeItem('fitcoach_badges');
         localStorage.removeItem('fitcoach_today_plan');
 
@@ -144,19 +141,8 @@ const RegistrationForm = ({ onSuccess }) => {
         
         if (onSuccess) {
           onSuccess();
-        }
-
-        // Check if email confirmation is required
-        if (data.user.identities?.length === 0) {
-          // Email confirmation required
-          setErrors({ 
-            success: 'Registration successful! Please check your email to verify your account.' 
-          });
         } else {
-          // Auto-confirmed, redirect to dashboard
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 1500);
+          navigate('/onboarding', { replace: true });
         }
       }
     } catch (error) {
@@ -198,9 +184,9 @@ const RegistrationForm = ({ onSuccess }) => {
       {/* Basic Information */}
       <div className="space-y-4">
         <Input
-          label="Full Name"
+          label={isAr ? "الاسم الكامل" : "Full Name"}
           type="text"
-          placeholder="Enter your full name"
+          placeholder={isAr ? "أدخل اسمك الكامل" : "Enter your full name"}
           value={formData?.fullName}
           onChange={(e) => handleInputChange('fullName', e?.target?.value)}
           error={errors?.fullName}
@@ -209,9 +195,9 @@ const RegistrationForm = ({ onSuccess }) => {
         />
 
         <Input
-          label="Email Address"
+          label={isAr ? "البريد الإلكتروني" : "Email Address"}
           type="email"
-          placeholder="Enter your email"
+          placeholder={isAr ? "أدخل بريدك الإلكتروني" : "Enter your email"}
           value={formData?.email}
           onChange={(e) => handleInputChange('email', e?.target?.value)}
           error={errors?.email}
@@ -221,9 +207,9 @@ const RegistrationForm = ({ onSuccess }) => {
 
         <div>
           <Input
-            label="Password"
+            label={isAr ? "كلمة المرور" : "Password"}
             type="password"
-            placeholder="Create a strong password"
+            placeholder={isAr ? "أنشئ كلمة مرور (6 أحرف على الأقل)" : "Create a strong password (min 6 chars)"}
             value={formData?.password}
             onChange={(e) => handleInputChange('password', e?.target?.value)}
             error={errors?.password}
@@ -248,9 +234,9 @@ const RegistrationForm = ({ onSuccess }) => {
                   passwordValidation?.strength === 'weak' ? 'text-error' :
                   passwordValidation?.strength === 'medium'? 'text-warning' : 'text-success'
                 }`}>
-                  {passwordValidation?.strength === 'weak' ? 'Weak' :
-                   passwordValidation?.strength === 'medium' ? 'Medium' :
-                   passwordValidation?.strength === 'strong' ? 'Strong' : 'Very Strong'}
+                  {passwordValidation?.strength === 'weak' ? (isAr ? 'ضعيفة' : 'Weak') :
+                   passwordValidation?.strength === 'medium' ? (isAr ? 'متوسطة' : 'Medium') :
+                   passwordValidation?.strength === 'strong' ? (isAr ? 'قوية' : 'Strong') : (isAr ? 'قوية جداً' : 'Very Strong')}
                 </span>
               </div>
             </div>
@@ -258,9 +244,9 @@ const RegistrationForm = ({ onSuccess }) => {
         </div>
 
         <Input
-          label="Confirm Password"
+          label={isAr ? "تأكيد كلمة المرور" : "Confirm Password"}
           type="password"
-          placeholder="Confirm your password"
+          placeholder={isAr ? "أعد إدخال كلمة المرور" : "Confirm your password"}
           value={formData?.confirmPassword}
           onChange={(e) => handleInputChange('confirmPassword', e?.target?.value)}
           error={errors?.confirmPassword}
@@ -369,20 +355,20 @@ const RegistrationForm = ({ onSuccess }) => {
         disabled={isLoading}
         className="h-12"
       >
-        {isLoading ? 'Creating Account...' : 'Create Account'}
+        {isLoading ? (isAr ? 'جارٍ إنشاء الحساب...' : 'Creating Account...') : (isAr ? 'إنشاء الحساب والمتابعة' : 'Create Account')}
       </Button>
 
       {/* Login Link */}
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
-          Already have an account?{' '}
+          {isAr ? 'لديك حساب بالفعل؟ ' : "Already have an account? "}
           <button
             type="button"
             onClick={() => navigate('/login-screen')}
             className="text-primary hover:underline font-medium"
             disabled={isLoading}
           >
-            Sign In
+            {isAr ? 'تسجيل الدخول' : 'Sign In'}
           </button>
         </p>
       </div>

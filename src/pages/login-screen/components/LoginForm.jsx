@@ -4,10 +4,12 @@ import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import { useSupabaseAuth } from '../../../contexts/SupabaseAuthContext';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 const LoginForm = ({ onSubmit, isLoading: externalLoading = false }) => {
   const navigate = useNavigate();
   const { signIn, loading: authLoading } = useSupabaseAuth();
+  const { isAr } = useLanguage();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -22,15 +24,15 @@ const LoginForm = ({ onSubmit, isLoading: externalLoading = false }) => {
     const newErrors = {};
 
     if (!formData?.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = isAr ? 'البريد الإلكتروني مطلوب' : 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData?.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = isAr ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Please enter a valid email address';
     }
 
     if (!formData?.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = isAr ? 'كلمة المرور مطلوبة' : 'Password is required';
     } else if (formData?.password?.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = isAr ? 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' : 'Password must be at least 6 characters';
     }
 
     setErrors(newErrors);
@@ -65,18 +67,12 @@ const LoginForm = ({ onSubmit, isLoading: externalLoading = false }) => {
       const data = await signIn(formData.email, formData.password);
       
       if (data?.user) {
-        // Store user info in localStorage for compatibility
-        localStorage.setItem(
-          'user',
-          JSON.stringify({ 
-            id: data.user.id, 
-            email: data.user.email, 
-            name: data.user.user_metadata?.full_name || data.user.email.split('@')[0]
-          })
-        );
-
         if (onSubmit) await onSubmit(formData);
-        navigate('/dashboard');
+        if (data.isNewUser || !data.user.onboardingCompleted) {
+          navigate('/onboarding', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -127,10 +123,10 @@ const LoginForm = ({ onSubmit, isLoading: externalLoading = false }) => {
 
       {/* Email Field */}
       <Input
-        label="Email Address"
+        label={isAr ? "البريد الإلكتروني" : "Email Address"}
         type="email"
         name="email"
-        placeholder="Enter your email"
+        placeholder={isAr ? "أدخل بريدك الإلكتروني" : "Enter your email"}
         value={formData?.email}
         onChange={handleInputChange}
         error={errors?.email}
@@ -142,10 +138,10 @@ const LoginForm = ({ onSubmit, isLoading: externalLoading = false }) => {
 
       {/* Password Field */}
       <Input
-        label="Password"
+        label={isAr ? "كلمة المرور" : "Password"}
         type={showPassword ? 'text' : 'password'}
         name="password"
-        placeholder="Enter your password"
+        placeholder={isAr ? "أدخل كلمة المرور" : "Enter your password"}
         value={formData?.password}
         onChange={handleInputChange}
         error={errors?.password}
@@ -179,7 +175,7 @@ const LoginForm = ({ onSubmit, isLoading: externalLoading = false }) => {
         className="h-12 flex items-center justify-center space-x-2"
       >
         <Icon name="LogIn" size={18} className="text-[#edad45]" />
-        <span>{isLoading ? 'Signing In...' : 'Sign In'}</span>
+        <span>{isLoading ? (isAr ? 'جارٍ تسجيل الدخول...' : 'Signing In...') : (isAr ? 'تسجيل الدخول' : 'Sign In')}</span>
       </Button>
 
       {/* Forgot Password Link */}
@@ -190,21 +186,21 @@ const LoginForm = ({ onSubmit, isLoading: externalLoading = false }) => {
           className="text-sm text-primary hover:text-primary/80 transition-colors"
           disabled={isLoading}
         >
-          Forgot your password?
+          {isAr ? 'هل نسيت كلمة المرور؟' : 'Forgot your password?'}
         </button>
       </div>
 
       {/* Sign Up Link */}
       <div className="text-center pt-4 border-t border-border">
         <p className="text-sm text-muted-foreground">
-          Don't have an account?{' '}
+          {isAr ? 'ليس لديك حساب؟ ' : "Don't have an account? "}
           <button
             type="button"
             onClick={() => navigate('/register-screen')}
             className="text-primary hover:text-primary/80 font-medium transition-colors"
             disabled={isLoading}
           >
-            Sign Up
+            {isAr ? 'إنشاء حساب جديد' : 'Sign Up'}
           </button>
         </p>
       </div>
