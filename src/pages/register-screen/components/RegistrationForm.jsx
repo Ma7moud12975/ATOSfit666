@@ -20,7 +20,7 @@ const RegistrationForm = ({ onSuccess }) => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isLoading = authLoading || isSubmitting;
+  const isLoading = isSubmitting;
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

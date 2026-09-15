@@ -18,7 +18,7 @@ const LoginForm = ({ onSubmit, isLoading: externalLoading = false }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isLoading = externalLoading || authLoading || isSubmitting;
+  const isLoading = externalLoading || isSubmitting;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

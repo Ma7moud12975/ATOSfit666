@@ -131,45 +131,10 @@ export const AuthProvider = ({ children }) => {
 
   const initializeMasterAuth = async () => {
     try {
-      // 1. Check for active Supabase session (persists across tabs/refresh)
-      if (supabase && typeof supabase.auth?.getSession === 'function') {
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user) {
-            setIsAuthenticated(true);
-            const savedGoogle = getSavedGoogleUser();
-            if (savedGoogle) setGoogleUser(savedGoogle);
-            setLoading(false);
-            return;
-          }
-        } catch {}
-      }
-
-      // 2. Check for saved Google session (GIS path or previous session)
-      const savedGoogle = getSavedGoogleUser();
+      // 1. Instant check: local user in localStorage (0ms)
       const localUserRaw = localStorage.getItem('user');
+      const savedGoogle = getSavedGoogleUser();
 
-      if (savedGoogle) {
-        setGoogleUser(savedGoogle);
-        setIsAuthenticated(true);
-
-        if (localUserRaw) {
-          try {
-            const localUser = JSON.parse(localUserRaw);
-            setSupabaseUser(localUser);
-            setIsNewUser(!localUser.onboardingCompleted);
-          } catch {
-            setIsNewUser(true);
-          }
-        } else {
-          setIsNewUser(true);
-        }
-
-        setLoading(false);
-        return;
-      }
-
-      // 3. Check local user in localStorage
       if (localUserRaw) {
         try {
           const parsed = JSON.parse(localUserRaw);
@@ -177,6 +142,7 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(true);
             setSupabaseUser(parsed);
             setIsNewUser(!parsed.onboardingCompleted);
+            if (savedGoogle) setGoogleUser(savedGoogle);
             setLoading(false);
 
             // Background refresh to pull newest cloud profile & picture from other devices
@@ -194,7 +160,37 @@ export const AuthProvider = ({ children }) => {
         } catch {}
       }
 
-      // 4. Dev fake auth fallback
+      if (savedGoogle) {
+        setGoogleUser(savedGoogle);
+        setIsAuthenticated(true);
+        setIsNewUser(true);
+        setLoading(false);
+        return;
+      }
+
+      // 2. Check for active Supabase session with safety timeout (max 1500ms)
+      if (supabase && typeof supabase.auth?.getSession === 'function') {
+        try {
+          const sessionPromise = supabase.auth.getSession();
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1500));
+          const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
+          if (session?.user) {
+            setIsAuthenticated(true);
+            const userObj = {
+              id: session.user.id,
+              email: session.user.email,
+              name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Athlete',
+              fullName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Athlete',
+              onboardingCompleted: true,
+            };
+            setSupabaseUser(userObj);
+            setLoading(false);
+            return;
+          }
+        } catch {}
+      }
+
+      // 3. Dev fake auth fallback
       const envFake    = import.meta.env.VITE_FAKE_AUTH === 'true';
       const envDisable = import.meta.env.VITE_DISABLE_FAKE_AUTH === 'true';
       const shouldFakeDev = !isProduction && !envDisable && envFake;
@@ -215,6 +211,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     } catch (err) {
       console.error('[AuthContext] Auth initialization error:', err);
+      setIsAuthenticated(false);
       setLoading(false);
     }
   };
