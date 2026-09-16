@@ -670,11 +670,42 @@ export function getCurrentUser() {
   }
 }
 
+/**
+ * Checks synchronously whether a valid local session or auth token exists
+ */
+export function hasValidSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+    const token = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+    const nativeSession = localStorage.getItem(NATIVE_AUTH_TOKEN_KEY);
+    const googleSession = localStorage.getItem('atos_google_session');
+
+    if (!raw) return false;
+    const user = JSON.parse(raw);
+    if (!user || (!user.id && !user.email)) return false;
+
+    // Has user profile plus token/session marker
+    if (token || nativeSession || googleSession) {
+      return true;
+    }
+
+    // Fallback if user profile is well-formed
+    if ((user.name || user.fullName) && (user.id || user.email)) {
+      return true;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export default {
   registerUser,
   loginUser,
   logoutUser,
   getCurrentUser,
+  hasValidSession,
   hashPassword,
   validateCredentialsFormally,
   generateAuthContext,

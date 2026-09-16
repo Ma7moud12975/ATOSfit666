@@ -416,6 +416,7 @@ const OnboardingScreen = () => {
     }
 
     localStorage.setItem('user', JSON.stringify(userProfile));
+    window.dispatchEvent(new CustomEvent('atos_user_profile_hydrated', { detail: userProfile }));
 
     // Save to cloud in background
     saveCloudUserProfile(userProfile, mesocycle).catch((cloudErr) => {

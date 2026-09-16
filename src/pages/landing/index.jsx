@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 import { useAuth } from '../../contexts/AuthContext';
+import { hasValidSession } from '../../utils/nativeAuth';
 import InteractiveImage from '../../components/InteractiveImage';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { applyTheme, getSavedTheme } from '../../utils/theme';
@@ -9,7 +10,8 @@ import '../../styles/bento-dashboard.css';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, supabaseUser, loading: authLoading } = useAuth();
+  const { isAuthenticated, supabaseUser, loading: authLoading, logout } = useAuth();
+  const hasSession = isAuthenticated || hasValidSession();
   const { language, toggleLanguage } = useLanguage();
   const [theme, setTheme] = useState(getSavedTheme);
   const [isVisible, setIsVisible] = useState(false);
@@ -38,6 +40,9 @@ const LandingPage = () => {
     about: 'من نحن',
     signIn: 'تسجيل الدخول',
     signUp: 'إنشاء حساب',
+    dashboard: 'لوحة التحكم',
+    signOut: 'تسجيل الخروج',
+    continueToDashboard: 'الانتقال إلى لوحة التحكم',
     signingIn: 'جارٍ التحميل...',
     start: 'ابدأ تمرينك الآن',
     starting: 'جارٍ التحميل...',
@@ -108,6 +113,9 @@ const LandingPage = () => {
     about: 'About Us',
     signIn: 'Sign In',
     signUp: 'Get Started',
+    dashboard: 'Dashboard',
+    signOut: 'Sign Out',
+    continueToDashboard: 'Continue to Dashboard',
     signingIn: 'Signing in...',
     start: 'Start Workout',
     starting: 'Starting...',
@@ -322,27 +330,42 @@ const LandingPage = () => {
               <Icon name="Languages" size={16} />
               <span className="font-bold">{isAr ? 'EN' : 'AR'}</span>
             </button>
-            {isAuthenticated && supabaseUser?.id && (
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-[#FAA802] border border-[#FAA802]/30 hover:bg-[#FAA802]/10 transition-all"
-              >
-                <Icon name="LayoutDashboard" size={16} />
-                <span>{isAr ? 'لوحة التحكم' : 'Dashboard'}</span>
-              </button>
+            {hasSession ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-[#FAA802] text-[#08080A] hover:bg-[#FB9202] transition-all shadow-[0_0_15px_rgba(250,168,2,0.3)]"
+                >
+                  <Icon name="LayoutDashboard" size={16} />
+                  <span>{landingCopy.dashboard}</span>
+                </button>
+                <button
+                  onClick={async () => {
+                    await logout();
+                  }}
+                  className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-[#636779] dark:text-[#A8A8A8] hover:text-red-500 border border-black/10 dark:border-white/10 hover:border-red-500/30 transition-all"
+                  title={landingCopy.signOut}
+                >
+                  <Icon name="LogOut" size={15} />
+                  <span className="hidden lg:inline">{landingCopy.signOut}</span>
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={handleLogin}
+                  className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-semibold transition-colors text-xs sm:text-sm px-3 py-2"
+                >
+                  {landingCopy.signIn}
+                </button>
+                <button
+                  onClick={handleGetStarted}
+                  className="inline-flex items-center justify-center bg-gradient-to-r from-[#FAA802] to-[#FB9202] hover:from-[#FBB502] hover:to-[#FAA802] text-[#08080A] px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold shadow-[0_0_20px_rgba(250,168,2,0.35)] hover:shadow-[0_0_25px_rgba(250,168,2,0.5)] transition-all"
+                >
+                  {landingCopy.signUp}
+                </button>
+              </>
             )}
-            <button
-              onClick={handleLogin}
-              className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-semibold transition-colors text-xs sm:text-sm px-3 py-2"
-            >
-              {landingCopy.signIn}
-            </button>
-            <button
-              onClick={handleGetStarted}
-              className="inline-flex items-center justify-center bg-gradient-to-r from-[#FAA802] to-[#FB9202] hover:from-[#FBB502] hover:to-[#FAA802] text-[#08080A] px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold shadow-[0_0_20px_rgba(250,168,2,0.35)] hover:shadow-[0_0_25px_rgba(250,168,2,0.5)] transition-all"
-            >
-              {landingCopy.signUp}
-            </button>
           </div>
 
           {/* Mobile Menu Toggle Button */}
@@ -415,36 +438,51 @@ const LandingPage = () => {
               >
                 {landingCopy.about}
               </button>
-              {isAuthenticated && supabaseUser?.id && (
-                <button
-                  onClick={() => {
-                    navigate('/dashboard');
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full bg-white/[0.06] border border-[#FAA802]/30 text-[#FAA802] py-3 rounded-xl text-sm font-bold mt-3 flex items-center justify-center gap-2"
-                >
-                  <Icon name="LayoutDashboard" size={18} />
-                  <span>{isAr ? 'الانتقال إلى لوحة التحكم' : 'Go to Dashboard'}</span>
-                </button>
+              {hasSession ? (
+                <div className="space-y-2 mt-3">
+                  <button
+                    onClick={() => {
+                      navigate('/dashboard');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-[#FAA802] text-[#08080A] py-3 rounded-xl text-sm font-extrabold shadow-[0_0_20px_rgba(250,168,2,0.35)] flex items-center justify-center gap-2"
+                  >
+                    <Icon name="LayoutDashboard" size={18} />
+                    <span>{landingCopy.continueToDashboard}</span>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      await logout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full border border-red-500/20 text-red-400 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-red-500/10"
+                  >
+                    <Icon name="LogOut" size={16} />
+                    <span>{landingCopy.signOut}</span>
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      handleGetStarted();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-[#FAA802] text-[#08080A] py-3 rounded-xl text-sm font-extrabold shadow-[0_0_20px_rgba(250, 168, 2,0.35)] mt-3"
+                  >
+                    {landingCopy.signUp}
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleLogin();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full border border-black/10 dark:border-white/10 text-[#08080A] dark:text-white py-3 rounded-xl text-sm font-bold mt-2"
+                  >
+                    {landingCopy.signIn}
+                  </button>
+                </>
               )}
-              <button
-                onClick={() => {
-                  handleGetStarted();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full bg-[#FAA802] text-[#08080A] py-3 rounded-xl text-sm font-extrabold shadow-[0_0_20px_rgba(250, 168, 2,0.35)] mt-3"
-              >
-                {landingCopy.signUp}
-              </button>
-              <button
-                onClick={() => {
-                  handleLogin();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full border border-black/10 dark:border-white/10 text-[#08080A] dark:text-white py-3 rounded-xl text-sm font-bold mt-2"
-              >
-                {landingCopy.signIn}
-              </button>
             </div>
           </div>
         )}
@@ -497,25 +535,42 @@ const LandingPage = () => {
 
               {/* Action Buttons Cluster */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
-                <button
-                  onClick={handleGetStarted}
-                  className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(250,168,2,0.45)] hover:shadow-[0_0_50px_rgba(250,168,2,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-[#FAA802]/40"
-                >
-                  <span>{landingCopy.start}</span>
-                  <Icon 
-                    name="ArrowRight" 
-                    size={20} 
-                    className={isAr ? 'rotate-180 group-hover:-translate-x-1 transition-transform' : 'group-hover:translate-x-1 transition-transform'} 
-                  />
-                </button>
+                {hasSession ? (
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(250,168,2,0.45)] hover:shadow-[0_0_50px_rgba(250,168,2,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-[#FAA802]/40"
+                  >
+                    <Icon name="LayoutDashboard" size={20} />
+                    <span>{landingCopy.continueToDashboard}</span>
+                    <Icon 
+                      name="ArrowRight" 
+                      size={20} 
+                      className={isAr ? 'rotate-180 group-hover:-translate-x-1 transition-transform' : 'group-hover:translate-x-1 transition-transform'} 
+                    />
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleGetStarted}
+                      className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(250,168,2,0.45)] hover:shadow-[0_0_50px_rgba(250,168,2,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-[#FAA802]/40"
+                    >
+                      <span>{landingCopy.start}</span>
+                      <Icon 
+                        name="ArrowRight" 
+                        size={20} 
+                        className={isAr ? 'rotate-180 group-hover:-translate-x-1 transition-transform' : 'group-hover:translate-x-1 transition-transform'} 
+                      />
+                    </button>
 
-                <button
-                  onClick={handleLogin}
-                  className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-black/10 dark:border-white/10 hover:border-[#FAA802]/50 text-[#08080A] dark:text-[#FFFFFF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all"
-                >
-                  <Icon name="LogIn" size={18} className="text-[#FAA802]" />
-                  <span>{landingCopy.signIn}</span>
-                </button>
+                    <button
+                      onClick={handleLogin}
+                      className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-black/10 dark:border-white/10 hover:border-[#FAA802]/50 text-[#08080A] dark:text-[#FFFFFF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all"
+                    >
+                      <Icon name="LogIn" size={18} className="text-[#FAA802]" />
+                      <span>{landingCopy.signIn}</span>
+                    </button>
+                  </>
+                )}
 
                 <a
                   href="#how-it-works"

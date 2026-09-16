@@ -1,15 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import AuthenticationLayout from '../../components/ui/AuthenticationLayout';
 import LoginForm from './components/LoginForm';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { hasValidSession } from '../../utils/nativeAuth';
 
 const LoginScreen = ({ defaultMode = 'login' }) => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAr } = useLanguage();
   const queryMode = searchParams.get('mode');
   const [activeTab, setActiveTab] = useState(() => (queryMode === 'register' || defaultMode === 'register' ? 'register' : 'login'));
+
+  useEffect(() => {
+    if (isAuthenticated || hasValidSession()) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     if (queryMode === 'register' || queryMode === 'login') {

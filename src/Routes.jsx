@@ -27,17 +27,64 @@ import PaymentCancel from './pages/payment-cancel';
 import CommunityPage from './pages/dashboard/CommunityPage';
 import MobileAppRouter from './components/mobile/MobileAppRouter';
 import MobileLayout from './components/mobile/MobileLayout';
+import { useAuth } from './contexts/AuthContext';
+import { hasValidSession, getCurrentUser } from './utils/nativeAuth';
 import { isNative } from './utils/platform';
+
+/**
+ * Auto-routes authenticated users directly to their dashboard (or onboarding if incomplete).
+ * Renders LandingPage only if the user is unauthenticated.
+ */
+const RootRedirect = () => {
+  const { isAuthenticated, loading } = useAuth();
+  const valid = hasValidSession();
+
+  if (isAuthenticated || valid) {
+    const user = getCurrentUser();
+    if (user && user.onboardingCompleted === false) {
+      return <Navigate to="/onboarding" replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#08080A]">
+        <div className="w-10 h-10 border-4 border-[#FAA802] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return <LandingPage />;
+};
+
+/**
+ * Prevents authenticated users from seeing Login or Register screens.
+ * If already logged in, redirects directly to Dashboard.
+ */
+const PublicAuthRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  const valid = hasValidSession();
+
+  if (isAuthenticated || valid) {
+    const user = getCurrentUser();
+    if (user && user.onboardingCompleted === false) {
+      return <Navigate to="/onboarding" replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
 
 const Routes = () => {
   const native = isNative();
 
   const AppContent = () => (
     <RouterRoutes>
-      {/* Define your route here */}
-      {/* Make the landing page the app root */}
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      {/* Root route: Auto-redirect authenticated users directly to Dashboard/Onboarding, else Landing */}
+      <Route path="/" element={<RootRedirect />} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
@@ -45,12 +92,11 @@ const Routes = () => {
       <Route path="/ai-assistant-food-scanner" element={<AIAssistantFoodScanner />} />
       <Route path="/ai-chat" element={<AIChatPage />} />
       <Route path="/food-scanner" element={<FoodScannerPage />} />
-      <Route path="/login-screen" element={<LoginScreen />} />
-      {/* Keep a /dashboard route as alias (public) */}
+      <Route path="/login-screen" element={<PublicAuthRoute><LoginScreen /></PublicAuthRoute>} />
       <Route path="/exercise-workout-screen" element={<ExerciseWorkoutScreen />} />
-      <Route path="/register-screen" element={<RegisterScreen />} />
+      <Route path="/register-screen" element={<PublicAuthRoute><RegisterScreen /></PublicAuthRoute>} />
       <Route path="/onboarding" element={<OnboardingScreen />} />
-      <Route path="/user-profile" element={<UserProfile />} />
+      <Route path="/user-profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
       <Route path="/community" element={<CommunityPage />} />
 
       {/* Schedule route removed per request */}

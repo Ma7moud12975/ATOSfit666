@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { hasValidSession, getCurrentUser } from '../../utils/nativeAuth';
 import { mobileAppFlowService } from '../../services/mobileAppFlowService';
 import MobileSplash from './MobileSplash';
 import MobileWelcome from './MobileWelcome';
@@ -28,8 +29,9 @@ const MobileAppRouter = ({ children }) => {
 
   const handleStartupLogic = () => {
     const hasSeenIntro = mobileAppFlowService.getHasSeenIntro();
+    const valid = isAuthenticated || hasValidSession();
 
-    if (!hasSeenIntro && !isAuthenticated) {
+    if (!hasSeenIntro && !valid) {
       setShowWelcome(true);
     }
 
@@ -47,19 +49,16 @@ const MobileAppRouter = ({ children }) => {
 
   // Handle automatic routing on root '/'
   if (location.pathname === '/') {
-    if (isAuthenticated) {
-      const onboardingCompleted = mobileAppFlowService.getOnboardingCompleted();
+    const valid = isAuthenticated || hasValidSession();
+    if (valid) {
+      const user = getCurrentUser();
+      const onboardingCompleted = user?.onboardingCompleted ?? mobileAppFlowService.getOnboardingCompleted();
       if (!onboardingCompleted) {
         return <Navigate to="/onboarding" replace />;
       }
       return <Navigate to="/dashboard" replace />;
     } else if (!showWelcome) {
-      // Bypassing Login Screen: Go directly to Onboarding if not authenticated
-      const onboardingCompleted = mobileAppFlowService.getOnboardingCompleted();
-      if (onboardingCompleted) {
-        return <Navigate to="/dashboard" replace />;
-      }
-      return <Navigate to="/onboarding" replace />;
+      return <Navigate to="/landing" replace />;
     }
   }
 

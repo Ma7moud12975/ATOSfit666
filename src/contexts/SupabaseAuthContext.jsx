@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import * as userApi from '../utils/api/userApi';
 import syncService from '../utils/syncService';
-import { registerUser, loginUser, logoutUser } from '../utils/nativeAuth';
+import { registerUser, loginUser, logoutUser, getCurrentUser, hasValidSession } from '../utils/nativeAuth';
 
 const SupabaseAuthContext = createContext(null);
 
@@ -15,53 +15,106 @@ export const useSupabaseAuth = () => {
 };
 
 export const SupabaseAuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [user, setUser] = useState(() => getCurrentUser());
+  const [profile, setProfile] = useState(() => getCurrentUser());
   const [stats, setStats] = useState(null);
   const [session, setSession] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => hasValidSession());
+  const [loading, setLoading] = useState(() => !hasValidSession());
   const [error, setError] = useState(null);
 
   // Initialize auth state
   useEffect(() => {
     initAuth();
 
-    // Listen for auth changes
+    // Cross-tab and in-app event listeners for seamless state synchronization
+    const handleProfileHydrated = (e) => {
+      if (e.detail) {
+        setUser(e.detail);
+        setProfile(e.detail);
+        setIsAuthenticated(true);
+        setLoading(false);
+      }
+    };
+
+    const handleLoggedOut = () => {
+      setUser(null);
+      setProfile(null);
+      setStats(null);
+      setSession(null);
+      setIsAuthenticated(false);
+      setLoading(false);
+    };
+
+    const handleStorageChange = (e) => {
+      if (e.key === 'user' || e.key === 'atos_auth_token') {
+        if (hasValidSession()) {
+          const u = getCurrentUser();
+          setUser(u);
+          setProfile(u);
+          setIsAuthenticated(true);
+        } else {
+          setUser(null);
+          setProfile(null);
+          setIsAuthenticated(false);
+        }
+      }
+    };
+
+    window.addEventListener('atos_user_profile_hydrated', handleProfileHydrated);
+    window.addEventListener('atos_user_logged_out', handleLoggedOut);
+    window.addEventListener('storage', handleStorageChange);
+
+    // Listen for Supabase auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setIsAuthenticated(!!session?.user);
-
         if (session?.user) {
+          setSession(session);
+          setUser(session.user);
+          setIsAuthenticated(true);
           await loadUserData(session.user.id);
-          // Setup sync listeners
           syncService.setupSyncListeners(session.user.id, (result) => {
             console.log('Sync completed:', result);
           });
-        } else {
+        } else if (!hasValidSession()) {
           setProfile(null);
           setStats(null);
+          setSession(null);
+          setUser(null);
+          setIsAuthenticated(false);
         }
       }
     );
 
     return () => {
+      window.removeEventListener('atos_user_profile_hydrated', handleProfileHydrated);
+      window.removeEventListener('atos_user_logged_out', handleLoggedOut);
+      window.removeEventListener('storage', handleStorageChange);
       subscription.unsubscribe();
     };
   }, []);
 
   const initAuth = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsAuthenticated(!!session?.user);
+      const valid = hasValidSession();
+      const localUser = getCurrentUser();
+      if (valid && localUser) {
+        setUser(localUser);
+        setProfile(localUser);
+        setIsAuthenticated(true);
+      }
 
+      const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
+        setSession(session);
+        setUser(session.user);
+        setIsAuthenticated(true);
         await loadUserData(session.user.id);
+      } else if (!valid) {
+        setSession(null);
+        setUser(null);
+        setIsAuthenticated(false);
       }
     } catch (err) {
       console.error('Auth initialization failed:', err);

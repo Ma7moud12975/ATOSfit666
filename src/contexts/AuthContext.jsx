@@ -19,6 +19,7 @@ import {
   loginUser as nativeLogin,
   logoutUser as nativeLogout,
   getCurrentUser as getNativeUser,
+  hasValidSession,
 } from '../utils/nativeAuth';
 
 const AuthContext = createContext(null);
@@ -34,11 +35,14 @@ export const AuthProvider = ({ children }) => {
   const [identity, setIdentity]           = useState(null);
   const [principal, setPrincipal]         = useState(null);
   const [googleUser, setGoogleUser]       = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading]             = useState(true);
-  const [supabaseUser, setSupabaseUser]   = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => hasValidSession());
+  const [loading, setLoading]             = useState(() => !hasValidSession());
+  const [supabaseUser, setSupabaseUser]   = useState(() => getNativeUser());
   const [userStats, setUserStats]         = useState(null);
-  const [isNewUser, setIsNewUser]         = useState(false);
+  const [isNewUser, setIsNewUser]         = useState(() => {
+    const u = getNativeUser();
+    return u ? !u.onboardingCompleted : false;
+  });
 
   const isProduction =
     import.meta.env.PROD ||
