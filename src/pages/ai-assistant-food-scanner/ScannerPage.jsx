@@ -12,6 +12,7 @@ import { buildFoodCoachPulse } from '../../utils/coachPulse';
 import { normalizeFoodAnalysis, parseFoodAnalysisResponse } from '../../utils/foodAnalysisNormalizer';
 import { useLanguage } from '../../contexts/LanguageContext';
 import MealLoggedFeedbackModal from './components/MealLoggedFeedbackModal';
+import ManualFoodEntryModal from './components/ManualFoodEntryModal';
 import { getChatbotApiKey, getChatbotModelName, callGeminiWithFallback } from '../../utils/aiConfig';
 import '../../styles/bento-dashboard.css';
 
@@ -27,6 +28,7 @@ const ScannerPage = () => {
   const [scanResult, setScanResult] = useState(null);
   const [scanHistory, setScanHistory] = useState([]);
   const [previewImage, setPreviewImage] = useState(null);
+  const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
   const fileInputRef = useRef(null);
 
   const CHATBOT_API_KEY = getChatbotApiKey();
@@ -226,6 +228,34 @@ const ScannerPage = () => {
     }
   };
 
+  // Handle saving a manually-entered meal from the AI estimation modal
+  const handleManualSave = async (foodData) => {
+    try {
+      const saved = await logFood(getUserId(), {
+        foodName: foodData.name,
+        calories: foodData.calories,
+        protein: foodData.protein,
+        carbs: foodData.carbs,
+        fat: foodData.fats,
+        sugar: foodData.sugar,
+        portionSize: foodData.servingSize,
+        imageUrl: '',
+        dateLogged: foodData.dateLogged || new Date().toISOString(),
+      });
+      const savedMeal = { ...formatHistoryItem(saved), saved: true };
+      setScanResult(savedMeal);
+      setScanHistory(prev => [savedMeal, ...prev.filter(item => String(item.id) !== String(savedMeal.id))]);
+      setPreviewImage(null);
+      const currentU = JSON.parse(localStorage.getItem('user') || '{}');
+      const updatedStats = getNutritionStats(getUserId(currentU), new Date(), currentU);
+      setDailyStats(updatedStats);
+      setJustLoggedMeal(savedMeal);
+      setIsFeedbackModalOpen(true);
+    } catch (e) {
+      console.error('Manual food entry save failed:', e);
+    }
+  };
+
   const recoveryMatch = scanResult && !scanResult.errorMessage ? buildRecoveryMatch(scanResult) : null;
   const coachPulse = buildFoodCoachPulse({ scanResult, recoveryMatch });
 
@@ -315,10 +345,18 @@ const ScannerPage = () => {
                     <p style={{ fontSize: '0.78rem', color: 'var(--bento-muted)', fontWeight: 700, margin: '2px 0 0' }}>{t('scanner.savedScans', { count: scanHistory.length })}</p>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileUpload} style={{ display: 'none' }} />
                   <button className="btn-olive" onClick={() => fileInputRef.current?.click()} style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
                     <Icon name="Upload" size={14} /> {t('scanner.upload')}
+                  </button>
+                  <button
+                    className="btn-olive"
+                    onClick={() => setIsManualEntryOpen(true)}
+                    style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', background: 'rgba(250,168,2,0.12)', border: '1.5px solid rgba(250,168,2,0.35)', color: '#FAA802' }}
+                  >
+                    <Icon name="PencilLine" size={14} />
+                    {language === 'ar' ? 'إضافة يدوياً' : 'Add Manually'}
                   </button>
                 </div>
               </div>
@@ -481,6 +519,13 @@ const ScannerPage = () => {
         meal={justLoggedMeal}
         dailyStats={dailyStats}
         onNavigateDashboard={() => navigate('/dashboard')}
+      />
+
+      <ManualFoodEntryModal
+        isOpen={isManualEntryOpen}
+        onClose={() => setIsManualEntryOpen(false)}
+        onSave={handleManualSave}
+        language={language}
       />
     </div>
   );
