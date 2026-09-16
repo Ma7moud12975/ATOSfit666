@@ -4,6 +4,7 @@ import { ReadinessStateMachine } from './pose/readinessStateMachine';
 import { VideoTimelineMarkers } from './pose/videoTimelineMarkers';
 import { PoseLandmarkSmoother } from './pose/landmarkFilter';
 import { globalAudioFeedback } from './pose/audioFeedbackController';
+import { ATOSAICoach } from './coach/index.js';
 
 /**
  * RepTracker - Reusable state management component for exercise repetition tracking
@@ -231,6 +232,7 @@ class PoseDetectionUtils {
     this._lastReadinessFeedbackAt = 0;
     this._lastReadinessState = this.readinessStatus.state;
     this._currentFrameTimeSec = null;
+    this.aiCoach = new ATOSAICoach(this.exerciseMode);
     
     // Landmark history for EMA backfilling - circular buffer storing recent landmarks per index
     // Structure: { landmarkIndex: [landmark1, landmark2, ...] }
@@ -1217,6 +1219,9 @@ class PoseDetectionUtils {
       // Set normalized mode directly (reverse plank removed)
       this.exerciseMode = normalized;
       console.debug('PoseDetectionUtils: setExerciseMode ->', this.exerciseMode);
+      if (this.aiCoach) {
+        this.aiCoach.setExercise(normalized);
+      }
       // Ensure per-mode state exists
       if (!this.perModeState[normalized]) {
         this.perModeState[normalized] = { state: 'up', count: 0 };
@@ -4502,6 +4507,15 @@ class PoseDetectionUtils {
       hasOnTimeUpdate: !!onTimeUpdate,
       hasOnReadinessChange: !!onReadinessChange
     });
+  }
+
+  // Expose ATOS AI Coach instance and report generator
+  getAiCoach() {
+    return this.aiCoach;
+  }
+
+  getCoachSessionReport() {
+    return this.aiCoach ? this.aiCoach.generateSessionReport() : null;
   }
 
   // Cleanup
