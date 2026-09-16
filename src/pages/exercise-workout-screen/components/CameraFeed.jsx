@@ -235,9 +235,10 @@ const CameraFeed = ({
     try {
       const mediaStream = await navigator.mediaDevices?.getUserMedia({
         video: {
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          facingMode: 'user'
+          width: { ideal: 1280, min: 640, max: 1920 },
+          height: { ideal: 720, min: 480, max: 1080 },
+          facingMode: 'user',
+          frameRate: { ideal: 30, min: 24, max: 60 }
         },
         audio: false
       });

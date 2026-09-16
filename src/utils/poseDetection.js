@@ -233,6 +233,7 @@ class PoseDetectionUtils {
     this._lastReadinessState = this.readinessStatus.state;
     this._currentFrameTimeSec = null;
     this.aiCoach = new ATOSAICoach(this.exerciseMode);
+    this.lastWorldLandmarks = null;
     
     // Landmark history for EMA backfilling - circular buffer storing recent landmarks per index
     // Structure: { landmarkIndex: [landmark1, landmark2, ...] }
@@ -387,13 +388,14 @@ class PoseDetectionUtils {
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
       });
 
+      const defaultComplexity = (typeof navigator !== 'undefined' && (navigator.hardwareConcurrency || 4) >= 4) ? 2 : 1;
       const config = window.MediaPipeConfig?.POSE_CONFIG || {
-        modelComplexity: 1,
+        modelComplexity: defaultComplexity,
         smoothLandmarks: true,
         enableSegmentation: false,
         smoothSegmentation: false,
-        minDetectionConfidence: 0.6,
-        minTrackingConfidence: 0.65
+        minDetectionConfidence: 0.65,
+        minTrackingConfidence: 0.70
       };
 
       this.pose.setOptions(config);
@@ -880,10 +882,14 @@ class PoseDetectionUtils {
     const smoothedResult = this.landmarkSmoother.process(rawLandmarks, criticalIndices, nowMs);
     const validatedLandmarks = smoothedResult.landmarks;
     
+    // Store 3D metric world landmarks for perspective-invariant angle calculations
+    this.lastWorldLandmarks = results.poseWorldLandmarks || results.worldLandmarks || null;
+
     // Update lastResults with smoothed landmarks for rock-solid jitter-free drawing
     this.lastResults = {
       ...results,
-      poseLandmarks: validatedLandmarks || rawLandmarks
+      poseLandmarks: validatedLandmarks || rawLandmarks,
+      poseWorldLandmarks: this.lastWorldLandmarks
     };
     
     if (!validatedLandmarks || smoothedResult.isSearching) {
@@ -1288,9 +1294,22 @@ class PoseDetectionUtils {
       return Number.NaN;
     }
 
-    if (use3D && this._hasUsableDepth(point1, point2, point3)) {
-      const angle3D = this.calculateAngle3D(point1, point2, point3);
-      if (Number.isFinite(angle3D)) return angle3D;
+    if (use3D) {
+      // Prioritize true metric 3D world landmarks to eliminate camera perspective tilt errors
+      if (this.lastWorldLandmarks && point1.index !== undefined && point2.index !== undefined && point3.index !== undefined) {
+        const wp1 = this.lastWorldLandmarks[point1.index];
+        const wp2 = this.lastWorldLandmarks[point2.index];
+        const wp3 = this.lastWorldLandmarks[point3.index];
+        if (wp1 && wp2 && wp3) {
+          const worldAngle = this.calculateAngle3D(wp1, wp2, wp3);
+          if (Number.isFinite(worldAngle)) return worldAngle;
+        }
+      }
+
+      if (this._hasUsableDepth(point1, point2, point3)) {
+        const angle3D = this.calculateAngle3D(point1, point2, point3);
+        if (Number.isFinite(angle3D)) return angle3D;
+      }
     }
 
     return this._calculateAngle2D(point1, point2, point3, minVectorLength);

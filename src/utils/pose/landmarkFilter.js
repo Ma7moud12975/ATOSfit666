@@ -199,6 +199,71 @@ export class PoseLandmarkSmoother {
 
     this.lastFrameTime = null;
     this.consecutiveOccludedFrames = 0;
+    this.boneBaselines = new Map();
+  }
+
+  /**
+   * Biomechanical kinematic bone rigidity enforcement.
+   * Bones do not expand or contract by >25% between frames in real human bodies.
+   * If MediaPipe landmark jumps due to occlusion or motion blur, clamp child joint
+   * along the anatomical vector to prevent impossible skeleton stretching.
+   */
+  _enforceKinematicBoneConstraints(landmarks) {
+    if (!landmarks || landmarks.length < 29) return;
+
+    const KINEMATIC_BONES = [
+      [11, 13], // Left upper arm (shoulder -> elbow)
+      [12, 14], // Right upper arm (shoulder -> elbow)
+      [13, 15], // Left forearm (elbow -> wrist)
+      [14, 16], // Right forearm (elbow -> wrist)
+      [23, 25], // Left thigh (hip -> knee)
+      [24, 26], // Right thigh (hip -> knee)
+      [25, 27], // Left shin (knee -> ankle)
+      [26, 28], // Right shin (knee -> ankle)
+    ];
+
+    for (const [parentIdx, childIdx] of KINEMATIC_BONES) {
+      const p = landmarks[parentIdx];
+      const c = landmarks[childIdx];
+      if (!p || !c) continue;
+
+      const dx = c.x - p.x;
+      const dy = c.y - p.y;
+      const dz = (c.z ?? 0) - (p.z ?? 0);
+      const measuredDist = Math.hypot(dx, dy, dz);
+
+      if (measuredDist < 0.002) continue;
+
+      const key = `${parentIdx}-${childIdx}`;
+      const pVis = p.visibility ?? 1.0;
+      const cVis = c.visibility ?? 1.0;
+
+      // Update baseline during high-confidence frames
+      if (pVis >= 0.70 && cVis >= 0.70) {
+        const prev = this.boneBaselines.get(key);
+        if (prev === undefined) {
+          this.boneBaselines.set(key, measuredDist);
+        } else {
+          // Exponential moving average for baseline calibration
+          this.boneBaselines.set(key, 0.96 * prev + 0.04 * measuredDist);
+        }
+      }
+
+      const baseline = this.boneBaselines.get(key);
+      if (baseline && baseline > 0.01) {
+        const ratio = measuredDist / baseline;
+        // If joint jumped by >25% due to occlusion/blur, clamp along anatomical bone axis
+        if (ratio < 0.72 || ratio > 1.28) {
+          const clampedDist = Math.max(baseline * 0.75, Math.min(baseline * 1.25, measuredDist));
+          const scale = clampedDist / measuredDist;
+          c.x = p.x + dx * scale;
+          c.y = p.y + dy * scale;
+          if (c.z !== undefined && p.z !== undefined) {
+            c.z = p.z + dz * scale;
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -234,6 +299,9 @@ export class PoseLandmarkSmoother {
       const minConf = isCritical ? this.minConfidence : 0.45;
 
       const smoothed = this.filters[i].filter(raw, timestamp, minConf, this.maxCoastMs);
+      if (smoothed) {
+        smoothed.index = i;
+      }
       smoothedLandmarks[i] = smoothed;
 
       if (isCritical) {
@@ -244,6 +312,9 @@ export class PoseLandmarkSmoother {
         }
       }
     }
+
+    // Apply biomechanical kinematic bone rigidity constraints to eliminate limb jitter
+    this._enforceKinematicBoneConstraints(smoothedLandmarks);
 
     const trackingQuality = criticalIndices.length > 0 
       ? highConfidenceCount / criticalIndices.length 
@@ -270,5 +341,6 @@ export class PoseLandmarkSmoother {
     this.filters.forEach(f => f.reset());
     this.lastFrameTime = null;
     this.consecutiveOccludedFrames = 0;
+    this.boneBaselines.clear();
   }
 }

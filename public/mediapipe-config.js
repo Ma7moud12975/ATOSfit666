@@ -12,16 +12,16 @@ window.MediaPipeConfig = {
   TFJS_CONVERTER_URL: 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.10.0/dist/tf-converter.esm.js',
   TFJS_BACKEND_WEBGL_URL: 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.10.0/dist/tf-backend-webgl.esm.js',
   POSE_DETECTION_URL: 'https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.0/dist/pose-detection.esm.js',
-  BLAZEPOSE_MODEL_TYPE: 'full', // 'lite'|'full'|'heavy'
+  BLAZEPOSE_MODEL_TYPE: 'heavy', // 'lite'|'full'|'heavy'
   
-  // Pose detection settings optimized for web
+  // Pose detection settings optimized for web with high-fidelity tracking
   POSE_CONFIG: {
-    modelComplexity: 1, // 0 = fastest, 1 = balanced, 2 = most accurate
+    modelComplexity: (typeof navigator !== 'undefined' && (navigator.hardwareConcurrency || 4) >= 4) ? 2 : 1, // 2 = heavy deep neural network (maximum landmark accuracy & depth), 1 = balanced
     smoothLandmarks: true,
     enableSegmentation: false,
     smoothSegmentation: false,
-    minDetectionConfidence: 0.6,
-    minTrackingConfidence: 0.65,
+    minDetectionConfidence: 0.65,
+    minTrackingConfidence: 0.70,
     staticImageMode: false, // Process video stream
     maxNumHands: 0 // Disable hand detection to save memory
   },
