@@ -29,7 +29,7 @@ import MobileAppRouter from './components/mobile/MobileAppRouter';
 import MobileLayout from './components/mobile/MobileLayout';
 import { useAuth } from './contexts/AuthContext';
 import { hasValidSession, getCurrentUser } from './utils/nativeAuth';
-import { isNative } from './utils/platform';
+import { isMobileDevice } from './utils/platform';
 
 /**
  * Auto-routes authenticated users directly to their dashboard (or onboarding if incomplete).
@@ -78,7 +78,7 @@ const PublicAuthRoute = ({ children }) => {
 };
 
 const Routes = () => {
-  const native = isNative();
+  const isMobile = isMobileDevice();
 
   const AppContent = () => (
     <RouterRoutes>
@@ -117,16 +117,14 @@ const Routes = () => {
         <AuthProvider>
           <ErrorBoundary>
             <ScrollToTop />
-            {native ? (
+            {isMobile ? (
               <MobileAppRouter>
                 <MobileLayout>
                   <AppContent />
                 </MobileLayout>
               </MobileAppRouter>
             ) : (
-              <MobileLayout>
-                <AppContent />
-              </MobileLayout>
+              <AppContent />
             )}
           </ErrorBoundary>
         </AuthProvider>

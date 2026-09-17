@@ -4,7 +4,7 @@ import Icon from '../AppIcon';
 import logoImage from '../../assets/logo.png';
 import { applyTheme, getSavedTheme } from '../../utils/theme';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { isNative } from '../../utils/platform';
+import { isMobileDevice } from '../../utils/platform';
 import { logoutUser, getCurrentUser } from '../../utils/nativeAuth';
 
 const AppHeader = ({ onSidebarToggle, isSidebarOpen, user, onLogout }) => {
@@ -13,7 +13,7 @@ const AppHeader = ({ onSidebarToggle, isSidebarOpen, user, onLogout }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [theme, setTheme] = useState(getSavedTheme);
   const { language, isRTL, t, toggleLanguage } = useLanguage();
-  const native = isNative();
+  const native = isMobileDevice();
 
   useEffect(() => {
     const handleThemeChange = (event) => setTheme(event.detail || getSavedTheme());

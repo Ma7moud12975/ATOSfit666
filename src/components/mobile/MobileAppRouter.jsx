@@ -2,32 +2,46 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { hasValidSession, getCurrentUser } from '../../utils/nativeAuth';
 import { mobileAppFlowService } from '../../services/mobileAppFlowService';
+import { isMobileDevice } from '../../utils/platform';
 import MobileSplash from './MobileSplash';
 import MobileWelcome from './MobileWelcome';
 import { Navigate, useLocation } from 'react-router-dom';
 
 /**
- * MobileAppRouter manages the startup sequence for the native app.
- * It sits between the standard Router and the pages.
+ * MobileAppRouter manages the startup sequence for the native app and mobile viewports.
  */
 const MobileAppRouter = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  const [showSplash, setShowSplash] = useState(true);
+  const isMobile = isMobileDevice();
+
+  const [showSplash, setShowSplash] = useState(() => {
+    if (!isMobile) return false;
+    try {
+      return !sessionStorage.getItem('atos_mobile_splash_viewed');
+    } catch {
+      return true;
+    }
+  });
+
   const [showWelcome, setShowWelcome] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    // 1. Show splash for a minimum time or until auth is ready
+    if (!showSplash) return;
+
+    // Show splash for ~1.8 seconds on initial mobile launch
     const timer = setTimeout(() => {
-      if (!loading) {
-        handleStartupLogic();
-      }
-    }, 2000);
+      handleFinishSplash();
+    }, 1800);
 
     return () => clearTimeout(timer);
-  }, [loading]);
+  }, [showSplash, loading]);
 
-  const handleStartupLogic = () => {
+  const handleFinishSplash = () => {
+    try {
+      sessionStorage.setItem('atos_mobile_splash_viewed', 'true');
+    } catch {}
+
     const hasSeenIntro = mobileAppFlowService.getHasSeenIntro();
     const valid = isAuthenticated || hasValidSession();
 
@@ -40,7 +54,7 @@ const MobileAppRouter = ({ children }) => {
   };
 
   if (showSplash) {
-    return <MobileSplash />;
+    return <MobileSplash onFinish={handleFinishSplash} />;
   }
 
   if (showWelcome && location.pathname === '/') {
@@ -62,11 +76,7 @@ const MobileAppRouter = ({ children }) => {
     }
   }
 
-  return (
-    <>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 };
 
 export default MobileAppRouter;

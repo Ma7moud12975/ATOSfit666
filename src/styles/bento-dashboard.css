@@ -1431,3 +1431,36 @@
   animation: roadmapSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* ==========================================
+   MOBILE GYM ERGONOMICS & TOUCH OPTIMIZATION
+   ========================================== */
+@media (max-width: 768px) {
+  /* Prevent tap highlight blue boxes on Android/iOS */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button, a, input, select, [role="button"] {
+    touch-action: manipulation;
+  }
+
+  /* Compact Bento cards on mobile screens for gym convenience */
+  .bento-card {
+    border-radius: 16px;
+  }
+
+  .bento-card.mission-card {
+    padding: 1.15rem;
+  }
+
+  .btn-coral, .btn-olive {
+    min-height: 46px; /* Thumb-friendly touch target */
+  }
+
+  /* Safe padding for bottom navigation bar */
+  main {
+    padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 6rem) !important;
+  }
+}
+
+
