@@ -163,3 +163,72 @@ export function mergeLocalFoodLogs(userId, remoteLogs = []) {
   writeJson('food_logs', merged, userId);
   return merged;
 }
+
+export function getLocalWeightHistory(userId, initialWeight = null) {
+  let history = readJson('weight_history', null, userId);
+  if (!history || !Array.isArray(history) || history.length === 0) {
+    const currentW = Number(initialWeight) > 0 ? Number(initialWeight) : 75;
+    const today = new Date();
+    history = [
+      {
+        id: `weight-${Date.now() - 14 * 86400000}`,
+        date: new Date(today.getTime() - 14 * 86400000).toISOString(),
+        weight: Number((currentW + 1.6).toFixed(1)),
+        label: new Date(today.getTime() - 14 * 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      },
+      {
+        id: `weight-${Date.now() - 10 * 86400000}`,
+        date: new Date(today.getTime() - 10 * 86400000).toISOString(),
+        weight: Number((currentW + 1.1).toFixed(1)),
+        label: new Date(today.getTime() - 10 * 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      },
+      {
+        id: `weight-${Date.now() - 7 * 86400000}`,
+        date: new Date(today.getTime() - 7 * 86400000).toISOString(),
+        weight: Number((currentW + 0.6).toFixed(1)),
+        label: new Date(today.getTime() - 7 * 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      },
+      {
+        id: `weight-${Date.now() - 3 * 86400000}`,
+        date: new Date(today.getTime() - 3 * 86400000).toISOString(),
+        weight: Number((currentW + 0.2).toFixed(1)),
+        label: new Date(today.getTime() - 3 * 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      },
+      {
+        id: `weight-${Date.now()}`,
+        date: today.toISOString(),
+        weight: Number(currentW.toFixed(1)),
+        label: today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      }
+    ];
+    writeJson('weight_history', history, userId);
+  }
+  return history.sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+export function saveLocalWeightEntry(userId, weightKg, explicitDate = null) {
+  const dateObj = explicitDate ? new Date(explicitDate) : new Date();
+  const entry = {
+    id: `weight-${Date.now()}`,
+    date: dateObj.toISOString(),
+    weight: Number(Number(weightKg).toFixed(1)),
+    label: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  };
+  const history = getLocalWeightHistory(userId, weightKg);
+  const dateKey = dateObj.toISOString().slice(0, 10);
+  const filtered = history.filter(item => item.date.slice(0, 10) !== dateKey);
+  const updated = [...filtered, entry].sort((a, b) => new Date(a.date) - new Date(b.date));
+  writeJson('weight_history', updated, userId);
+  return entry;
+}
+
+export function deleteLocalWeightEntry(userId, entryId) {
+  const history = getLocalWeightHistory(userId).filter(item => item.id !== entryId);
+  writeJson('weight_history', history, userId);
+  return history;
+}
+
+export function clearLocalWeightHistory(userId) {
+  writeJson('weight_history', [], userId);
+  return [];
+}

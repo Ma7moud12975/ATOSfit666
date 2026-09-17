@@ -9,7 +9,8 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 
 const PersonalInfoTab = ({ user, onUpdateUser }) => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+  const isAr = language === 'ar';
   const [editingField, setEditingField] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -33,10 +34,33 @@ const PersonalInfoTab = ({ user, onUpdateUser }) => {
   };
 
   const handleSave = async (field) => {
-    onUpdateUser({ ...user, [field]: formData?.[field] });
+    const value = formData?.[field];
+    const updated = { ...user, [field]: value };
+    if (field === 'name') {
+      updated.fullName = value;
+    }
+    onUpdateUser(updated);
+
+    try {
+      const { resolveDbUserId } = await import('../../../utils/api/chatApi');
+      const { updateUser } = await import('../../../utils/api/userApi');
+      const resolved = await resolveDbUserId(user?.id || user?.email);
+      if (resolved) {
+        const dbUpdates = {};
+        if (field === 'name') dbUpdates.full_name = value;
+        if (field === 'email') dbUpdates.email = value;
+        if (field === 'dateOfBirth') dbUpdates.date_of_birth = value;
+        if (Object.keys(dbUpdates).length > 0) {
+          await updateUser(resolved, dbUpdates);
+        }
+      }
+    } catch (err) {
+      console.warn('Supabase direct update warning:', err);
+    }
+
     try {
       const { updateUserProfile } = await import('../../../utils/db');
-      await updateUserProfile(user.id, { [field]: formData?.[field] });
+      await updateUserProfile(user.id, { [field]: value });
     } catch {}
     setEditingField(null);
   };
@@ -52,45 +76,32 @@ const PersonalInfoTab = ({ user, onUpdateUser }) => {
 
   // Delete account function
   const handleDeleteAccount = async () => {
-    if (!user?.id) {
-      alert('No user found to delete');
+    if (!user?.id && !user?.email) {
+      alert(isAr ? 'لم يتم العثور على حساب لحذفه' : 'No user found to delete');
       return;
     }
 
     setIsDeleting(true);
     try {
-      console.log('🗑️ Deleting user account:', user.id);
+      console.log('🗑️ Deleting user account:', user.id || user.email);
 
-      // Delete from all Supabase tables (cascade should handle related data)
-      // But we'll explicitly delete to be safe
-      
-      // 1. Delete achievements
-      await supabase.from('achievements').delete().eq('user_id', user.id);
-      console.log('✅ Deleted achievements');
+      const { resolveDbUserId } = await import('../../../utils/api/chatApi');
+      const targetUserId = (await resolveDbUserId(user?.id || user?.email)) || user?.id;
 
-      // 2. Delete exercises
-      await supabase.from('exercises').delete().eq('user_id', user.id);
-      console.log('✅ Deleted exercises');
-
-      // 3. Delete food logs
-      await supabase.from('food_logs').delete().eq('user_id', user.id);
-      console.log('✅ Deleted food logs');
-
-      // 4. Delete chatbot logs
-      await supabase.from('chatbot_logs').delete().eq('user_id', user.id);
-      console.log('✅ Deleted chatbot logs');
-
-      // 5. Delete user stats
-      await supabase.from('user_stats').delete().eq('user_id', user.id);
-      console.log('✅ Deleted user stats');
-
-      // 6. Delete user record
-      const { error } = await supabase.from('users').delete().eq('id', user.id);
-      if (error) {
-        console.error('❌ Error deleting user:', error);
-        throw error;
+      if (targetUserId) {
+        // 1. Delete achievements
+        await supabase.from('achievements').delete().eq('user_id', targetUserId);
+        // 2. Delete exercises
+        await supabase.from('exercises').delete().eq('user_id', targetUserId);
+        // 3. Delete food logs
+        await supabase.from('food_logs').delete().eq('user_id', targetUserId);
+        // 4. Delete chatbot logs
+        await supabase.from('chatbot_logs').delete().eq('user_id', targetUserId);
+        // 5. Delete user stats
+        await supabase.from('user_stats').delete().eq('user_id', targetUserId);
+        // 6. Delete user record
+        await supabase.from('users').delete().eq('id', targetUserId);
       }
-      console.log('✅ Deleted user record');
 
       // Clear all local storage
       localStorage.removeItem('user');
@@ -99,11 +110,10 @@ const PersonalInfoTab = ({ user, onUpdateUser }) => {
       localStorage.removeItem('workoutAnalytics');
       localStorage.removeItem('fitcoach_today_plan');
       
-      // Clear all achievement progress from localStorage
       const keysToRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && (key.includes('achievement') || key.includes('pushup') || key.includes('plank'))) {
+        if (key && (key.includes('achievement') || key.includes('pushup') || key.includes('plank') || key.includes('atos_account'))) {
           keysToRemove.push(key);
         }
       }
@@ -113,19 +123,15 @@ const PersonalInfoTab = ({ user, onUpdateUser }) => {
       try {
         const { db } = await import('../../../utils/db');
         await db.delete();
-        console.log('✅ Cleared IndexedDB');
       } catch (dbError) {
         console.warn('⚠️ Could not clear IndexedDB:', dbError);
       }
 
-      alert('Account deleted successfully!');
-      
-      // Navigate to registration page
+      alert(isAr ? 'تم حذف الحساب بنجاح' : 'Account deleted successfully!');
       navigate('/register-screen', { replace: true });
-
     } catch (error) {
       console.error('❌ Error deleting account:', error);
-      alert('Failed to delete account. Please try again.');
+      alert(isAr ? 'فشل حذف الحساب. يرجى المحاولة لاحقاً.' : 'Failed to delete account. Please try again.');
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
@@ -273,8 +279,8 @@ const PersonalInfoTab = ({ user, onUpdateUser }) => {
               <div className="flex items-center space-x-3">
                 <Icon name="Trash2" size={20} className="text-destructive" />
                 <div>
-                  <p className="font-medium text-destructive">Delete Account</p>
-                  <p className="text-sm text-muted-foreground">Permanently delete your account</p>
+                  <p className="font-medium text-destructive">{t('profile.deleteAccount')}</p>
+                  <p className="text-sm text-muted-foreground">{isAr ? 'حذف حسابك وبياناتك نهائياً من النظام' : 'Permanently delete your account'}</p>
                 </div>
               </div>
               {!showDeleteConfirm ? (
@@ -283,17 +289,17 @@ const PersonalInfoTab = ({ user, onUpdateUser }) => {
                   size="sm"
                   onClick={() => setShowDeleteConfirm(true)}
                 >
-                  Delete
+                  {t('profile.deleteAccount')}
                 </Button>
               ) : (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 space-x-reverse">
                   <Button 
                     variant="ghost" 
                     size="sm"
                     onClick={() => setShowDeleteConfirm(false)}
                     disabled={isDeleting}
                   >
-                    Cancel
+                    {t('profile.cancel')}
                   </Button>
                   <Button 
                     variant="destructive" 
@@ -304,22 +310,22 @@ const PersonalInfoTab = ({ user, onUpdateUser }) => {
                     {isDeleting ? (
                       <>
                         <Icon name="Loader" size={14} className="mr-1 animate-spin" />
-                        Deleting...
+                        {isAr ? 'جارِ الحذف...' : 'Deleting...'}
                       </>
                     ) : (
-                      'Confirm Delete'
+                      t('profile.confirmDelete')
                     )}
                   </Button>
                 </div>
               )}
             </div>
             {showDeleteConfirm && (
-              <div className="mt-3 p-3 bg-destructive/10 rounded-lg">
-                <p className="text-sm text-destructive font-medium">
-                  ⚠️ Warning: This action cannot be undone!
+              <div className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                <p className="text-sm text-destructive font-bold">
+                  {t('profile.deleteWarning')}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  All your data including workouts, achievements, and progress will be permanently deleted.
+                  {t('profile.deleteCopy')}
                 </p>
               </div>
             )}

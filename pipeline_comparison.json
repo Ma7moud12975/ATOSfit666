@@ -1,0 +1,233 @@
+{
+  "project": "ATOSfit - AI Fitness & Coaching Platform",
+  "version_comparison": {
+    "before": "Old Legacy Pipeline (Initial State)",
+    "after": "New Upgraded Pipeline (Current Production State)"
+  },
+  "old_pipeline_legacy": {
+    "title": "Legacy Pipeline (Before Modifications)",
+    "summary": "Siloed components, volatile sessions, 2D flat computer vision, aggressive non-contextual audio feedback, camera-only nutrition tracking, and disconnected static achievements.",
+    "architecture_pattern": "Fragmented / Page-Isolated / Non-Reactive",
+    "stages": [
+      {
+        "stage_id": "STAGE_1_AUTH",
+        "name": "Authentication & Session Management",
+        "input": "User credentials or social login trigger",
+        "steps": [
+          "Manual authentication request via Supabase/ICP",
+          "Session stored insecurely or ephemerally without persistent session sync",
+          "Inconsistent user identification across app (separate use of email, principal ID, local ID)"
+        ],
+        "output": "Fragile session that is lost on app refresh or close",
+        "key_issues": [
+          "Session drops on app close or browser refresh",
+          "User forced to re-login every session",
+          "Sign-out button hanging or unresponsive in multiple views",
+          "Slow authentication handshake without background caching"
+        ]
+      },
+      {
+        "stage_id": "STAGE_2_COMPUTER_VISION",
+        "name": "Camera & 2D Pose Detection",
+        "input": "Device web camera video stream",
+        "steps": [
+          "Camera initialized at standard low resolution (640x480) with default frame rates",
+          "Lightweight MediaPipe BlazePose model executed without hardware capability detection",
+          "Raw 2D landmark coordinates extracted directly from flat screen pixels (X, Y)",
+          "Direct mathematical angle calculations between 2D screen points"
+        ],
+        "output": "Flat screen angles vulnerable to camera tilt and perspective distortion",
+        "key_issues": [
+          "No kinematic filtering causing severe limb jitter and rubber-banding",
+          "2D angles produce inaccurate rep counts if user is angled 45 degrees to the camera",
+          "Low pixel density drops joint detection in low-light environments"
+        ]
+      },
+      {
+        "stage_id": "STAGE_3_FORM_CORRECTION",
+        "name": "Form Correction & Real-Time Feedback",
+        "input": "Raw calculated angles per frame",
+        "steps": [
+          "Linear conditional check (If angle < threshold -> Wrong, else Right)",
+          "Immediate voice synthesizer trigger on every single deviation frame",
+          "No awareness of movement phases (eccentric descent vs concentric ascent)"
+        ],
+        "output": "Rapid-fire repetitive audio feedback",
+        "key_issues": [
+          "Acts like an overwhelming biomechanical exam shouting cues every second",
+          "Multiple conflicting cues shouted simultaneously (e.g., knees wrong + back wrong)",
+          "No tolerance filtering between minor micro-deviations and dangerous faults",
+          "No verification step to check if the user actually corrected the fault"
+        ]
+      },
+      {
+        "stage_id": "STAGE_4_NUTRITION",
+        "name": "Food Scanner & Nutrition Tracking",
+        "input": "Camera photo snapshot only",
+        "steps": [
+          "User captures photo with device camera",
+          "Image sent to multimodal vision model",
+          "Basic macro estimation returned"
+        ],
+        "output": "Logged meal or failure",
+        "key_issues": [
+          "Zero manual food entry option if user forgets to take a photo",
+          "No ability to specify gram serving weights accurately",
+          "Model calls with strict JSON mode returned empty/zero values on lightweight models",
+          "Zero offline fallback; network drop prevents logging"
+        ]
+      },
+      {
+        "stage_id": "STAGE_5_ACHIEVEMENTS",
+        "name": "Achievements & User Progression",
+        "input": "Static page load",
+        "steps": [
+          "3,000-line monolithic deprecated accordion component rendered",
+          "Hardcoded empty user data passed (0 workouts, 0 streaks)",
+          "Requires user to manually click 'Start Achievement' button for each individual exercise"
+        ],
+        "output": "Static disconnected badge cards",
+        "key_issues": [
+          "No auto-sync with actual workout history recorded in exercises table",
+          "No Athlete Level, XP, or Rank system",
+          "Requires manual button click to track exercises already performed",
+          "No real-time event listener to update when workouts finish"
+        ]
+      }
+    ],
+    "diagram_nodes": [
+      { "id": "O_CAM", "label": "Webcam Feed (640x480 Low Res)" },
+      { "id": "O_POSE", "label": "MediaPipe Light (2D Screen Pixels)" },
+      { "id": "O_RULE", "label": "Linear Angle Rule (Angle < Min = Wrong)" },
+      { "id": "O_AUDIO", "label": "Aggressive Audio Alerts (Shouting 5 cues/sec)" },
+      { "id": "O_AUTH", "label": "Volatile Auth (Lost on app close)" },
+      { "id": "O_FOOD", "label": "Photo Only Scanner (Fails offline / No manual grams)" },
+      { "id": "O_ACH", "label": "Static 3000-Line Accordion (0 Workouts / Manual Start Button)" }
+    ],
+    "diagram_edges": [
+      { "from": "O_CAM", "to": "O_POSE", "label": "Unfiltered Frames" },
+      { "from": "O_POSE", "to": "O_RULE", "label": "2D Screen Angles" },
+      { "from": "O_RULE", "to": "O_AUDIO", "label": "Immediate Deviation Trigger" },
+      { "from": "O_AUTH", "to": "O_ACH", "label": "Hardcoded Zeros / Disconnected" }
+    ]
+  },
+  "new_pipeline_current": {
+    "title": "Current Production Pipeline (After Complete Upgrades)",
+    "summary": "Persistent single sign-on, HD 3D metric world tracking with bone rigidity filters, 5-layer autonomous coaching loop, dual vision + manual offline food estimation, auto-reconciling cloud database achievements with Athlete XP Ranks, and a unified reactive event bus.",
+    "architecture_pattern": "Hybrid Local-First + Event-Driven + Cloud Synchronized",
+    "stages": [
+      {
+        "stage_id": "STAGE_1_AUTH",
+        "name": "Persistent Identity & Session Management",
+        "input": "User Login (Email, Google OAuth, or ICP Internet Identity)",
+        "steps": [
+          "Automatic token verification and persistent localAccountStorage initialization",
+          "Session restored instantaneously (0ms) upon opening app, matching Facebook session model",
+          "Unified identity resolver ('resolveDbUserId') maps all auth providers to clean Supabase UUIDs",
+          "Responsive, reliable Sign-Out handler with local cache clearing"
+        ],
+        "output": "Permanent authenticated session and universal resolved user ID across all tables",
+        "key_advantages": [
+          "Zero unwanted re-logins on app restart",
+          "Cross-table identity consistency",
+          "Seamless offline mode with instant local caching"
+        ]
+      },
+      {
+        "stage_id": "STAGE_2_COMPUTER_VISION",
+        "name": "HD Camera & 3D Kinematic Pose Tracking",
+        "input": "High-Definition camera feed (1280x720 @ 30-60 FPS)",
+        "steps": [
+          "Adaptive hardware detection switches to MediaPipe Heavy model on 4+ core systems",
+          "Kinematic Bone-Rigidity Filter clamps 8 primary limb segments to running EMA baseline (+/- 25%)",
+          "Elimination of jitter and elastic rubber-banding during rapid movements",
+          "Metric 3D World Coordinates ('poseWorldLandmarks') stored in physical meters",
+          "True 3D perspective-invariant angle calculation independent of phone camera angle"
+        ],
+        "output": "Biomechanically precise 3D joints and perspective-invariant angles",
+        "key_advantages": [
+          "HD clarity and high confidence tracking (0.65 detection / 0.70 tracking)",
+          "Rock-solid bone lengths with zero jitter",
+          "Perspective-free angles accurate from 0 to 90 degree camera angles"
+        ]
+      },
+      {
+        "stage_id": "STAGE_3_FORM_CORRECTION",
+        "name": "5-Layer AI Coaching Architecture",
+        "input": "Continuous 3D landmark streams & calculated metric joint angles",
+        "steps": [
+          "Layer 1 (Phase Detector): Identifies Eccentric descent, Isometric pause, Concentric ascent, Lockout",
+          "Layer 2 (Tolerance Engine): Evaluates deviation severity (Micro vs Moderate vs Critical injury-risk)",
+          "Layer 3 (Micro-Cue Engine): Selects exactly ONE clear actionable cue (e.g., 'Chest proud', 'Knees outward')",
+          "Layer 4 (Verification Loop): Checks next repetition; rewards correction with positive praise and stays silent when form is good",
+          "Layer 5 (Pattern Learner): Analyzes fatigue curves across sets and warns before injury breakdown"
+        ],
+        "output": "Natural personal coach experience (constructive, timely, non-intrusive) + post-workout biomechanical report",
+        "key_advantages": [
+          "Feels like an elite human coach standing by your side",
+          "No conflicting cues; single priority cue per rep",
+          "Silent encouragement during clean reps"
+        ]
+      },
+      {
+        "stage_id": "STAGE_4_NUTRITION",
+        "name": "Dual AI Vision & Smart Manual Nutrition Engine",
+        "input": "Camera photo snapshot OR Manual food name + gram weight",
+        "steps": [
+          "Mode A (Visual): Gemini Multimodal Vision analysis for plate photo scans",
+          "Mode B (Manual): Serving weight presets (30g, 50g, 100g, 150g, 200g, 300g) + custom gram slider",
+          "Gemini Dietitian Prompt optimized for plain text output across all model variants",
+          "4-Layer Parsing Stack (Direct JSON -> Regex extraction -> Markdown stripping -> Normalizer)",
+          "36-Item Local USDA Nutritional Database Fallback guarantees zero 0s even when completely offline",
+          "Instant save to localAccountStorage + background sync to Supabase 'food_logs'"
+        ],
+        "output": "Accurate calorie and macro breakdowns (Protein, Carbs, Fats, Sugar) logged immediately",
+        "key_advantages": [
+          "Complete flexibility: scan photo or log manually in seconds",
+          "Guaranteed zero 0-macro glitches",
+          "100% offline capability"
+        ]
+      },
+      {
+        "stage_id": "STAGE_5_ACHIEVEMENTS",
+        "name": "Gamified Auto-Reconciling Cloud Progression Engine",
+        "input": "Completed workout sessions, cumulative rep logs, streaks, and calorie burns",
+        "steps": [
+          "Auto-Reconciliation Service: queries 'exercises' historical logs + 'user_stats' + 'achievements'",
+          "Self-Healing: Automatically computes true cumulative reps/time per exercise and awards missing milestones to cloud DB",
+          "Multi-Level Calibrated Catalog: 18 exercises across 5 progressive tiers (Bronze -> Silver -> Gold -> Platinum -> Diamond)",
+          "Athlete Rank System: 5 Athlete Tiers based on total XP (Rookie Mover -> Apex Legend)",
+          "Event Bus Broadcast ('ACHIEVEMENTS_UPDATED_EVENT'): Real-time UI refresh across tabs with 0ms page reload",
+          "Interactive Bento Dashboard: Category filters, search, glowing tier badges, and Detail Modal with 'Train Now' deep linking"
+        ],
+        "output": "Live gamified athlete progression profile synchronized across all devices",
+        "key_advantages": [
+          "Zero manual tracking required; workouts instantly translate to badges",
+          "Self-healing database synchronization",
+          "Engaging athlete tier ranks with visual rewards and direct workout launching"
+        ]
+      }
+    ],
+    "diagram_nodes": [
+      { "id": "N_AUTH", "label": "Persistent Session (Facebook Model + resolveDbUserId)" },
+      { "id": "N_CAM", "label": "HD Camera Feed (1280x720 @ 30-60fps)" },
+      { "id": "N_POSE", "label": "MediaPipe Heavy + Kinematic Bone Rigidity Filter" },
+      { "id": "N_3D", "label": "3D Metric World Landmarks (Physical Meters)" },
+      { "id": "N_COACH", "label": "5-Layer AI Coaching Loop (Phase -> Tolerance -> MicroCue -> Verify -> Learn)" },
+      { "id": "N_NUTRI", "label": "Smart Food Engine (Gemini Vision + Manual Grams + 36-Food Offline DB)" },
+      { "id": "N_DB", "label": "Supabase PostgreSQL (exercises, user_stats, food_logs, achievements)" },
+      { "id": "N_ACH", "label": "Gamified Bento Engine (Auto-Reconcile + Athlete XP Ranks + Detail Modal)" },
+      { "id": "N_BUS", "label": "Central Event Bus (DASHBOARD_DATA_UPDATED & ACHIEVEMENTS_UPDATED)" }
+    ],
+    "diagram_edges": [
+      { "from": "N_CAM", "to": "N_POSE", "label": "High-Density Video Stream" },
+      { "from": "N_POSE", "to": "N_3D", "label": "Kinematic Stabilized Joints" },
+      { "from": "N_3D", "to": "N_COACH", "label": "Perspective-Invariant Angles" },
+      { "from": "N_COACH", "to": "N_DB", "label": "Workout Logs & Biomechanical Scores" },
+      { "from": "N_NUTRI", "to": "N_DB", "label": "Food Logs & Caloric Balance" },
+      { "from": "N_DB", "to": "N_ACH", "label": "Auto-Reconciled Cumulative Totals" },
+      { "from": "N_ACH", "to": "N_BUS", "label": "Real-Time Broadcast" },
+      { "from": "N_BUS", "to": "N_ACH", "label": "Zero-Reload Live UI Update" }
+    ]
+  }
+}

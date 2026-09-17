@@ -46,8 +46,10 @@ const UserProfile = () => {
           if (lookupId) {
             try {
               console.log('📥 Loading user profile from Supabase:', lookupId);
-              supabaseUser = await getUserProfile(lookupId);
-              supabaseStats = await getUserStats(lookupId);
+              const { resolveDbUserId } = await import('../../utils/api/chatApi');
+              const resolvedUid = (await resolveDbUserId(lookupId)) || lookupId;
+              supabaseUser = await getUserProfile(resolvedUid);
+              supabaseStats = await getUserStats(resolvedUid);
               console.log('✅ Supabase user:', supabaseUser);
               console.log('✅ Supabase stats:', supabaseStats);
             } catch (error) {
@@ -146,6 +148,15 @@ const UserProfile = () => {
       await saveCloudUserProfile(updatedUser);
       const { updateUserProfile } = await import('../../utils/db');
       await updateUserProfile(updatedUser.id, updatedUser);
+
+      const { resolveDbUserId } = await import('../../utils/api/chatApi');
+      const resolvedUid = (await resolveDbUserId(updatedUser?.id || updatedUser?.email)) || updatedUser?.id;
+      if (resolvedUid) {
+        await updateUser(resolvedUid, {
+          full_name: updatedUser.name || updatedUser.fullName,
+          email: updatedUser.email
+        });
+      }
     } catch (e) {
       console.warn('Error saving profile changes to cloud:', e);
     }
@@ -185,8 +196,10 @@ const UserProfile = () => {
       if (metrics.fitnessLevel !== undefined) supabaseUpdates.fitness_level = metrics.fitnessLevel;
       if (metrics.goals !== undefined) supabaseUpdates.goals = metrics.goals;
       
-      if (Object.keys(supabaseUpdates).length > 0 && user?.id) {
-        await updateUser(user.id, supabaseUpdates);
+      const { resolveDbUserId } = await import('../../utils/api/chatApi');
+      const resolvedUid = (await resolveDbUserId(user?.id || user?.email)) || user?.id;
+      if (Object.keys(supabaseUpdates).length > 0 && resolvedUid) {
+        await updateUser(resolvedUid, supabaseUpdates);
       }
     } catch (error) {
       console.error('❌ Error updating Supabase:', error);
@@ -205,7 +218,8 @@ const UserProfile = () => {
     // Sync to Supabase Cloud & DB
     try {
       await saveCloudUserProfile(updatedUser);
-      const targetIdentifier = user?.email || user?.id;
+      const { resolveDbUserId } = await import('../../utils/api/chatApi');
+      const targetIdentifier = (await resolveDbUserId(user?.email || user?.id)) || user?.email || user?.id;
       if (targetIdentifier) {
         await updateUser(targetIdentifier, { profile_picture: newPicture });
       }
@@ -220,7 +234,7 @@ const UserProfile = () => {
   const tabs = [
     { id: 'personal', label: t('profile.personalInfo'), icon: 'User' },
     { id: 'metrics', label: t('profile.fitnessMetrics'), icon: 'Activity' },
-    { id: 'subscription', label: 'Subscription', icon: 'CreditCard' }
+    { id: 'subscription', label: t('profile.subscription'), icon: 'CreditCard' }
   ];
 
   const renderTabContent = () => {
@@ -505,13 +519,13 @@ const UserProfile = () => {
           />
 
           {/* Tab Navigation */}
-          <div className="bg-card border border-border rounded-lg mb-6">
+          <div className="rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md shadow-elevation-1 overflow-hidden mb-6">
             {/* Mobile Tab Selector */}
-            <div className="lg:hidden border-b border-border">
+            <div className="lg:hidden border-b border-border/60 p-2">
               <select
                 value={activeTab}
                 onChange={(e) => setActiveTab(e?.target?.value)}
-                className="w-full p-4 bg-transparent text-card-foreground font-medium focus:outline-none"
+                className="w-full p-3 bg-[#12141a] border border-[#FAA802]/30 rounded-xl text-card-foreground font-bold focus:outline-none"
               >
                 {tabs?.map((tab) => (
                   <option key={tab?.id} value={tab?.id}>
@@ -522,14 +536,15 @@ const UserProfile = () => {
             </div>
 
             {/* Desktop Tab Navigation */}
-            <div className="hidden lg:flex border-b border-border">
+            <div className="hidden lg:flex border-b border-border/60">
               {tabs?.map((tab) => (
                 <button
                   key={tab?.id}
                   onClick={() => setActiveTab(tab?.id)}
-                  className={`flex items-center space-x-2 px-6 py-4 font-medium transition-colors border-b-2 ${
+                  className={`flex items-center space-x-2 space-x-reverse px-6 py-4 font-bold transition-all duration-200 border-b-2 ${
                     activeTab === tab?.id
-                      ? 'border-primary text-primary bg-primary/5' :'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      ? 'border-[#FAA802] text-[#FAA802] bg-[#FAA802]/10'
+                      : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/40'
                   }`}
                 >
                   <Icon name={tab?.icon} size={18} />

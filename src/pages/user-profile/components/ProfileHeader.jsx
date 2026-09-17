@@ -6,7 +6,8 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 
 const ProfileHeader = ({ user, onProfilePictureUpdate }) => {
   const [showImageOptions, setShowImageOptions] = useState(false);
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+  const isAr = language === 'ar';
 
   const handleImageUpload = (event) => {
     const file = event?.target?.files?.[0];
@@ -50,28 +51,31 @@ const ProfileHeader = ({ user, onProfilePictureUpdate }) => {
   };
 
   const membershipDuration = () => {
-    const joinDate = new Date(user.joinDate);
+    const joinDate = new Date(user?.joinDate || Date.now());
     const now = new Date();
     const diffTime = Math.abs(now - joinDate);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     if (diffDays < 30) {
-      return `${diffDays} days`;
+      return isAr ? `${diffDays} يوم` : `${diffDays} days`;
     } else if (diffDays < 365) {
       const months = Math.floor(diffDays / 30);
-      return `${months} month${months > 1 ? 's' : ''}`;
+      return isAr ? `${months} شهر` : `${months} month${months > 1 ? 's' : ''}`;
     } else {
       const years = Math.floor(diffDays / 365);
-      return `${years} year${years > 1 ? 's' : ''}`;
+      return isAr ? `${years} سنة` : `${years} year${years > 1 ? 's' : ''}`;
     }
   };
 
   return (
-    <div className="bg-gradient-to-r from-primary/10 via-success/5 to-accent/10 rounded-xl p-6 mb-6">
-      <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+    <div
+      dir={isAr ? 'rtl' : 'ltr'}
+      className="relative overflow-hidden rounded-2xl border border-[#FAA802]/25 bg-gradient-to-r from-card via-background to-card p-6 mb-6 shadow-elevation-2 backdrop-blur-md"
+    >
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
         {/* Profile Picture */}
-        <div className="relative">
-          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-muted border-4 border-background shadow-elevation-2">
+        <div className="relative group">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-muted border-2 border-[#FAA802]/50 shadow-elevation-3 transition-transform duration-300 group-hover:scale-105">
             <Image
               src={user?.profilePicture}
               alt={`${user?.name}'s profile`}
@@ -82,10 +86,10 @@ const ProfileHeader = ({ user, onProfilePictureUpdate }) => {
           {/* Camera Overlay */}
           <button
             onClick={() => setShowImageOptions(true)}
-            className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-elevation-2 hover:bg-primary/90 transition-colors"
+            className="absolute -bottom-1 -right-1 w-8 h-8 bg-[#FAA802] text-black font-bold rounded-xl flex items-center justify-center shadow-elevation-2 hover:bg-[#FAA802]/90 transition-all duration-200"
             aria-label={t('profile.updatePicture')}
           >
-            <Icon name="Camera" size={16} />
+            <Icon name="Camera" size={15} />
           </button>
 
           {/* Image Upload Options */}
@@ -95,10 +99,10 @@ const ProfileHeader = ({ user, onProfilePictureUpdate }) => {
                 className="fixed inset-0 z-40"
                 onClick={() => setShowImageOptions(false)}
               />
-              <div className="absolute top-full right-0 mt-2 bg-popover border border-border rounded-lg shadow-elevation-3 z-50 min-w-48">
+              <div className="absolute top-full right-0 mt-2 bg-[#12141a] border border-[#FAA802]/30 rounded-xl shadow-elevation-3 z-50 min-w-48 overflow-hidden">
                 <div className="p-2">
-                  <label className="flex items-center space-x-3 px-3 py-2 text-sm text-popover-foreground hover:bg-muted rounded-md cursor-pointer transition-colors">
-                    <Icon name="Upload" size={16} />
+                  <label className="flex items-center space-x-3 space-x-reverse px-3 py-2 text-sm text-foreground hover:bg-muted/50 rounded-lg cursor-pointer transition-colors">
+                    <Icon name="Upload" size={16} className="text-[#FAA802]" />
                     <span>{t('profile.uploadDevice')}</span>
                     <input
                       type="file"
@@ -107,11 +111,13 @@ const ProfileHeader = ({ user, onProfilePictureUpdate }) => {
                       className="hidden"
                     />
                   </label>
-                  <button className="flex items-center space-x-3 w-full px-3 py-2 text-sm text-popover-foreground hover:bg-muted rounded-md transition-colors">
-                    <Icon name="Camera" size={16} />
-                    <span>{t('profile.takePhoto')}</span>
-                  </button>
-                  <button className="flex items-center space-x-3 w-full px-3 py-2 text-sm text-destructive hover:bg-muted rounded-md transition-colors">
+                  <button 
+                    onClick={() => {
+                      onProfilePictureUpdate('');
+                      setShowImageOptions(false);
+                    }}
+                    className="flex items-center space-x-3 space-x-reverse w-full px-3 py-2 text-sm text-destructive hover:bg-muted/50 rounded-lg transition-colors"
+                  >
                     <Icon name="Trash2" size={16} />
                     <span>{t('profile.removePhoto')}</span>
                   </button>
@@ -122,40 +128,44 @@ const ProfileHeader = ({ user, onProfilePictureUpdate }) => {
         </div>
 
         {/* User Info */}
-        <div className="flex-1 text-center sm:text-left">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
-            {user?.name}
-          </h1>
+        <div className="flex-1 text-center sm:text-left rtl:sm:text-right">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
+            <h1 className="text-2xl sm:text-3xl font-black text-foreground">
+              {user?.name || (isAr ? 'رياضي جديد' : 'ATOS Athlete')}
+            </h1>
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#FAA802]/15 text-[#FAA802] border border-[#FAA802]/30 capitalize">
+              {user?.fitnessLevel || 'Beginner'}
+            </span>
+          </div>
           <p className="text-sm text-muted-foreground mb-3">{user?.email}</p>
           
-          <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-2 sm:space-y-0 sm:space-x-4 mb-4">
-            <div className="flex items-center space-x-2 text-muted-foreground">
-              <Icon name="Calendar" size={16} />
-              <span className="text-sm">{t('profile.memberFor')} {membershipDuration()}</span>
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mb-4 text-xs">
+            <div className="flex items-center space-x-1.5 space-x-reverse text-muted-foreground">
+              <Icon name="Calendar" size={14} className="text-[#FAA802]" />
+              <span>{t('profile.memberFor')} {membershipDuration()}</span>
             </div>
             
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-success rounded-full"></div>
-              <span className="text-sm text-success font-medium">{t('profile.active')}</span>
+            <div className="flex items-center space-x-1.5 space-x-reverse">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+              <span className="text-emerald-400 font-semibold">{t('profile.active')}</span>
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="flex justify-center sm:justify-start space-x-6">
-            <div className="text-center">
-              <p className="text-lg font-semibold text-foreground">{user?.totalWorkouts}</p>
-              <p className="text-xs text-muted-foreground">{t('profile.workouts')}</p>
+          {/* Quick Stats Bento Pills */}
+          <div className="flex flex-wrap justify-center sm:justify-start gap-3">
+            <div className="px-3.5 py-1.5 rounded-xl border border-border/70 bg-card/70 flex items-center gap-2">
+              <Icon name="Dumbbell" size={15} className="text-primary" />
+              <span className="text-sm font-bold text-foreground">{user?.totalWorkouts || 0}</span>
+              <span className="text-xs text-muted-foreground">{t('profile.workouts')}</span>
             </div>
-            <div className="text-center">
-              <p className="text-lg font-semibold text-foreground">{user?.currentStreak}</p>
-              <p className="text-xs text-muted-foreground">{t('profile.dayStreak')}</p>
+
+            <div className="px-3.5 py-1.5 rounded-xl border border-border/70 bg-card/70 flex items-center gap-2">
+              <Icon name="Flame" size={15} className="text-[#FAA802]" />
+              <span className="text-sm font-bold text-foreground">{user?.currentStreak || 0}</span>
+              <span className="text-xs text-muted-foreground">{t('profile.dayStreak')}</span>
             </div>
-            {/* Achievements removed per request */}
           </div>
         </div>
-
-        {/* Action Button */}
-        {/* Unused header action icons removed per request */}
       </div>
     </div>
   );
