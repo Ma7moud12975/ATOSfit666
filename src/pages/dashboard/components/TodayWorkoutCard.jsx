@@ -1,243 +1,105 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
-import TodayPlanCustomizer from './TodayPlanCustomizer';
+import React from 'react';
+import { Flame, Calendar, Play } from 'lucide-react';
 
-const TodayWorkoutCard = ({ workoutData, onCustomize }) => {
-  const navigate = useNavigate();
-  const [showCustomizer, setShowCustomizer] = useState(false);
-  const [plan, setPlan] = useState(null);
-  const PLAN_KEY = 'fitcoach_today_plan';
-
-  const todayWorkout = plan || workoutData || {
-    name: "Full Body Strength",
-    scheduledTime: "6:00 PM",
-    exercises: [
-  { name: "Push-ups", sets: 3, reps: 15, completed: false },
-  { name: "Wide Push Ups", sets: 3, reps: 12, completed: false },
-  { name: "Narrow Push Ups", sets: 3, reps: 12, completed: false },
-  { name: "Diamond Push Ups", sets: 3, reps: 10, completed: false },
-  { name: "Knee Push Ups", sets: 3, reps: 12, completed: false },
-      { name: "Squats", sets: 3, reps: 20, completed: false },
-      { name: "Plank", sets: 3, duration: "30s", completed: false },
-
-      { name: "Lunges", sets: 3, reps: 12, completed: false }
-    ],
-    estimatedDuration: 25,
-    difficulty: "Intermediate"
-  };
-
-  const completedExercises = todayWorkout?.exercises?.filter(ex => ex?.completed)?.length || 0;
-  const totalExercises = todayWorkout?.exercises?.length || 0;
-  const totalSets = todayWorkout?.exercises?.reduce((acc, ex) => acc + (Number(ex.sets) || 3), 0) || 1;
-  const completedSets = todayWorkout?.exercises?.reduce((acc, ex) => {
-    if (ex.completed) return acc + (Number(ex.sets) || 3);
-    return acc + (Number(ex.completedSets) || 0);
-  }, 0) || 0;
-  const progressPercentage = Math.min(100, Math.round((completedSets / totalSets) * 100));
-
-  const handleStartWorkout = () => {
-    // ensure persisted plan exists
-    const normalized = {
-      ...todayWorkout,
-      exercises: todayWorkout.exercises.map(ex => ({ ...ex }))
-    };
-    localStorage.setItem(PLAN_KEY, JSON.stringify(normalized));
-    setPlan(normalized);
-    // continue from first incomplete
-    const firstIncomplete = normalized.exercises.find(ex => !ex.completed);
-    navigate('/exercise-workout-screen', { state: { todayPlan: normalized, selectedExercise: firstIncomplete || normalized.exercises[0] } });
-  };
-
-  const handleCustomize = () => {
-    setShowCustomizer(true);
-  };
-
-  const handleSavePlan = (newPlan) => {
-    // reset completion and persist
-    const normalized = {
-      ...newPlan,
-      exercises: newPlan.exercises.map(ex => ({ ...ex, completed: false }))
-    };
-    localStorage.setItem(PLAN_KEY, JSON.stringify(normalized));
-    setPlan(normalized);
-    setShowCustomizer(false);
-  };
-
-  const handleCancelCustomize = () => setShowCustomizer(false);
-
-  // Load and subscribe to plan updates
-  useEffect(() => {
-    const reloadPlan = () => {
-      try {
-        const raw = localStorage.getItem(PLAN_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed?.exercises?.length) {
-            setPlan(parsed);
-            return;
-          }
-        }
-        if (workoutData?.exercises?.length) {
-          setPlan(workoutData);
-        }
-      } catch {}
-    };
-
-    reloadPlan();
-    const handleUpdate = () => reloadPlan();
-    window.addEventListener('dashboardDataUpdated', handleUpdate);
-    window.addEventListener('workoutCompleted', handleUpdate);
-    window.addEventListener('storage', handleUpdate);
-    return () => {
-      window.removeEventListener('dashboardDataUpdated', handleUpdate);
-      window.removeEventListener('workoutCompleted', handleUpdate);
-      window.removeEventListener('storage', handleUpdate);
-    };
-  }, [workoutData]);
+export default function TodayWorkoutCard({
+  todayWorkout,
+  displayedExercises = [],
+  onOpenPlanModal,
+  onStartWorkout,
+  language,
+  t,
+}) {
+  const isAr = language === 'ar';
 
   return (
-    <div className="bg-card border border-border rounded-xl p-6 mb-6 shadow-elevation-2">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-xl font-semibold text-card-foreground mb-1">
-            Today's Workout
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            Scheduled for {todayWorkout?.scheduledTime}
-          </p>
-        </div>
-        <div className="text-right">
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-1">
-            <Icon name="Clock" size={16} />
-            <span>{todayWorkout?.estimatedDuration} min</span>
-          </div>
-          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-            todayWorkout?.difficulty === 'Beginner' ? 'bg-success/10 text-success' :
-            todayWorkout?.difficulty === 'Intermediate'? 'bg-warning/10 text-warning' : 'bg-error/10 text-error'
-          }`}>
-            {todayWorkout?.difficulty}
-          </span>
-        </div>
-      </div>
-      <div className="mb-4">
-        <div className="flex items-center justify-between text-sm mb-2">
-          <span className="font-medium text-card-foreground">{todayWorkout?.name}</span>
-          <span className="text-muted-foreground text-xs sm:text-sm">
-            {completedSets}/{totalSets} sets • {completedExercises}/{totalExercises} exercises
-          </span>
-        </div>
-        <div className="w-full bg-muted rounded-full h-2">
-          <div 
-            className="bg-primary h-2 rounded-full transition-all duration-300"
-            style={{ width: `${progressPercentage}%` }}
-          ></div>
-        </div>
-      </div>
-      <div className="space-y-2 mb-4">
-        {todayWorkout?.exercises?.map((exercise, index) => (
-          <div key={index} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-              exercise?.completed ? 'bg-success' : 'bg-muted border-2 border-border'
-            }`}>
-              {exercise?.completed && <Icon name="Check" size={12} color="white" />}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center space-x-2">
-                <span className={`text-sm font-medium ${
-                  exercise?.completed ? 'text-muted-foreground line-through' : 'text-card-foreground'
-                }`}>
-                  {exercise?.name}
+    <div className="bento-card col-span-1 md:col-span-2 lg:col-span-3 min-h-[200px]">
+      <div
+        className="trail trail-coral"
+        style={{ width: 280, height: 280, top: '-40%', right: '-5%', opacity: 0.12 }}
+      />
+      <div className="p-5 sm:p-7 relative z-10">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5">
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <div className="inline-flex items-center gap-1.5 bg-[#FAA802]/12 border border-[#FAA802]/25 rounded-full px-3 py-1">
+                <Flame size={13} className="text-[#FAA802]" strokeWidth={2.4} />
+                <span className="text-[0.7rem] text-[#FAA802] font-bold tracking-wider uppercase">
+                  {t('dashboard.todaysWorkout')}
                 </span>
-                {exercise?.completedSets > 0 && !exercise?.completed && (
-                  <span className="text-[11px] px-1.5 py-0.5 rounded bg-primary/15 text-primary font-bold">
-                    Set {exercise.completedSets}/{exercise.sets}
-                  </span>
-                )}
               </div>
-              <div className="flex items-center space-x-2.5 mt-0.5">
-                <span className="text-xs text-muted-foreground">
-                  {exercise?.sets} sets × {exercise?.reps || exercise?.duration}
-                </span>
-                {/* Visual set dots */}
-                <div className="flex items-center space-x-1" title={`${exercise?.completedSets || 0}/${exercise?.sets} sets completed`}>
-                  {Array.from({ length: Number(exercise?.sets) || 3 }).map((_, sIdx) => {
-                    const isDone = exercise?.completed || sIdx < (Number(exercise?.completedSets) || 0);
-                    return (
-                      <span
-                        key={sIdx}
-                        className={`w-2 h-2 rounded-full transition-colors ${
-                          isDone ? 'bg-success' : 'bg-muted-foreground/30'
-                        }`}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-            {!exercise?.completed ? (
-              <Button
-                size="xs"
-                variant="outline"
-                onClick={() => navigate('/exercise-workout-screen', { state: { selectedExercise: exercise, todayPlan: todayWorkout } })}
-              >
-                {exercise?.completedSets > 0 ? 'Resume' : 'Start'}
-              </Button>
-            ) : (
-              <span className="text-xs text-success font-semibold flex items-center gap-1">
-                <Icon name="Check" size={12} /> Done
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="flex space-x-3">
-        <Button
-          variant="default"
-          onClick={handleStartWorkout}
-          className="flex-1"
-          iconName="Play"
-          iconPosition="left"
-        >
-          {completedExercises > 0 ? 'Continue Workout' : 'Start Workout'}
-        </Button>
-        <Button
-          variant="outline"
-          iconName="Settings"
-          className="px-4"
-          onClick={handleCustomize}
-        >
-          Customize
-        </Button>
-      </div>
-      {showCustomizer && (
-        <TodayPlanCustomizer
-          exercises={[
-            { id: 1, name: 'Push-ups', category: 'Upper Body', difficulty: 'Beginner', sets: 3, reps: 15, duration: '3-5 min' },
-            { id: 2, name: 'Squats', category: 'Lower Body', difficulty: 'Beginner', sets: 3, reps: 20, duration: '4-6 min' },
-            { id: 3, name: 'Lunges', category: 'Lower Body', difficulty: 'Intermediate', sets: 3, reps: 12, duration: '5-7 min' },
-            { id: 4, name: 'Burpees', category: 'Full Body', difficulty: 'Advanced', sets: 3, reps: 10, duration: '6-8 min' },
-            { id: 5, name: 'Sit Ups', category: 'Core', difficulty: 'Intermediate', sets: 3, reps: '15', duration: '3-5 min' },
-            { id: 6, name: 'Mountain Climbers', category: 'Cardio', difficulty: 'Intermediate', sets: 3, reps: '20s', duration: '3-5 min' },
-            { id: 7, name: 'Jumping Jacks', category: 'Cardio', difficulty: 'Beginner', sets: 3, reps: '30s', duration: '2-4 min' },
-            { id: 8, name: 'High Knees', category: 'Cardio', difficulty: 'Beginner', sets: 3, reps: '25s', duration: '2-3 min' },
-            { id: 9, name: 'Plank', category: 'Core', difficulty: 'Intermediate', sets: 3, reps: '30s', duration: '1-3 min' },
-            { id: 10, name: 'Side Plank', category: 'Core', difficulty: 'Intermediate', sets: 3, reps: '20s', duration: '2-4 min' },
-            { id: 11, name: 'Wall Sit', category: 'Lower Body', difficulty: 'Beginner', sets: 3, reps: '30s', duration: '1-2 min' },
 
-            { id: 13, name: 'Wall Sit', category: 'Lower Body', difficulty: 'Beginner', sets: 3, reps: '30s', duration: '1-2 min' },
-            { id: 14, name: 'Wide Push Ups', category: 'Upper Body', difficulty: 'Intermediate', sets: 3, reps: 12, duration: '3-5 min' },
-            { id: 15, name: 'Narrow Push Ups', category: 'Upper Body', difficulty: 'Intermediate', sets: 3, reps: 12, duration: '3-5 min' },
-            { id: 16, name: 'Diamond Push Ups', category: 'Upper Body', difficulty: 'Advanced', sets: 3, reps: 10, duration: '3-5 min' },
-            { id: 17, name: 'Knee Push Ups', category: 'Upper Body', difficulty: 'Beginner', sets: 3, reps: 12, duration: '3-5 min' }
-          ]}
-          onSave={handleSavePlan}
-          onCancel={handleCancelCustomize}
-        />
-      )}
+              {todayWorkout?.plan?.phase && (
+                <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 dark:border-white/12 rounded-full px-3 py-1">
+                  <span className="text-[0.68rem] text-[var(--bento-text)] font-semibold">
+                    {isAr
+                      ? `الأسبوع ${todayWorkout.plan.weekNumber || 1}: ${todayWorkout.plan.phaseAr || todayWorkout.plan.phase}`
+                      : `Week ${todayWorkout.plan.weekNumber || 1}: ${todayWorkout.plan.phase}`}
+                  </span>
+                </div>
+              )}
+
+              {todayWorkout?.isRestDay && (
+                <div className="inline-flex items-center gap-1 bg-blue-500/15 border border-blue-500/30 rounded-full px-3 py-1">
+                  <span className="text-[0.68rem] text-blue-400 font-bold">
+                    {isAr ? 'استشفاء نشط' : 'Rest & Recovery'}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[var(--bento-text)] m-0 leading-tight tracking-tight">
+              {isAr
+                ? (todayWorkout?.plan?.titleAr || todayWorkout?.plan?.name || (todayWorkout?.isCompleted ? 'اكتمل تمرين اليوم' : t('dashboard.fullBodyStrength')))
+                : (todayWorkout?.plan?.name || (todayWorkout?.isCompleted ? 'Workout completed today' : t('dashboard.fullBodyStrength')))}
+            </h2>
+
+            <p className="text-[var(--bento-muted)] mt-1.5 text-sm font-medium">
+              {todayWorkout?.isRestDay
+                ? (isAr ? 'يوم استشفاء مخصص لترميم الألياف العضلية وترطيب الجسم.' : 'Active recovery day. Prioritize hydration and joint mobility.')
+                : todayWorkout?.totalPlanCount
+                ? `${todayWorkout.completedPlanCount}/${todayWorkout.totalPlanCount} ${isAr ? 'تمارين موجهة' : 'exercises'} • ${Math.round(todayWorkout.totalWorkoutTime / 60 || todayWorkout.plan?.estimatedDurationMin || 25)} ${isAr ? 'دقيقة' : 'min'}`
+                : todayWorkout?.isCompleted
+                ? `${Math.round(todayWorkout.caloriesBurned)} kcal • ${Math.round(todayWorkout.totalWorkoutTime / 60)} min`
+                : (isAr ? 'جلسة تدريبية مخصصة تنتظرك اليوم' : 'No workout completed yet today')}
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={onOpenPlanModal}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-white/5 border border-white/15 text-[var(--bento-text)] hover:border-[#FAA802]/60 hover:bg-[#FAA802]/10 transition-all duration-200"
+            >
+              <Calendar size={16} className="text-[#FAA802]" strokeWidth={2} />
+              <span>{isAr ? 'خطة الـ 4 أسابيع' : '4-Week Plan'}</span>
+            </button>
+
+            <button className="btn-coral justify-center" onClick={() => onStartWorkout()}>
+              <Play size={15} fill="#08080A" stroke="#08080A" strokeWidth={2} />
+              <span>
+                {todayWorkout?.isCompleted
+                  ? (isAr ? 'مراجعة التمرين' : 'Review workout')
+                  : todayWorkout?.isRestDay
+                  ? (isAr ? 'جلسة استشفاء' : 'Mobility session')
+                  : t('dashboard.startWorkout')}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Exercise chips */}
+        <div className="flex flex-wrap gap-2 pt-2">
+          {displayedExercises.map((ex, i) => (
+            <div
+              key={i}
+              onClick={onOpenPlanModal}
+              className="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-all duration-200 bg-[var(--bento-chip)] border border-[var(--bento-border)] text-[var(--bento-soft-text)] hover:border-[#FAA802]/50 hover:text-[#FAA802]"
+            >
+              {ex}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
-};
-
-export default TodayWorkoutCard;
+}
