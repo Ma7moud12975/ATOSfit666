@@ -1,4 +1,7 @@
 import { supabase } from '../supabase';
+import { resolveDbUserId } from './chatApi';
+import { emitAchievementsUpdated } from '../achievementsService';
+import { emitDashboardDataUpdated } from '../dashboardStatsService';
 
 /**
  * Achievements API - Handles all achievement-related database operations
@@ -215,20 +218,26 @@ export function isTimeBased(exerciseName) {
  */
 export async function getAchievements(userId) {
   console.log('📊 Getting achievements for user:', userId);
+  const resolvedUid = (await resolveDbUserId(userId).catch(() => null)) || userId;
   
-  const { data, error } = await supabase
-    .from('achievements')
-    .select('*')
-    .eq('user_id', userId)
-    .order('date_earned', { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from('achievements')
+      .select('*')
+      .or(`user_id.eq.${resolvedUid},user_id.eq.${userId}`)
+      .order('date_earned', { ascending: false });
 
-  if (error) {
-    console.error('❌ Error fetching achievements:', error);
-    throw error;
+    if (error) {
+      console.warn('⚠️ Supabase error in getAchievements:', error);
+      return [];
+    }
+    
+    console.log('✅ Achievements fetched:', data?.length || 0);
+    return data || [];
+  } catch (err) {
+    console.warn('⚠️ Failed to fetch achievements, returning empty:', err);
+    return [];
   }
-  
-  console.log('✅ Achievements fetched:', data?.length || 0);
-  return data || [];
 }
 
 /**
@@ -371,6 +380,12 @@ export async function updateAchievements(userId, exercises) {
       console.error('❌ Error updating achievement for', exercise.name, error);
     }
   }
+  
+  // Notify listeners that achievements were updated
+  try {
+    emitAchievementsUpdated();
+    emitDashboardDataUpdated({ type: 'ACHIEVEMENTS_UPDATED', results });
+  } catch {}
   
   return results;
 }
