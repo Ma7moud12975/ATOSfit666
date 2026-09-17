@@ -3962,444 +3962,207 @@ class PoseDetectionUtils {
     }
   }
 
-  // Draw pose landmarks on canvas
+  // Draw modern, symmetric, resolution-adaptive pose overlay on canvas
   drawPoseOverlay(canvasCtx, results, canvasWidth, canvasHeight, transform = null) {
-    // Always log to help debug landmark visibility
-    console.log('🎨 Drawing pose overlay with', results.poseLandmarks?.length || 0, 'landmarks');
-
     if (!results.poseLandmarks || !canvasCtx) {
-      console.log('❌ No landmarks or canvas context available');
       return;
     }
 
+    const landmarks = results.poseLandmarks;
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    // Draw landmarks
-    const landmarks = results.poseLandmarks;
-    let drawnLandmarks = 0;
-
-    landmarks.forEach((landmark, index) => {
-      if (landmark.visibility && landmark.visibility > 0.3) {
-        let x, y;
-        
-        if (transform) {
-          // MediaPipe landmarks are normalized (0-1), so we scale directly
-          x = (landmark.x * transform.scaleX) + transform.offsetX;
-          y = (landmark.y * transform.scaleY) + transform.offsetY;
-        } else {
-          // Fallback to simple scaling
-          x = landmark.x * canvasWidth;
-          y = landmark.y * canvasHeight;
-        }
-
-        // Enhanced landmark styling with professional gradient and shadow effects
-        const radius = landmark.visibility > 0.9 ? 12 : 
-                      landmark.visibility > 0.7 ? 10 : 
-                      landmark.visibility > 0.5 ? 8 : 6;
-        const shadowBlur = 6;
-        
-        // Draw outer glow effect first
-        canvasCtx.save();
-        canvasCtx.shadowColor = 'rgba(255, 255, 255, 0.3)';
-        canvasCtx.shadowBlur = shadowBlur * 1.5;
-        canvasCtx.shadowOffsetX = 0;
-        canvasCtx.shadowOffsetY = 0;
-        
-        // Create professional radial gradient for landmark
-        const gradient = canvasCtx.createRadialGradient(x, y, 0, x, y, radius);
-        
-        // Professional color scheme based on visibility and confidence
-        if (landmark.visibility > 0.9) {
-          // High confidence - professional emerald gradient
-          gradient.addColorStop(0, '#A7F3D0');   // Light emerald center
-          gradient.addColorStop(0.4, '#34D399'); // Bright emerald
-          gradient.addColorStop(0.8, '#10B981'); // Rich emerald
-          gradient.addColorStop(1, '#047857');   // Deep emerald edge
-        } else if (landmark.visibility > 0.8) {
-          // Good confidence - professional blue gradient
-          gradient.addColorStop(0, '#DBEAFE');   // Light blue center
-          gradient.addColorStop(0.4, '#93C5FD'); // Sky blue
-          gradient.addColorStop(0.8, '#3B82F6'); // Bright blue
-          gradient.addColorStop(1, '#1E40AF');   // Deep blue edge
-        } else if (landmark.visibility > 0.7) {
-          // Medium confidence - professional amber gradient
-          gradient.addColorStop(0, '#FEF3C7');   // Light amber center
-          gradient.addColorStop(0.4, '#FCD34D'); // Bright amber
-          gradient.addColorStop(0.8, '#F59E0B'); // Rich amber
-          gradient.addColorStop(1, '#D97706');   // Deep amber edge
-        } else if (landmark.visibility > 0.5) {
-          // Lower confidence - professional rose gradient
-          gradient.addColorStop(0, '#FCE7F3');   // Light rose center
-          gradient.addColorStop(0.4, '#F9A8D4'); // Bright rose
-          gradient.addColorStop(0.8, '#EC4899'); // Rich rose
-          gradient.addColorStop(1, '#BE185D');   // Deep rose edge
-        } else {
-          // Very low confidence - bright yellow gradient for visibility
-          gradient.addColorStop(0, '#FEF9C3');   // Light yellow center
-          gradient.addColorStop(0.4, '#FDE047'); // Bright yellow
-          gradient.addColorStop(0.8, '#EAB308'); // Rich yellow
-          gradient.addColorStop(1, '#CA8A04');   // Deep yellow edge
-        }
-        
-        // Draw the main landmark circle with professional styling
-        canvasCtx.beginPath();
-        canvasCtx.arc(x, y, radius, 0, 2 * Math.PI);
-        canvasCtx.fillStyle = gradient;
-        canvasCtx.fill();
-        
-        canvasCtx.restore();
-        
-        // Add professional white border with subtle shadow
-        canvasCtx.save();
-        canvasCtx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-        canvasCtx.shadowBlur = 3;
-        canvasCtx.shadowOffsetX = 1;
-        canvasCtx.shadowOffsetY = 1;
-        
-        canvasCtx.beginPath();
-        canvasCtx.arc(x, y, radius, 0, 2 * Math.PI);
-        canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-        canvasCtx.lineWidth = 2;
-        canvasCtx.stroke();
-        canvasCtx.restore();
-        
-        // Add inner highlight for premium 3D effect
-        const highlightRadius = radius * 0.35;
-        const highlightGradient = canvasCtx.createRadialGradient(
-          x - highlightRadius, y - highlightRadius, 0,
-          x - highlightRadius, y - highlightRadius, highlightRadius
-        );
-        highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-        highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        
-        canvasCtx.beginPath();
-        canvasCtx.arc(x - highlightRadius * 0.5, y - highlightRadius * 0.5, highlightRadius, 0, 2 * Math.PI);
-        canvasCtx.fillStyle = highlightGradient;
-        canvasCtx.fill();
-        
-        drawnLandmarks++;
-      }
-    });
-
-    // Only log occasionally
-    if (Math.random() < 0.1) {
-      console.log('✨ Drew', drawnLandmarks, 'landmarks');
-    }
-
-    // Add pulse animation effect for high-confidence landmarks
-    this.addPulseEffect(canvasCtx, landmarks, canvasWidth, canvasHeight, transform);
-
-    // Always use basic connections (more reliable)
-    this.drawBasicConnections(canvasCtx, landmarks, canvasWidth, canvasHeight, transform);
-
-    // Add confidence indicator overlay
-    this.drawConfidenceIndicator(canvasCtx, landmarks, canvasWidth, canvasHeight);
-
-    // Draw sit-ups debug overlay if available
-    try {
-      const stateObj = this.perModeState && this.perModeState['situps'];
-      if (stateObj && stateObj._debug) {
-        const d = stateObj._debug;
-        const lines = [
-          `situps: count=${stateObj.count} state=${stateObj.state}`,
-          `hipAngle=${d.avgHipAngle != null ? d.avgHipAngle.toFixed(1) : 'n/a'}`,
-          `kneeAngle=${d.avgKneeAngle != null ? d.avgKneeAngle.toFixed(1) : 'n/a'}`,
-          `noseDy=${d.noseDy != null ? d.noseDy.toFixed(3) : 'n/a'}`,
-          `rotDeg=${d.combinedRotDeg != null ? d.combinedRotDeg.toFixed(1) : 'n/a'}`,
-          `pending=${d.pending} src=${d.pendingSource}`
-        ];
-
-        canvasCtx.save();
-        canvasCtx.font = '16px monospace';
-        canvasCtx.fillStyle = 'rgba(0,0,0,0.6)';
-        canvasCtx.fillRect(8, 8, 260, (lines.length * 18) + 8);
-        canvasCtx.fillStyle = '#FFFFFF';
-        for (let i = 0; i < lines.length; i++) {
-          canvasCtx.fillText(lines[i], 12, 26 + (i * 18));
-        }
-        canvasCtx.restore();
-      }
-    } catch (e) {
-      // ignore overlay errors
-    }
-
-    canvasCtx.restore();
-  }
-
-  // Draw basic pose connections
-  drawBasicConnections(canvasCtx, landmarks, canvasWidth, canvasHeight, transform = null) {
-    const connections = [
-      [11, 12], // shoulders
-      [11, 13], // left shoulder to elbow
-      [13, 15], // left elbow to wrist
-      [12, 14], // right shoulder to elbow
-      [14, 16], // right elbow to wrist
-      [11, 23], // left shoulder to hip
-      [12, 24], // right shoulder to hip
-      [23, 24], // hips
-      [23, 25], // left hip to knee
-      [25, 27], // left knee to ankle
-      [24, 26], // right hip to knee
-      [26, 28]  // right knee to ankle
-    ];
-
-    // Define connection types for different styling
-    const connectionTypes = {
-      torso: [[11, 12], [11, 23], [12, 24], [23, 24]], // Core body connections
-      arms: [[11, 13], [13, 15], [12, 14], [14, 16]], // Arm connections
-      legs: [[23, 25], [25, 27], [24, 26], [26, 28]]  // Leg connections
+    // Helper to extract and scale coordinates
+    const getCoord = (idx) => {
+      const lm = landmarks[idx];
+      if (!lm || (lm.visibility !== undefined && lm.visibility < 0.35)) return null;
+      const x = transform ? (lm.x * transform.scaleX + transform.offsetX) : (lm.x * canvasWidth);
+      const y = transform ? (lm.y * transform.scaleY + transform.offsetY) : (lm.y * canvasHeight);
+      return { x, y, visibility: lm.visibility ?? 1 };
     };
 
-    let drawnConnections = 0;
-    connections.forEach(([startIdx, endIdx]) => {
-      const startPoint = landmarks[startIdx];
-      const endPoint = landmarks[endIdx];
-
-      if (startPoint && endPoint &&
-        startPoint.visibility > 0.5 && endPoint.visibility > 0.5) {
-        
-        let startX, startY, endX, endY;
-        
-        if (transform) {
-          // MediaPipe landmarks are normalized (0-1), so we scale directly
-          startX = (startPoint.x * transform.scaleX) + transform.offsetX;
-          startY = (startPoint.y * transform.scaleY) + transform.offsetY;
-          endX = (endPoint.x * transform.scaleX) + transform.offsetX;
-          endY = (endPoint.y * transform.scaleY) + transform.offsetY;
-        } else {
-          // Fallback to simple scaling
-          startX = startPoint.x * canvasWidth;
-          startY = startPoint.y * canvasHeight;
-          endX = endPoint.x * canvasWidth;
-          endY = endPoint.y * canvasHeight;
-        }
-        
-        // Determine connection type and styling with professional color scheme
-        let connectionColor, lineWidth, shadowColor, glowColor;
-        const connection = [startIdx, endIdx];
-        
-        if (connectionTypes.torso.some(([s, e]) => (s === startIdx && e === endIdx) || (s === endIdx && e === startIdx))) {
-          // Torso connections - professional blue gradient
-          connectionColor = '#3B82F6';
-          glowColor = '#60A5FA';
-          lineWidth = 6;
-          shadowColor = 'rgba(59, 130, 246, 0.5)';
-        } else if (connectionTypes.arms.some(([s, e]) => (s === startIdx && e === endIdx) || (s === endIdx && e === startIdx))) {
-          // Arm connections - professional green gradient
-          connectionColor = '#10B981';
-          glowColor = '#34D399';
-          lineWidth = 5;
-          shadowColor = 'rgba(16, 185, 129, 0.5)';
-        } else if (connectionTypes.legs.some(([s, e]) => (s === startIdx && e === endIdx) || (s === endIdx && e === startIdx))) {
-          // Leg connections - professional purple gradient
-          connectionColor = '#8B5CF6';
-          glowColor = '#A78BFA';
-          lineWidth = 5;
-          shadowColor = 'rgba(139, 92, 246, 0.5)';
-        } else {
-          // Default styling - professional gray gradient
-          connectionColor = '#6B7280';
-          glowColor = '#9CA3AF';
-          lineWidth = 4;
-          shadowColor = 'rgba(107, 114, 128, 0.4)';
-        }
-
-        // Create professional linear gradient for the connection line
-        const gradient = canvasCtx.createLinearGradient(startX, startY, endX, endY);
-        const avgVisibility = (startPoint.visibility + endPoint.visibility) / 2;
-        
-        if (avgVisibility > 0.9) {
-          // High confidence - rich gradient with glow
-          gradient.addColorStop(0, glowColor);
-          gradient.addColorStop(0.3, connectionColor);
-          gradient.addColorStop(0.7, connectionColor);
-          gradient.addColorStop(1, glowColor);
-        } else if (avgVisibility > 0.8) {
-          // Good confidence - solid gradient
-          gradient.addColorStop(0, connectionColor);
-          gradient.addColorStop(0.5, connectionColor + 'DD');
-          gradient.addColorStop(1, connectionColor);
-        } else if (avgVisibility > 0.7) {
-          // Medium confidence - semi-transparent gradient
-          gradient.addColorStop(0, connectionColor + 'CC');
-          gradient.addColorStop(0.5, connectionColor + '99');
-          gradient.addColorStop(1, connectionColor + 'CC');
-        } else {
-          // Lower confidence - more transparent gradient
-          gradient.addColorStop(0, connectionColor + '99');
-          gradient.addColorStop(0.5, connectionColor + '66');
-          gradient.addColorStop(1, connectionColor + '99');
-        }
-
-        // Draw professional shadow/glow effect
-        canvasCtx.save();
-        canvasCtx.shadowColor = shadowColor;
-        canvasCtx.shadowBlur = 12; // Enhanced glow effect
-        canvasCtx.shadowOffsetX = 0;
-        canvasCtx.shadowOffsetY = 0;
-        
-        // Draw the main connection line with professional styling
-        canvasCtx.beginPath();
-        canvasCtx.moveTo(startX, startY);
-        canvasCtx.lineTo(endX, endY);
-        canvasCtx.strokeStyle = gradient;
-        canvasCtx.lineWidth = lineWidth;
-        canvasCtx.lineCap = 'round'; // Rounded line caps for professional appearance
-        canvasCtx.lineJoin = 'round'; // Rounded line joins for smooth connections
-        canvasCtx.stroke();
-        
-        canvasCtx.restore();
-        
-        // Add subtle inner highlight for premium depth
-        canvasCtx.save();
-        canvasCtx.beginPath();
-        canvasCtx.moveTo(startX, startY);
-        canvasCtx.lineTo(endX, endY);
-        canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-        canvasCtx.lineWidth = 1;
-        canvasCtx.lineCap = 'round';
-        canvasCtx.stroke();
-        canvasCtx.restore();
-        
-        drawnConnections++;
-      }
-    });
-
-    // Only log occasionally
-    if (Math.random() < 0.02) {
-      console.log('✅ Drawing completed!', drawnConnections, 'connections');
-    }
-  }
-
-  // Add professional pulse animation effect for high-confidence landmarks
-  addPulseEffect(canvasCtx, landmarks, canvasWidth, canvasHeight, transform = null) {
-    if (!landmarks) return;
-    
-    const currentTime = Date.now();
-    const pulseSpeed = 0.002; // Slower, more professional pulse
-    const pulseIntensity = Math.sin(currentTime * pulseSpeed) * 0.5 + 0.5; // 0 to 1
-    
-    landmarks.forEach((landmark, index) => {
-      if (landmark.visibility && landmark.visibility > 0.9) { // Only very high-confidence landmarks
-        let x, y;
-        
-        if (transform) {
-          x = (landmark.x * transform.scaleX) + transform.offsetX;
-          y = (landmark.y * transform.scaleY) + transform.offsetY;
-        } else {
-          x = landmark.x * canvasWidth;
-          y = landmark.y * canvasHeight;
-        }
-
-        // Create professional pulsing outer ring
-        const pulseRadius = 14 + (pulseIntensity * 8); // Varies from 14 to 22
-        const pulseAlpha = 0.4 - (pulseIntensity * 0.25); // Fades as it expands
-        const pulseWidth = 3 - (pulseIntensity * 1); // Gets thinner as it expands
-        
-        canvasCtx.save();
-        canvasCtx.beginPath();
-        canvasCtx.arc(x, y, pulseRadius, 0, 2 * Math.PI);
-        canvasCtx.strokeStyle = `rgba(52, 211, 153, ${pulseAlpha})`; // Professional green pulse
-        canvasCtx.lineWidth = pulseWidth;
-        canvasCtx.stroke();
-        
-        // Add inner glow ring for premium effect
-        const innerRadius = pulseRadius - 4;
-        const innerAlpha = pulseAlpha * 0.7;
-        canvasCtx.beginPath();
-        canvasCtx.arc(x, y, innerRadius, 0, 2 * Math.PI);
-        canvasCtx.strokeStyle = `rgba(167, 243, 208, ${innerAlpha})`; // Light emerald inner glow
-        canvasCtx.lineWidth = 1;
-        canvasCtx.stroke();
-        
-        canvasCtx.restore();
-        canvasCtx.restore();
-      }
-    });
-  }
-
-  // Draw professional confidence indicator overlay
-  drawConfidenceIndicator(canvasCtx, landmarks, canvasWidth, canvasHeight) {
-    if (!landmarks) return;
-    
-    // Calculate overall pose confidence
-    const visibleLandmarks = landmarks.filter(l => l.visibility > 0.5);
-    const avgConfidence = visibleLandmarks.length > 0 
-      ? visibleLandmarks.reduce((sum, l) => sum + l.visibility, 0) / visibleLandmarks.length 
-      : 0;
-    
-    // Professional confidence indicator in top-right corner
-    const barWidth = 140;
-    const barHeight = 10;
-    const barX = canvasWidth - barWidth - 25;
-    const barY = 25;
-    const cornerRadius = 5;
-    
-    canvasCtx.save();
-    
-    // Professional background with subtle shadow
-    canvasCtx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-    canvasCtx.shadowBlur = 6;
-    canvasCtx.shadowOffsetX = 0;
-    canvasCtx.shadowOffsetY = 2;
-    
-    // Background bar with rounded corners
-    canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-    canvasCtx.beginPath();
-    canvasCtx.roundRect(barX, barY, barWidth, barHeight, cornerRadius);
-    canvasCtx.fill();
-    
-    // Confidence fill with professional gradient
-    const fillWidth = barWidth * avgConfidence;
-    let fillColor, gradientColor;
-    
-    if (avgConfidence > 0.85) {
-      fillColor = '#10B981'; // Professional emerald green
-      gradientColor = '#34D399';
-    } else if (avgConfidence > 0.65) {
-      fillColor = '#F59E0B'; // Professional amber
-      gradientColor = '#FCD34D';
+    // Calculate dynamic proportional body scale anchored to user's shoulder width or canvas
+    let bodyScale = 1.0;
+    const p11 = getCoord(11);
+    const p12 = getCoord(12);
+    if (p11 && p12) {
+      const shoulderDist = Math.hypot(p11.x - p12.x, p11.y - p12.y);
+      // Standard shoulder span is ~115px at 480p baseline. Clamp to prevent extreme scales.
+      bodyScale = Math.min(Math.max(shoulderDist / 115, 0.65), 1.6);
     } else {
-      fillColor = '#EF4444'; // Professional red
-      gradientColor = '#F87171';
+      bodyScale = Math.min(Math.max(Math.min(canvasWidth, canvasHeight) / 500, 0.7), 1.4);
     }
-    
-    // Create professional gradient fill
-    const fillGradient = canvasCtx.createLinearGradient(barX, barY, barX, barY + barHeight);
-    fillGradient.addColorStop(0, gradientColor);
-    fillGradient.addColorStop(1, fillColor);
-    
-    canvasCtx.fillStyle = fillGradient;
+
+    // 1. Symmetrical Biomechanical Skeleton Connectors (Drawn first underneath)
+    const connections = [
+      // Clavicle & Pelvis beams
+      [11, 12], // Shoulders
+      [23, 24], // Hips
+      // Torso Flanks (Symmetric)
+      [11, 23], // Left torso
+      [12, 24], // Right torso
+      // Upper Limbs (Symmetric)
+      [11, 13], // Left upper arm
+      [13, 15], // Left forearm
+      [12, 14], // Right upper arm
+      [14, 16], // Right forearm
+      // Lower Limbs (Symmetric)
+      [23, 25], // Left thigh
+      [25, 27], // Left shin
+      [24, 26], // Right thigh
+      [26, 28], // Right shin
+      // Feet Base (Symmetric)
+      [27, 31], // Left ankle to foot
+      [28, 32], // Right ankle to foot
+    ];
+
+    // Draw Laser Connector Lines
+    canvasCtx.save();
+    canvasCtx.lineCap = 'round';
+    canvasCtx.lineJoin = 'round';
+
+    // Pass 1: Soft Golden Glow Aura
+    canvasCtx.strokeStyle = 'rgba(250, 168, 2, 0.22)';
+    canvasCtx.lineWidth = 4.2 * bodyScale;
     canvasCtx.beginPath();
-    canvasCtx.roundRect(barX, barY, fillWidth, barHeight, cornerRadius);
-    canvasCtx.fill();
-    
-    // Professional border
-    canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-    canvasCtx.lineWidth = 1;
-    canvasCtx.beginPath();
-    canvasCtx.roundRect(barX, barY, barWidth, barHeight, cornerRadius);
+    connections.forEach(([sIdx, eIdx]) => {
+      const sp = getCoord(sIdx);
+      const ep = getCoord(eIdx);
+      if (sp && ep) {
+        canvasCtx.moveTo(sp.x, sp.y);
+        canvasCtx.lineTo(ep.x, ep.y);
+      }
+    });
+
+    // Neck / Spine Line Aura
+    if (p11 && p12) {
+      const midShoulderX = (p11.x + p12.x) / 2;
+      const midShoulderY = (p11.y + p12.y) / 2;
+      const p0 = getCoord(0); // Head anchor
+      if (p0) {
+        canvasCtx.moveTo(midShoulderX, midShoulderY);
+        canvasCtx.lineTo(p0.x, p0.y);
+      }
+      const p23 = getCoord(23);
+      const p24 = getCoord(24);
+      if (p23 && p24) {
+        const midHipX = (p23.x + p24.x) / 2;
+        const midHipY = (p23.y + p24.y) / 2;
+        canvasCtx.moveTo(midShoulderX, midShoulderY);
+        canvasCtx.lineTo(midHipX, midHipY);
+      }
+    }
     canvasCtx.stroke();
-    
-    // Professional confidence text
-    canvasCtx.font = 'bold 11px system-ui, -apple-system, sans-serif';
-    canvasCtx.fillStyle = '#FFFFFF';
-    canvasCtx.textAlign = 'right';
-    canvasCtx.textBaseline = 'bottom';
-    canvasCtx.fillText(`Pose: ${Math.round(avgConfidence * 100)}%`, barX + barWidth, barY - 8);
-    
-    // Add confidence level indicator
-    let confidenceLevel;
-    if (avgConfidence > 0.85) confidenceLevel = 'Excellent';
-    else if (avgConfidence > 0.65) confidenceLevel = 'Good';
-    else confidenceLevel = 'Low';
-    
-    canvasCtx.font = '10px system-ui, -apple-system, sans-serif';
-    canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    canvasCtx.textAlign = 'right';
-    canvasCtx.fillText(confidenceLevel, barX + barWidth, barY + barHeight + 14);
-    
+
+    // Pass 2: High-Precision Neon Laser Core
+    canvasCtx.strokeStyle = 'rgba(250, 168, 2, 0.85)';
+    canvasCtx.lineWidth = 1.8 * bodyScale;
+    canvasCtx.shadowColor = '#FAA802';
+    canvasCtx.shadowBlur = 4 * bodyScale;
+    canvasCtx.beginPath();
+    connections.forEach(([sIdx, eIdx]) => {
+      const sp = getCoord(sIdx);
+      const ep = getCoord(eIdx);
+      if (sp && ep) {
+        canvasCtx.moveTo(sp.x, sp.y);
+        canvasCtx.lineTo(ep.x, ep.y);
+      }
+    });
+
+    // Neck / Spine Line Core
+    if (p11 && p12) {
+      const midShoulderX = (p11.x + p12.x) / 2;
+      const midShoulderY = (p11.y + p12.y) / 2;
+      const p0 = getCoord(0);
+      if (p0) {
+        canvasCtx.moveTo(midShoulderX, midShoulderY);
+        canvasCtx.lineTo(p0.x, p0.y);
+      }
+      const p23 = getCoord(23);
+      const p24 = getCoord(24);
+      if (p23 && p24) {
+        const midHipX = (p23.x + p24.x) / 2;
+        const midHipY = (p23.y + p24.y) / 2;
+        canvasCtx.moveTo(midShoulderX, midShoulderY);
+        canvasCtx.lineTo(midHipX, midHipY);
+      }
+    }
+    canvasCtx.stroke();
+    canvasCtx.restore();
+
+    // 2. Symmetrical Biomechanical Joint Nodes (Drawn on top)
+    // Primary athletic joints: Shoulders, Elbows, Wrists, Hips, Knees, Ankles
+    const primaryJoints = [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28];
+    const nodeRadius = 5.6 * bodyScale;
+
+    primaryJoints.forEach((idx) => {
+      const pt = getCoord(idx);
+      if (!pt) return;
+
+      canvasCtx.save();
+
+      // 1. Dark Glass Backing Disc (High-contrast separation against clothing/skin/light)
+      canvasCtx.beginPath();
+      canvasCtx.arc(pt.x, pt.y, nodeRadius, 0, 2 * Math.PI);
+      canvasCtx.fillStyle = 'rgba(8, 8, 10, 0.85)';
+      canvasCtx.fill();
+
+      // 2. Precision Outer Reticle Ring
+      canvasCtx.beginPath();
+      canvasCtx.arc(pt.x, pt.y, nodeRadius, 0, 2 * Math.PI);
+      canvasCtx.strokeStyle = 'rgba(250, 168, 2, 0.75)';
+      canvasCtx.lineWidth = 1.2 * bodyScale;
+      canvasCtx.stroke();
+
+      // 3. Glowing Gold Core
+      canvasCtx.beginPath();
+      canvasCtx.arc(pt.x, pt.y, nodeRadius * 0.52, 0, 2 * Math.PI);
+      canvasCtx.fillStyle = '#FAA802';
+      canvasCtx.shadowColor = 'rgba(250, 168, 2, 0.65)';
+      canvasCtx.shadowBlur = 5 * bodyScale;
+      canvasCtx.fill();
+
+      // 4. White Center Pip (Subtle high-tech pinpoint)
+      canvasCtx.beginPath();
+      canvasCtx.arc(pt.x, pt.y, nodeRadius * 0.22, 0, 2 * Math.PI);
+      canvasCtx.fillStyle = '#FFFFFF';
+      canvasCtx.shadowBlur = 0;
+      canvasCtx.fill();
+
+      canvasCtx.restore();
+    });
+
+    // Minimal Head Anchor Node (Single clean node, leaves face free and unobstructed)
+    const headNode = getCoord(0);
+    if (headNode) {
+      canvasCtx.save();
+      const headRadius = 4.2 * bodyScale;
+      canvasCtx.beginPath();
+      canvasCtx.arc(headNode.x, headNode.y, headRadius, 0, 2 * Math.PI);
+      canvasCtx.fillStyle = 'rgba(8, 8, 10, 0.85)';
+      canvasCtx.fill();
+      canvasCtx.strokeStyle = 'rgba(250, 168, 2, 0.6)';
+      canvasCtx.lineWidth = 1 * bodyScale;
+      canvasCtx.stroke();
+      canvasCtx.beginPath();
+      canvasCtx.arc(headNode.x, headNode.y, headRadius * 0.45, 0, 2 * Math.PI);
+      canvasCtx.fillStyle = '#FAA802';
+      canvasCtx.fill();
+      canvasCtx.restore();
+    }
+
+    // Foot Tips (Micro Accent Nodes)
+    [31, 32].forEach((idx) => {
+      const pt = getCoord(idx);
+      if (!pt) return;
+      canvasCtx.save();
+      canvasCtx.beginPath();
+      canvasCtx.arc(pt.x, pt.y, 3.2 * bodyScale, 0, 2 * Math.PI);
+      canvasCtx.fillStyle = '#FAA802';
+      canvasCtx.fill();
+      canvasCtx.restore();
+    });
+
     canvasCtx.restore();
   }
 
