@@ -1,5 +1,4 @@
 import React from 'react';
-import GoogleSignInButton from '../../../components/auth/GoogleSignInButton';
 import Button from '../../../components/ui/Button';
 
 const SocialLogin = ({ isLoading = false, onSocialLogin }) => {
@@ -24,12 +23,6 @@ const SocialLogin = ({ isLoading = false, onSocialLogin }) => {
         </div>
       </div>
 
-      {/* Google Sign In — Real OAuth */}
-      <GoogleSignInButton
-        text="Continue with Google"
-        fullWidth
-        size="lg"
-      />
 
       {/* Apple Login */}
       <Button

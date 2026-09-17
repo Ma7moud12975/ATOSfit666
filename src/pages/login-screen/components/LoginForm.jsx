@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
-import GoogleSignInButton from '../../../components/auth/GoogleSignInButton';
 import { useSupabaseAuth } from '../../../contexts/SupabaseAuthContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import {
@@ -344,29 +343,6 @@ const LoginForm = ({ initialMode = 'login', onModeChange, onSubmit, isLoading: e
           </span>
         </Button>
 
-        {/* Social Login Option */}
-        <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/10" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="px-3 bg-[#0D0E12] text-gray-400 font-medium">
-              {isAr ? 'أو المتابعة عبر' : 'Or continue with'}
-            </span>
-          </div>
-        </div>
-
-        <GoogleSignInButton
-          text={
-            mode === 'login'
-              ? isAr
-                ? 'تسجيل الدخول عبر Google'
-                : 'Sign in with Google'
-              : isAr
-              ? 'إنشاء حساب عبر Google'
-              : 'Sign up with Google'
-          }
-        />
 
         {/* Mode Switcher Link at Bottom */}
         <div className="text-center pt-4 border-t border-white/10">
