@@ -388,7 +388,8 @@ class PoseDetectionUtils {
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
       });
 
-      const defaultComplexity = (typeof navigator !== 'undefined' && (navigator.hardwareConcurrency || 4) >= 4) ? 2 : 1;
+      // Model complexity 1 (Full, ~6MB) is the official Google recommendation for real-time video. Complexity 2 is 28MB and causes severe mobile lag.
+      const defaultComplexity = 1;
       const config = window.MediaPipeConfig?.POSE_CONFIG || {
         modelComplexity: defaultComplexity,
         smoothLandmarks: true,

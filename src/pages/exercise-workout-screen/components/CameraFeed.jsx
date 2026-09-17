@@ -227,16 +227,36 @@ const CameraFeed = ({
     };
   }, [isActive, selectedExercise, isPoseDetectionReady, showPoseOverlay]);
 
+  // Background pre-warm MediaPipe Pose when workout screen loads
+  useEffect(() => {
+    const prewarm = async () => {
+      try {
+        if (!window.Pose) {
+          const existingScript = document.querySelector('script[src*="@mediapipe/pose"]');
+          if (!existingScript) {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js';
+            document.head.appendChild(s);
+          }
+        }
+      } catch (e) {
+        console.warn('Pose prewarm notice:', e);
+      }
+    };
+    prewarm();
+  }, []);
+
   const startCamera = async () => {
     console.log('📹 Starting camera...');
     setIsLoading(true);
     setError(null);
 
     try {
+      const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent || ''));
       const mediaStream = await navigator.mediaDevices?.getUserMedia({
         video: {
-          width: { ideal: 1280, min: 640, max: 1920 },
-          height: { ideal: 720, min: 480, max: 1080 },
+          width: isMobile ? { ideal: 640, max: 1280 } : { ideal: 1280, min: 640, max: 1920 },
+          height: isMobile ? { ideal: 480, max: 720 } : { ideal: 720, min: 480, max: 1080 },
           facingMode: 'user',
           frameRate: { ideal: 30, min: 24, max: 60 }
         },

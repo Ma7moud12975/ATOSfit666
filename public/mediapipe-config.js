@@ -12,11 +12,17 @@ window.MediaPipeConfig = {
   TFJS_CONVERTER_URL: 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.10.0/dist/tf-converter.esm.js',
   TFJS_BACKEND_WEBGL_URL: 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.10.0/dist/tf-backend-webgl.esm.js',
   POSE_DETECTION_URL: 'https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.0/dist/pose-detection.esm.js',
-  BLAZEPOSE_MODEL_TYPE: 'heavy', // 'lite'|'full'|'heavy'
+  BLAZEPOSE_MODEL_TYPE: 'lite', // 'lite' (fastest load for mobile) | 'full' | 'heavy'
   
-  // Pose detection settings optimized for web with high-fidelity tracking
+  // Pose detection settings optimized for real-time mobile & web video
   POSE_CONFIG: {
-    modelComplexity: (typeof navigator !== 'undefined' && (navigator.hardwareConcurrency || 4) >= 4) ? 2 : 1, // 2 = heavy deep neural network (maximum landmark accuracy & depth), 1 = balanced
+    // Model complexity: 1 (Full, ~6MB) provides high-accuracy 3D landmarks and initializes in ~1-2 seconds.
+    // Complexity 2 (~28MB) causes 20-30s compilation and memory bottlenecks on mobile devices.
+    modelComplexity: (function() {
+      if (typeof navigator === 'undefined') return 1;
+      var isMob = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent || '') || (typeof window !== 'undefined' && window.innerWidth <= 768);
+      return isMob ? 1 : 1;
+    })(),
     smoothLandmarks: true,
     enableSegmentation: false,
     smoothSegmentation: false,
