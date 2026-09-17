@@ -137,7 +137,7 @@ const Select = React.forwardRef(({
                     id={selectId}
                     type="button"
                     className={cn(
-                        "flex h-11 w-full items-center justify-between rounded-xl border border-border/80 bg-[#12141a] px-4 py-2.5 text-sm text-card-foreground transition-all duration-200 hover:border-[#FAA802]/60 focus:border-[#FAA802] focus:outline-none focus:ring-1 focus:ring-[#FAA802] disabled:cursor-not-allowed disabled:opacity-50 shadow-sm",
+                        "flex h-11 w-full items-center justify-between rounded-xl border border-border/80 bg-card dark:bg-[#12141a] px-4 py-2.5 text-sm text-foreground transition-all duration-200 hover:border-[#FAA802]/60 focus:border-[#FAA802] focus:outline-none focus:ring-1 focus:ring-[#FAA802] disabled:cursor-not-allowed disabled:opacity-50 shadow-sm",
                         isOpen && "border-[#FAA802] ring-1 ring-[#FAA802]",
                         error && "border-destructive focus:ring-destructive",
                         !hasValue && "text-muted-foreground"
@@ -148,7 +148,7 @@ const Select = React.forwardRef(({
                     aria-haspopup="listbox"
                     {...props}
                 >
-                    <span className="truncate font-medium">{getSelectedDisplay()}</span>
+                    <span className="truncate font-medium text-foreground">{getSelectedDisplay()}</span>
 
                     <div className="flex items-center gap-1.5">
                         {loading && (
@@ -193,7 +193,7 @@ const Select = React.forwardRef(({
 
                 {/* Dropdown Popup Menu */}
                 {isOpen && (
-                    <div className="absolute z-[100] left-0 right-0 w-full mt-2 bg-[#12141a] text-card-foreground border border-[#FAA802]/30 rounded-xl shadow-2xl backdrop-blur-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                    <div className="absolute z-[100] left-0 right-0 w-full mt-2 bg-card dark:bg-[#12141a] text-card-foreground border border-border/80 dark:border-[#FAA802]/30 rounded-xl shadow-2xl backdrop-blur-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                         {searchable && (
                             <div className="p-2 border-b border-border/60">
                                 <div className="relative">
@@ -223,7 +223,7 @@ const Select = React.forwardRef(({
                                                 "relative flex cursor-pointer select-none items-center justify-between rounded-lg px-3 py-2.5 text-sm outline-none transition-all duration-150",
                                                 selected
                                                     ? "bg-[#FAA802] text-black font-bold shadow-sm"
-                                                    : "text-gray-200 hover:bg-[#FAA802]/15 hover:text-[#FAA802] font-medium",
+                                                    : "text-foreground hover:bg-[#FAA802]/15 hover:text-[#FAA802] dark:hover:text-[#FAA802] font-medium",
                                                 option?.disabled && "pointer-events-none opacity-40"
                                             )}
                                             onClick={() => !option?.disabled && handleOptionSelect(option)}
