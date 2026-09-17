@@ -241,6 +241,7 @@ export default function Dashboard() {
   useEffect(() => {
     const refreshDashboard = () => {
       const u = JSON.parse(localStorage.getItem('user') || '{}');
+      if (u?.name || u?.id) setUser(u);
       const accountId = user.principal || user.id || user.email || user.name || u.principal || u.id || u.email || u.name;
       setDashboardData(getDashboardSnapshot(accountId));
       setTrainingPlan(getUserTrainingPlan(accountId, u));

@@ -164,6 +164,10 @@ const UserProfile = () => {
 
   const handleUpdateMetrics = async (metrics) => {
     const preliminaryUser = { ...user, ...metrics };
+    if (metrics.primaryGoal) {
+      preliminaryUser.primaryGoal = metrics.primaryGoal;
+      preliminaryUser.goals = [metrics.primaryGoal];
+    }
     const metabolic = calculateMetabolicTargets(preliminaryUser);
     const updatedUser = {
       ...preliminaryUser,
@@ -195,6 +199,7 @@ const UserProfile = () => {
       if (metrics.weight !== undefined) supabaseUpdates.weight = metrics.weight;
       if (metrics.fitnessLevel !== undefined) supabaseUpdates.fitness_level = metrics.fitnessLevel;
       if (metrics.goals !== undefined) supabaseUpdates.goals = metrics.goals;
+      if (metrics.primaryGoal !== undefined) supabaseUpdates.goals = [metrics.primaryGoal];
       
       const { resolveDbUserId } = await import('../../utils/api/chatApi');
       const resolvedUid = (await resolveDbUserId(user?.id || user?.email)) || user?.id;

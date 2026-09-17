@@ -219,11 +219,15 @@ const FitnessMetricsTab = ({ user, onUpdateMetrics }) => {
   };
 
   const handlePreferenceChange = async (key, value) => {
-    onUpdateMetrics({ [key]: value });
+    const updates = { [key]: value };
+    if (key === 'primaryGoal') {
+      updates.goals = [value];
+    }
+    onUpdateMetrics(updates);
     try {
       const resolvedUid = await resolveDbUserId(accountId);
       if (resolvedUid) {
-        const dbPayload = key === 'fitnessLevel' ? { fitness_level: value } : { primary_goal: value };
+        const dbPayload = key === 'fitnessLevel' ? { fitness_level: value } : { goals: [value] };
         await updateUser(resolvedUid, dbPayload);
       }
     } catch (err) {
@@ -575,7 +579,7 @@ const FitnessMetricsTab = ({ user, onUpdateMetrics }) => {
       </div>
 
       {/* 4. Fitness Preferences (Bento Style) */}
-      <div className="rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md p-6 shadow-elevation-1">
+      <div className="relative z-30 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md p-6 shadow-elevation-1">
         <div className="flex items-center gap-2 mb-4">
           <span className="p-1.5 rounded-lg bg-emerald-500/15 text-emerald-400">
             <Icon name="Sliders" size={18} />
@@ -586,7 +590,7 @@ const FitnessMetricsTab = ({ user, onUpdateMetrics }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-xl border border-border/70 bg-background/50 p-4">
+          <div className="relative z-20 rounded-xl border border-border/70 bg-background/50 p-4">
             <Select
               label={t('profile.fitnessLevel')}
               options={fitnessLevelOptions}
@@ -595,7 +599,7 @@ const FitnessMetricsTab = ({ user, onUpdateMetrics }) => {
             />
           </div>
 
-          <div className="rounded-xl border border-border/70 bg-background/50 p-4">
+          <div className="relative z-20 rounded-xl border border-border/70 bg-background/50 p-4">
             <Select
               label={t('profile.primaryGoal')}
               options={goalOptions}
@@ -607,7 +611,7 @@ const FitnessMetricsTab = ({ user, onUpdateMetrics }) => {
       </div>
 
       {/* 5. Live Activity Summary (Connected to Supabase user_stats & exercises) */}
-      <div className="rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md p-6 shadow-elevation-1">
+      <div className="relative z-10 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md p-6 shadow-elevation-1">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div>
             <div className="flex items-center gap-2">

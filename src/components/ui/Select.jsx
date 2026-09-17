@@ -1,5 +1,5 @@
-// components/ui/Select.jsx - Shadcn style Select
-import React, { useState } from "react";
+// components/ui/Select.jsx - Shadcn style Select with Dark Bento Support
+import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check, Search, X } from "lucide-react";
 import { cn } from "../../utils/cn";
 import Button from "./Button";
@@ -28,9 +28,28 @@ const Select = React.forwardRef(({
 }, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const containerRef = useRef(null);
 
     // Generate unique ID if not provided
     const selectId = id || `select-${Math.random()?.toString(36)?.substr(2, 9)}`;
+
+    // Click outside handler
+    useEffect(() => {
+        const handleOutsideClick = (e) => {
+            if (containerRef.current && !containerRef.current.contains(e.target)) {
+                setIsOpen(false);
+                onOpenChange?.(false);
+            }
+        };
+        if (isOpen) {
+            document.addEventListener('mousedown', handleOutsideClick);
+            document.addEventListener('touchstart', handleOutsideClick);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleOutsideClick);
+            document.removeEventListener('touchstart', handleOutsideClick);
+        };
+    }, [isOpen, onOpenChange]);
 
     // Filter options based on search
     const filteredOptions = searchable && searchTerm
@@ -99,13 +118,13 @@ const Select = React.forwardRef(({
     const hasValue = multiple ? value?.length > 0 : value !== undefined && value !== '';
 
     return (
-        <div className={cn("relative", className)}>
+        <div ref={containerRef} className={cn("relative", isOpen && "z-50", className)}>
             {label && (
                 <label
                     htmlFor={selectId}
                     className={cn(
-                        "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block",
-                        error ? "text-destructive" : "text-foreground"
+                        "text-sm font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block",
+                        error ? "text-destructive" : "text-card-foreground"
                     )}
                 >
                     {label}
@@ -118,7 +137,8 @@ const Select = React.forwardRef(({
                     id={selectId}
                     type="button"
                     className={cn(
-                        "flex h-10 w-full items-center justify-between rounded-md border border-input bg-white text-black px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                        "flex h-11 w-full items-center justify-between rounded-xl border border-border/80 bg-[#12141a] px-4 py-2.5 text-sm text-card-foreground transition-all duration-200 hover:border-[#FAA802]/60 focus:border-[#FAA802] focus:outline-none focus:ring-1 focus:ring-[#FAA802] disabled:cursor-not-allowed disabled:opacity-50 shadow-sm",
+                        isOpen && "border-[#FAA802] ring-1 ring-[#FAA802]",
                         error && "border-destructive focus:ring-destructive",
                         !hasValue && "text-muted-foreground"
                     )}
@@ -128,11 +148,11 @@ const Select = React.forwardRef(({
                     aria-haspopup="listbox"
                     {...props}
                 >
-                    <span className="truncate">{getSelectedDisplay()}</span>
+                    <span className="truncate font-medium">{getSelectedDisplay()}</span>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                         {loading && (
-                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                            <svg className="animate-spin h-4 w-4 text-[#FAA802]" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                             </svg>
@@ -142,14 +162,14 @@ const Select = React.forwardRef(({
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-4 w-4"
+                                className="h-4 w-4 text-muted-foreground hover:text-foreground"
                                 onClick={handleClear}
                             >
                                 <X className="h-3 w-3" />
                             </Button>
                         )}
 
-                        <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                        <ChevronDown className={cn("h-4 w-4 text-[#FAA802] transition-transform duration-200", isOpen && "rotate-180")} />
                     </div>
                 </button>
 
@@ -171,62 +191,67 @@ const Select = React.forwardRef(({
                     ))}
                 </select>
 
-                {/* Dropdown */}
+                {/* Dropdown Popup Menu */}
                 {isOpen && (
-                    <div className="absolute z-50 w-full mt-1 bg-white text-black border border-border rounded-md shadow-md">
+                    <div className="absolute z-[100] left-0 right-0 w-full mt-2 bg-[#12141a] text-card-foreground border border-[#FAA802]/30 rounded-xl shadow-2xl backdrop-blur-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                         {searchable && (
-                            <div className="p-2 border-b">
+                            <div className="p-2 border-b border-border/60">
                                 <div className="relative">
                                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         placeholder="Search options..."
                                         value={searchTerm}
                                         onChange={handleSearchChange}
-                                        className="pl-8"
+                                        className="pl-8 bg-background/50 border-border/70 text-foreground"
                                     />
                                 </div>
                             </div>
                         )}
 
-                        <div className="py-1 max-h-60 overflow-auto">
+                        <div className="p-1.5 max-h-60 overflow-y-auto space-y-1">
                             {filteredOptions?.length === 0 ? (
-                                <div className="px-3 py-2 text-sm text-muted-foreground">
+                                <div className="px-3 py-2 text-sm text-muted-foreground text-center">
                                     {searchTerm ? 'No options found' : 'No options available'}
                                 </div>
                             ) : (
-                                filteredOptions?.map((option) => (
-                                    <div
-                                        key={option?.value}
-                                        className={cn(
-                                            "relative flex cursor-pointer select-none items-center rounded-sm px-3 py-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
-                                            isSelected(option?.value) && "bg-primary text-primary-foreground",
-                                            option?.disabled && "pointer-events-none opacity-50"
-                                        )}
-                                        onClick={() => !option?.disabled && handleOptionSelect(option)}
-                                    >
-                                        <span className="flex-1">{option?.label}</span>
-                                        {multiple && isSelected(option?.value) && (
-                                            <Check className="h-4 w-4" />
-                                        )}
-                                        {option?.description && (
-                                            <span className="text-xs text-muted-foreground ml-2">
-                                                {option?.description}
-                                            </span>
-                                        )}
-                                    </div>
-                                ))
+                                filteredOptions?.map((option) => {
+                                    const selected = isSelected(option?.value);
+                                    return (
+                                        <div
+                                            key={option?.value}
+                                            className={cn(
+                                                "relative flex cursor-pointer select-none items-center justify-between rounded-lg px-3 py-2.5 text-sm outline-none transition-all duration-150",
+                                                selected
+                                                    ? "bg-[#FAA802] text-black font-bold shadow-sm"
+                                                    : "text-gray-200 hover:bg-[#FAA802]/15 hover:text-[#FAA802] font-medium",
+                                                option?.disabled && "pointer-events-none opacity-40"
+                                            )}
+                                            onClick={() => !option?.disabled && handleOptionSelect(option)}
+                                        >
+                                            <span className="flex-1 truncate">{option?.label}</span>
+                                            {selected && (
+                                                <Check className="h-4 w-4 text-black ml-2 flex-shrink-0" />
+                                            )}
+                                            {option?.description && (
+                                                <span className={cn("text-xs ml-2", selected ? "text-black/70" : "text-muted-foreground")}>
+                                                    {option?.description}
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                                })
                             )}
                         </div>
                     </div>
                 )}
             </div>
             {description && !error && (
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground mt-1.5">
                     {description}
                 </p>
             )}
             {error && (
-                <p className="text-sm text-destructive mt-1">
+                <p className="text-xs text-destructive mt-1.5">
                     {error}
                 </p>
             )}

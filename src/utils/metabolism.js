@@ -85,6 +85,7 @@ export function calculateMetabolicTargets(user = {}) {
   const age = Number(user.age || 25);
   const gender = user.gender || 'male';
   const activityLevel = user.activityLevel || (
+    user.fitnessLevel === 'expert' ? 'extra_active' :
     user.fitnessLevel === 'advanced' ? 'very_active' :
     user.fitnessLevel === 'intermediate' ? 'moderate' : 'light'
   );
@@ -96,26 +97,49 @@ export function calculateMetabolicTargets(user = {}) {
 
   // 2. Determine Goal Type and Calorie Adjustment
   const weightDiff = targetWeight - currentWeight;
+  const explicitGoal = user.primaryGoal || user.primary_goal || user.goal || (Array.isArray(user.goals) ? user.goals[0] : null);
+
   let goalType = 'maintenance';
   let calorieAdjustment = 0;
   let goalNoteAr = 'الحفاظ على الوزن وإعادة تشكيل البناء العضلي';
   let goalNoteEn = 'Weight maintenance & body recomposition';
   let weeklyChangeKg = 0;
 
-  if (weightDiff < -0.5 || physique === 'lean') {
+  if (explicitGoal === 'weight_loss' || explicitGoal === 'fat_loss' || (!explicitGoal && (weightDiff < -0.5 || physique === 'lean'))) {
     // Fat Loss / Weight Loss
     goalType = 'weight_loss';
     calorieAdjustment = -500;
     weeklyChangeKg = -0.45;
     goalNoteAr = 'عجز 500 سعرة حرارية يومياً لخسارة الدهون بنسبة صحية';
     goalNoteEn = '500 kcal daily deficit for healthy sustainable fat loss';
-  } else if (weightDiff > 0.5 || physique === 'ripped') {
+  } else if (explicitGoal === 'muscle_gain' || explicitGoal === 'hypertrophy' || (!explicitGoal && (weightDiff > 0.5 || physique === 'ripped'))) {
     // Muscle Gain / Hypertrophy
     goalType = 'muscle_gain';
     calorieAdjustment = 350;
     weeklyChangeKg = 0.3;
     goalNoteAr = 'فائض 350 سعرة حرارية يومياً للبناء العضلي الصافي';
     goalNoteEn = '350 kcal daily surplus for lean muscle hypertrophy';
+  } else if (explicitGoal === 'endurance') {
+    // Endurance
+    goalType = 'endurance';
+    calorieAdjustment = 150;
+    weeklyChangeKg = 0;
+    goalNoteAr = 'تغذية متوازنة ومعززة بالكاربوهيدرات لطاقة وتحمل أعلى';
+    goalNoteEn = 'Balanced carbohydrate-rich fueling for high endurance';
+  } else if (explicitGoal === 'strength') {
+    // Strength
+    goalType = 'strength';
+    calorieAdjustment = 200;
+    weeklyChangeKg = 0.15;
+    goalNoteAr = 'فائض محسوب لتغذية الجهاز العصبي وزيادة القوة العضلية';
+    goalNoteEn = 'Targeted surplus for peak neuromuscular strength';
+  } else {
+    // General Fitness / Maintenance
+    goalType = 'general_fitness';
+    calorieAdjustment = 0;
+    weeklyChangeKg = 0;
+    goalNoteAr = 'الحفاظ على الوزن وتعزيز الصحة واللياقة العامة';
+    goalNoteEn = 'Maintenance calories for general wellness and mobility';
   }
 
   // Safe minimum calorie floor: Men >= 1500 kcal, Women >= 1200 kcal
