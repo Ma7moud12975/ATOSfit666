@@ -4,7 +4,6 @@ import Icon from '../../components/AppIcon';
 import { useAuth } from '../../contexts/AuthContext';
 import { hasValidSession } from '../../utils/nativeAuth';
 import InteractiveImage from '../../components/InteractiveImage';
-import HeroAthleteVisual from '../../components/HeroAthleteVisual';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { applyTheme, getSavedTheme } from '../../utils/theme';
 import '../../styles/bento-dashboard.css';
@@ -253,38 +252,13 @@ const LandingPage = () => {
       dir={isAr ? 'rtl' : 'ltr'}
       className="min-h-screen bg-[#F7F8FA] dark:bg-[#08080A] text-[#08080A] dark:text-[#FFFFFF] font-sans relative overflow-x-hidden selection:bg-[#FAA802]/30 selection:text-white transition-colors duration-300"
       style={{
-        background: theme === 'dark' 
-          ? `radial-gradient(ellipse at 50% 0%, rgba(250, 168, 2, 0.16) 0%, transparent 55rem),
-             radial-gradient(circle at 85% 45%, rgba(250, 168, 2, 0.08) 0%, transparent 40rem),
-             radial-gradient(circle at 15% 85%, rgba(192, 192, 192, 0.05) 0%, transparent 35rem),
-             radial-gradient(ellipse at top, #141416 0%, #08080A 40%, #050506 100%)`
-          : undefined
+        background: theme === 'dark' ? '#08080A' : undefined
       }}
     >
       {/* ============================================================ */}
-      {/* Dashboard Ambient Horizon & Creative Biomechanical Aura     */}
+      {/* Subtle Fine Architectural Grid Texture                       */}
       {/* ============================================================ */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        {/* Animated Atmospheric Trails (Matching Bento Dashboard) */}
-        <div className="trail trail-coral" style={{ width: 600, height: 600, top: '-10%', right: '8%', opacity: 0.16 }} />
-        <div className="trail trail-olive" style={{ width: 480, height: 480, top: '40%', left: '-5%', opacity: 0.10 }} />
-        <div className="trail trail-coral" style={{ width: 550, height: 550, top: '75%', right: '12%', opacity: 0.12 }} />
-
-        {/* Creative Biomechanical Motion Ring (Subtle, Slow-Spinning Telemetry - Expansive) */}
-        <div className="absolute top-[4%] left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] xl:w-[1250px] xl:h-[1250px] pointer-events-none opacity-20 dark:opacity-30">
-          <svg className="w-full h-full animate-[spin_200s_linear_infinite]" viewBox="0 0 850 850" fill="none">
-            <circle cx="425" cy="425" r="340" stroke="#FAA802" strokeWidth="1" strokeDasharray="6 14" opacity="0.4" />
-            <circle cx="425" cy="425" r="410" stroke="#C0C0C0" strokeWidth="0.75" strokeDasharray="3 18" opacity="0.25" />
-            <circle cx="425" cy="425" r="240" stroke="#FAA802" strokeWidth="1" strokeDasharray="8 20" opacity="0.3" />
-            {/* Precision Range-Of-Motion Calibration Markers */}
-            <line x1="425" y1="70" x2="425" y2="95" stroke="#FAA802" strokeWidth="1.5" opacity="0.6" />
-            <line x1="425" y1="755" x2="425" y2="780" stroke="#FAA802" strokeWidth="1.5" opacity="0.6" />
-            <line x1="70" y1="425" x2="95" y2="425" stroke="#FAA802" strokeWidth="1.5" opacity="0.6" />
-            <line x1="755" y1="425" x2="780" y2="425" stroke="#FAA802" strokeWidth="1.5" opacity="0.6" />
-          </svg>
-        </div>
-
-        {/* Fine Architectural Grid Texture */}
         <div 
           className="absolute inset-0 opacity-[0.02] dark:opacity-[0.035] pointer-events-none"
           style={{
@@ -497,84 +471,103 @@ const LandingPage = () => {
       {/* ============================================================ */}
       {/* Hero Section: Distributed, Creative, High-Impact             */}
       {/* ============================================================ */}
-      <section id="home" className="relative z-10 pt-8 sm:pt-12 lg:pt-16 pb-12 sm:pb-20">
-        <div className="w-full max-w-[1840px] mx-auto px-6 sm:px-10 lg:px-12 xl:px-16 2xl:px-20">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-6 xl:gap-8 2xl:gap-12 items-center">
-            {/* Left Column: Vision, Headline, Actions (Spans 5 cols on desktop, spacious & expansive) */}
-            <div className={`lg:col-span-6 xl:col-span-5 2xl:col-span-5 space-y-6 sm:space-y-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-              
-              {/* Minimalist Editorial Eyebrow Tag */}
-              <div className="flex items-center gap-2 text-xs sm:text-sm font-bold tracking-[0.22em] text-[#FAA802] uppercase select-none">
-                <span className="text-base font-black leading-none">▸</span>
-                <span>{isAr ? "رؤية رياضية متقدمة للأداء البدني" : "TODAY'S MISSION"}</span>
-              </div>
+      <section id="home" className="relative z-10 min-h-[640px] lg:min-h-[760px] xl:min-h-[820px] flex items-center overflow-hidden bg-[#08080A]">
+        {/* Full-Bleed Right-Aligned Cinematic Athlete Backdrop (Zero boxes, seamless organic blend) */}
+        <div className={`absolute inset-y-0 ${isAr ? 'left-0' : 'right-0'} w-full lg:w-[68%] xl:w-[62%] pointer-events-none overflow-hidden z-0`}>
+          <img 
+            src="/assets/images/hero-athlete-elite.jpg" 
+            alt="ATOSfit Elite Athlete" 
+            className={`w-full h-full object-cover ${isAr ? 'scale-x-[-1] object-left' : 'object-right'}`}
+            style={{
+              filter: 'contrast(1.04) brightness(1.0)',
+            }}
+          />
+          {/* Seamless Masterful Fade: dissolves left, top, and bottom into pure #08080A */}
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: isAr
+                ? `linear-gradient(to left, #08080A 0%, rgba(8,8,10,0.98) 12%, rgba(8,8,10,0.6) 42%, transparent 75%),
+                   linear-gradient(to bottom, #08080A 0%, transparent 10%, transparent 80%, #08080A 100%),
+                   linear-gradient(to top, #08080A 0%, transparent 15%)`
+                : `linear-gradient(to right, #08080A 0%, rgba(8,8,10,0.98) 12%, rgba(8,8,10,0.6) 42%, transparent 75%),
+                   linear-gradient(to bottom, #08080A 0%, transparent 10%, transparent 80%, #08080A 100%),
+                   linear-gradient(to top, #08080A 0%, transparent 15%)`
+            }}
+          />
+        </div>
 
-              {/* Bold High-Impact Pure White Editorial Headline */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-[68px] 2xl:text-[76px] font-black tracking-tight leading-[1.08] text-[#0F1015] dark:text-white">
-                <span className="block">
-                  {landingCopy.form}
-                </span>
-                <span className="block text-[#0F1015] dark:text-white">
-                  {landingCopy.results}
-                </span>
-              </h1>
+        {/* Content Container (Positioned Over Seamless Dark Space) */}
+        <div className="w-full max-w-[1840px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-20 relative z-10 py-16 sm:py-20 lg:py-24">
+          <div className="max-w-xl xl:max-w-2xl space-y-6 sm:space-y-8">
+            
+            {/* Minimalist Editorial Eyebrow Tag */}
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-bold tracking-[0.22em] text-[#FAA802] uppercase select-none">
+              <span className="text-base font-black leading-none">▸</span>
+              <span>{isAr ? "رؤية رياضية متقدمة للأداء البدني" : "TODAY'S MISSION"}</span>
+            </div>
 
-              {/* Refined Muted Editorial Subtitle */}
-              <p className="text-base sm:text-lg lg:text-xl text-[#525866] dark:text-[#9DA4B2] leading-relaxed max-w-xl font-normal">
-                {isAr 
-                  ? 'رصد فوري لزوايا المفاصل واستقامة الجسم وعد تلقائي للتكرارات عبر كاميرا هاتفك، لتجربة تدريب نخبوية تجمع بين أقصى فائدة عضلية والوقاية التامة من الإصابات.'
-                  : 'Good rhythm. Biomechanical form review, remaining mission to chase peak strength, posture calibration, and longevity.'}
-              </p>
+            {/* Bold High-Impact Pure White Editorial Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-[68px] 2xl:text-[76px] font-black tracking-tight leading-[1.08] text-[#0F1015] dark:text-white">
+              <span className="block">
+                {landingCopy.form}
+              </span>
+              <span className="block text-[#0F1015] dark:text-white">
+                {landingCopy.results}
+              </span>
+            </h1>
 
-              {/* Authentic Pill Buttons (Exact Match to Tablet Reference Mockup) */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
-                {hasSession ? (
+            {/* Refined Muted Editorial Subtitle */}
+            <p className="text-base sm:text-lg lg:text-xl text-[#525866] dark:text-[#9DA4B2] leading-relaxed max-w-xl font-normal">
+              {isAr 
+                ? 'رصد فوري لزوايا المفاصل واستقامة الجسم وعد تلقائي للتكرارات عبر كاميرا هاتفك، لتجربة تدريب نخبوية تجمع بين أقصى فائدة عضلية والوقاية التامة من الإصابات.'
+                : 'Good rhythm. Biomechanical form review, remaining mission to chase peak strength, posture calibration, and longevity.'}
+            </p>
+
+            {/* Authentic Pill Buttons (Exact Match to Tablet Reference Mockup) */}
+            <div className="flex flex-wrap items-center gap-4 pt-2">
+              {hasSession ? (
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="inline-flex items-center justify-center bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-bold px-8 py-3.5 rounded-full text-base transition-all shadow-[0_4px_20px_rgba(250,168,2,0.3)] hover:scale-105 active:scale-95"
+                >
+                  <span>{landingCopy.continueToDashboard}</span>
+                </button>
+              ) : (
+                <>
                   <button
-                    onClick={() => navigate('/dashboard')}
-                    className="inline-flex items-center justify-center bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-bold px-8 py-3.5 rounded-full text-base transition-all shadow-[0_4px_20px_rgba(250,168,2,0.3)] hover:scale-105 active:scale-95"
+                    onClick={handleGetStarted}
+                    className="inline-flex items-center justify-center bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-bold px-9 py-3.5 rounded-full text-base transition-all shadow-[0_4px_20px_rgba(250,168,2,0.3)] hover:scale-105 active:scale-95"
                   >
-                    <span>{landingCopy.continueToDashboard}</span>
+                    <span>{landingCopy.start}</span>
                   </button>
-                ) : (
-                  <>
-                    <button
-                      onClick={handleGetStarted}
-                      className="inline-flex items-center justify-center bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-bold px-9 py-3.5 rounded-full text-base transition-all shadow-[0_4px_20px_rgba(250,168,2,0.3)] hover:scale-105 active:scale-95"
-                    >
-                      <span>{landingCopy.start}</span>
-                    </button>
 
-                    <a
-                      href="#how-it-works"
-                      className="inline-flex items-center justify-center border border-black/20 dark:border-white/25 hover:border-[#FAA802] text-[#08080A] dark:text-white font-medium px-8 py-3.5 rounded-full text-base hover:bg-white/[0.05] transition-all"
-                    >
-                      <span>{isAr ? 'اكتشف المزيد' : 'Learn more'}</span>
-                    </a>
-                  </>
-                )}
+                  <a
+                    href="#how-it-works"
+                    className="inline-flex items-center justify-center border border-black/20 dark:border-white/25 hover:border-[#FAA802] text-[#08080A] dark:text-white font-medium px-8 py-3.5 rounded-full text-base hover:bg-white/[0.05] transition-all"
+                  >
+                    <span>{isAr ? 'اكتشف المزيد' : 'Learn more'}</span>
+                  </a>
+                </>
+              )}
+            </div>
+
+            {/* Live Trust & Telemetry Strip */}
+            <div className="grid grid-cols-3 gap-6 pt-6 border-t border-black/[0.06] dark:border-white/[0.08] max-w-xl">
+              <div className="flex flex-col">
+                <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">99.4%</span>
+                <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.accuracyStat}</span>
               </div>
-
-              {/* Live Trust & Telemetry Strip */}
-              <div className="grid grid-cols-3 gap-6 pt-6 border-t border-black/[0.06] dark:border-white/[0.08] max-w-2xl xl:max-w-3xl">
-                <div className="flex flex-col">
-                  <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">99.4%</span>
-                  <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.accuracyStat}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">&lt; 20ms</span>
-                  <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.latencyStat}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">100%</span>
-                  <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.privacyStat}</span>
-                </div>
+              <div className="flex flex-col">
+                <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">&lt; 20ms</span>
+                <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.latencyStat}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">100%</span>
+                <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.privacyStat}</span>
               </div>
             </div>
 
-            {/* Right Column: High-Impact Athletic Biomechanical Hero Visual */}
-            <div className="lg:col-span-6 xl:col-span-7 2xl:col-span-7 relative w-full flex items-center justify-center min-h-[500px] xl:min-h-[580px]">
-              <HeroAthleteVisual onStartTrial={handleGetStarted} />
-            </div>
           </div>
         </div>
       </section>
