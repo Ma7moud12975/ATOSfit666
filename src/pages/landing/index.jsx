@@ -239,6 +239,24 @@ const LandingPage = () => {
     }
   ];
 
+  const marqueeItems = isAr ? [
+    { label: 'تتبع 33 مفصلاً حركياً', sub: 'رصد الهيكل العظمي بالكامل' },
+    { label: 'رؤية حاسوبية 60 FPS', sub: 'تحليل فوري لحظة بلحظة' },
+    { label: 'خصوصية على جهازك 100%', sub: 'بدون تسجيل أو رفع فيديوهات' },
+    { label: 'توجيه صوتي في < 20ms', sub: 'تنبيه فوري للأخطاء الحركية' },
+    { label: 'قياس المدى الحركي الكامل', sub: 'دقة عمق السكوات والضغط' },
+    { label: 'عد تلقائي للتكرارات', sub: 'حساب الإيقاع ومعدل الأداء' },
+    { label: 'معالجة عصبية محلية', sub: 'أداء فائق بدون استهلاك للإنترنت' },
+  ] : [
+    { label: '33 SKELETAL JOINTS', sub: 'Full Body Kinematics' },
+    { label: '60 FPS VISION ENGINE', sub: 'Real-Time Pose Analysis' },
+    { label: '100% ON-DEVICE PRIVACY', sub: 'Zero Video Uploads' },
+    { label: '< 20MS AUDIO CUES', sub: 'Instant Form Coaching' },
+    { label: 'FULL RANGE OF MOTION', sub: 'Depth & Joint Lockout' },
+    { label: 'AUTOMATIC REP CADENCE', sub: 'Tempo & Interval Tracking' },
+    { label: 'LOCAL NEURAL PROCESSING', sub: 'Ultra-low Latency' },
+  ];
+
   const handleGetStarted = () => {
     navigate('/login-screen?mode=register');
   };
@@ -255,6 +273,78 @@ const LandingPage = () => {
         background: theme === 'dark' ? '#08080A' : undefined
       }}
     >
+      {/* ============================================================ */}
+      {/* Competitor-Grade Editorial Motion Styles                     */}
+      {/* ============================================================ */}
+      <style>{`
+        @keyframes heroBreath {
+          0%, 100% {
+            transform: scale(1) translate3d(0, 0, 0);
+          }
+          50% {
+            transform: scale(1.035) translate3d(0, -6px, 0);
+          }
+        }
+
+        @keyframes marqueeSlide {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
+        }
+
+        @keyframes marqueeSlideRtl {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(50%, 0, 0); }
+        }
+
+        @keyframes btnSheen {
+          0% { transform: translateX(-150%) skewX(-20deg); }
+          25%, 100% { transform: translateX(250%) skewX(-20deg); }
+        }
+
+        .animate-hero-breath {
+          animation: heroBreath 22s ease-in-out infinite;
+          will-change: transform;
+        }
+
+        .animate-marquee {
+          display: flex;
+          width: max-content;
+          animation: marqueeSlide 35s linear infinite;
+        }
+        .animate-marquee:hover {
+          animation-play-state: paused;
+        }
+
+        .animate-marquee-rtl {
+          display: flex;
+          width: max-content;
+          animation: marqueeSlideRtl 35s linear infinite;
+        }
+        .animate-marquee-rtl:hover {
+          animation-play-state: paused;
+        }
+
+        .btn-sheen-effect {
+          position: relative;
+          overflow: hidden;
+        }
+        .btn-sheen-effect::after {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: linear-gradient(
+            60deg,
+            transparent 35%,
+            rgba(255, 255, 255, 0.45) 50%,
+            transparent 65%
+          );
+          animation: btnSheen 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+          pointer-events: none;
+        }
+      `}</style>
       {/* ============================================================ */}
       {/* Subtle Fine Architectural Grid Texture                       */}
       {/* ============================================================ */}
@@ -473,16 +563,18 @@ const LandingPage = () => {
       {/* Hero Section: Distributed, Creative, High-Impact             */}
       {/* ============================================================ */}
       <section id="home" className="relative z-10 min-h-[640px] lg:min-h-[760px] xl:min-h-[820px] flex items-center overflow-hidden bg-[#08080A]">
-        {/* Full-Bleed Right-Aligned Cinematic Athlete Backdrop (Zero boxes, seamless organic blend) */}
+        {/* Full-Bleed Right-Aligned Cinematic Athlete Backdrop (Ken Burns breathing slow scale) */}
         <div className={`absolute inset-y-0 ${isAr ? 'left-0' : 'right-0'} w-full lg:w-[68%] xl:w-[62%] pointer-events-none overflow-hidden z-0`}>
-          <img 
-            src="/assets/images/hero-athlete-elite.jpg" 
-            alt="ATOSfit Elite Athlete" 
-            className={`w-full h-full object-cover ${isAr ? 'scale-x-[-1] object-left' : 'object-right'}`}
-            style={{
-              filter: 'contrast(1.04) brightness(1.0)',
-            }}
-          />
+          <div className={`w-full h-full ${isAr ? 'scale-x-[-1]' : ''}`}>
+            <img 
+              src="/assets/images/hero-athlete-elite.jpg" 
+              alt="ATOSfit Elite Athlete" 
+              className="w-full h-full object-cover object-right animate-hero-breath"
+              style={{
+                filter: 'contrast(1.04) brightness(1.0)',
+              }}
+            />
+          </div>
           {/* Seamless Masterful Fade: dissolves left, top, and bottom into pure #08080A */}
           <div 
             className="absolute inset-0"
@@ -502,10 +594,19 @@ const LandingPage = () => {
         <div className="w-full max-w-[1840px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-20 relative z-10 py-16 sm:py-20 lg:py-24">
           <div className="max-w-xl xl:max-w-2xl space-y-6 sm:space-y-8">
             
-            {/* Minimalist Editorial Eyebrow Tag */}
-            <div className="flex items-center gap-2 text-xs sm:text-sm font-bold tracking-[0.22em] text-[#FAA802] uppercase select-none">
-              <span className="text-base font-black leading-none">▸</span>
-              <span>{isAr ? "رؤية رياضية متقدمة للأداء البدني" : "TODAY'S MISSION"}</span>
+            {/* Minimalist Editorial Eyebrow Tag with Live Status Pill */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2 text-xs sm:text-sm font-bold tracking-[0.22em] text-[#FAA802] uppercase select-none">
+                <span className="text-base font-black leading-none">▸</span>
+                <span>{isAr ? "رؤية رياضية متقدمة للأداء البدني" : "TODAY'S MISSION"}</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold tracking-wide">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span>{isAr ? "محرك الرؤية نشط 60FPS" : "60FPS CV ACTIVE"}</span>
+              </div>
             </div>
 
             {/* Bold High-Impact Pure White Editorial Headline */}
@@ -525,12 +626,12 @@ const LandingPage = () => {
                 : 'Good rhythm. Biomechanical form review, remaining mission to chase peak strength, posture calibration, and longevity.'}
             </p>
 
-            {/* Authentic Pill Buttons (Exact Match to Tablet Reference Mockup) */}
+            {/* Authentic Pill Buttons (Exact Match to Tablet Reference Mockup with Interactive Light Sheen) */}
             <div className="flex flex-wrap items-center gap-4 pt-2">
               {hasSession ? (
                 <button
                   onClick={() => navigate('/dashboard')}
-                  className="inline-flex items-center justify-center bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-bold px-8 py-3.5 rounded-full text-base transition-all shadow-[0_4px_20px_rgba(250,168,2,0.3)] hover:scale-105 active:scale-95"
+                  className="btn-sheen-effect inline-flex items-center justify-center bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-bold px-8 py-3.5 rounded-full text-base transition-all shadow-[0_4px_20px_rgba(250,168,2,0.3)] hover:scale-105 active:scale-95"
                 >
                   <span>{landingCopy.continueToDashboard}</span>
                 </button>
@@ -538,9 +639,14 @@ const LandingPage = () => {
                 <>
                   <button
                     onClick={handleGetStarted}
-                    className="inline-flex items-center justify-center bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-bold px-9 py-3.5 rounded-full text-base transition-all shadow-[0_4px_20px_rgba(250,168,2,0.3)] hover:scale-105 active:scale-95"
+                    className="btn-sheen-effect group inline-flex items-center justify-center gap-2 bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-bold px-9 py-3.5 rounded-full text-base transition-all shadow-[0_4px_25px_rgba(250,168,2,0.35)] hover:shadow-[0_8px_32px_rgba(250,168,2,0.5)] hover:scale-105 active:scale-95"
                   >
                     <span>{landingCopy.start}</span>
+                    <Icon 
+                      name="ArrowRight" 
+                      size={18} 
+                      className={`transition-transform duration-300 group-hover:translate-x-1.5 ${isAr ? 'rotate-180 group-hover:-translate-x-1.5' : ''}`} 
+                    />
                   </button>
 
                   <a
@@ -553,18 +659,27 @@ const LandingPage = () => {
               )}
             </div>
 
-            {/* Live Trust & Telemetry Strip */}
+            {/* Live Trust & Telemetry Strip with Status Accents */}
             <div className="grid grid-cols-3 gap-6 pt-6 border-t border-black/[0.06] dark:border-white/[0.08] max-w-xl">
               <div className="flex flex-col">
-                <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">99.4%</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">99.4%</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.7)]" />
+                </div>
                 <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.accuracyStat}</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">&lt; 20ms</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">&lt; 20ms</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FAA802] shadow-[0_0_6px_rgba(250,168,2,0.7)]" />
+                </div>
                 <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.latencyStat}</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">100%</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">100%</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.7)]" />
+                </div>
                 <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.privacyStat}</span>
               </div>
             </div>
@@ -572,6 +687,32 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+
+      {/* ============================================================ */}
+      {/* Infinite Athletic Telemetry Marquee Ribbon (Competitor Tech) */}
+      {/* ============================================================ */}
+      <div className="relative z-20 border-y border-black/[0.08] dark:border-white/[0.08] bg-[#0A0B0E] py-4 overflow-hidden select-none">
+        {/* Soft edge gradient masks for seamless flow */}
+        <div className="absolute inset-y-0 left-0 w-20 sm:w-32 bg-gradient-to-r from-[#08080A] to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-20 sm:w-32 bg-gradient-to-l from-[#08080A] to-transparent z-10 pointer-events-none" />
+
+        <div className={isAr ? "animate-marquee-rtl" : "animate-marquee"}>
+          {marqueeItems.concat(marqueeItems).map((item, idx) => (
+            <div key={idx} className="flex items-center gap-4 px-6 sm:px-8 whitespace-nowrap">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#FAA802] shadow-[0_0_6px_#FAA802]" />
+                <span className="text-xs sm:text-sm font-black tracking-wider uppercase text-white/95">
+                  {item.label}
+                </span>
+              </div>
+              <span className="text-xs text-[#8A8F98] font-medium">
+                {item.sub}
+              </span>
+              <span className="text-white/15 select-none px-2 font-mono">/</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* ============================================================ */}
       {/* How It Works: 3 Simple Athletic Steps                       */}
@@ -596,18 +737,18 @@ const LandingPage = () => {
             {landingCopy.steps.map((step, idx) => (
               <div 
                 key={idx}
-                className="relative rounded-[28px] p-8 bg-white dark:bg-[#141416]/85 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/40 hover:shadow-[0_0_35px_rgba(250, 168, 2,0.15)] transition-all duration-300 flex flex-col justify-between group"
+                className="relative rounded-[28px] p-8 bg-white dark:bg-[#141416]/85 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/50 hover:shadow-[0_16px_40px_rgba(250,168,2,0.14)] hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between group cursor-default"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <div className="w-14 h-14 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 flex items-center justify-center text-[#FAA802] group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 flex items-center justify-center text-[#FAA802] group-hover:scale-110 group-hover:bg-[#FAA802]/25 transition-all duration-300">
                     <Icon name={step.icon} size={26} />
                   </div>
-                  <span className="text-3xl font-black text-black/15 dark:text-white/10 group-hover:text-[#FAA802]/30 transition-colors" dir="ltr">
+                  <span className="text-3xl font-black text-black/15 dark:text-white/10 group-hover:text-[#FAA802]/40 transition-colors" dir="ltr">
                     {step.num}
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white mb-3">
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white mb-3 group-hover:text-[#FAA802] transition-colors">
                     {step.title}
                   </h3>
                   <p className="text-sm text-[#525866] dark:text-[#A8A8A8] leading-relaxed">
@@ -642,7 +783,7 @@ const LandingPage = () => {
             {landingCopy.exercises.map((ex, idx) => (
               <div 
                 key={idx}
-                className="p-5 rounded-2xl bg-white dark:bg-[#141416]/85 border border-black/[0.08] dark:border-white/[0.08] hover:border-[#FAA802]/50 hover:shadow-[0_0_25px_rgba(250, 168, 2,0.15)] hover:scale-[1.02] transition-all flex flex-col justify-between group"
+                className="p-5 rounded-2xl bg-white dark:bg-[#141416]/85 border border-black/[0.08] dark:border-white/[0.08] hover:border-[#FAA802]/50 hover:shadow-[0_12px_30px_rgba(250,168,2,0.14)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group cursor-default"
               >
                 <div>
                   <span className="text-[11px] font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-wider block mb-1">
@@ -686,16 +827,16 @@ const LandingPage = () => {
             {privacyCards.map((card, idx) => (
               <div 
                 key={idx}
-                className="rounded-[28px] p-8 bg-white dark:bg-[#141416]/80 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/50 hover:shadow-[0_0_45px_rgba(250, 168, 2,0.16)] transition-all duration-300 flex flex-col justify-between group"
+                className="rounded-[28px] p-8 bg-white dark:bg-[#141416]/80 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/50 hover:shadow-[0_20px_50px_rgba(250,168,2,0.16)] hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between group cursor-default"
               >
                 <div>
-                  <div className="w-14 h-14 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 flex items-center justify-center text-[#FAA802] mb-6 shadow-[0_0_20px_rgba(250, 168, 2,0.2)] group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 flex items-center justify-center text-[#FAA802] mb-6 shadow-[0_0_20px_rgba(250,168,2,0.2)] group-hover:scale-110 group-hover:bg-[#FAA802]/25 transition-all duration-300">
                     <Icon name={card.icon} size={28} />
                   </div>
                   <span className="text-[11px] font-bold text-[#B8860B] dark:text-[#FAA802] uppercase tracking-wider block mb-2">
                     {card.tag}
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white mb-3">
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white mb-3 group-hover:text-[#FAA802] transition-colors">
                     {card.title}
                   </h3>
                   <p className="text-sm text-[#525866] dark:text-[#A8A8A8] leading-relaxed mb-6">
