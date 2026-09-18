@@ -33,10 +33,7 @@ const LandingPage = () => {
 
     const landingCopy = isAr ? {
     home: 'الرئيسية',
-    programNav: 'البرامج التدريبية',
-    nutritionNav: 'التغذية والوجبات',
-    communityNav: 'المجتمع الرياضي',
-    howItWorksNav: 'طريقة العمل',
+    howItWorksNav: 'كيف يعمل',
     exercisesNav: 'التمارين',
     pricing: 'الأسعار',
     privacy: 'الخصوصية',
@@ -109,9 +106,6 @@ const LandingPage = () => {
     copyright: '© 2026 ATOS fit. جميع الحقوق محفوظة.',
   } : {
     home: 'Home',
-    programNav: 'Program',
-    nutritionNav: 'Nutrition',
-    communityNav: 'Community',
     howItWorksNav: 'How It Works',
     exercisesNav: 'Exercises',
     pricing: 'Pricing',
@@ -239,24 +233,6 @@ const LandingPage = () => {
     }
   ];
 
-  const marqueeItems = isAr ? [
-    { label: 'تتبع 33 مفصلاً حركياً', sub: 'رصد الهيكل العظمي بالكامل' },
-    { label: 'رؤية حاسوبية 60 FPS', sub: 'تحليل فوري لحظة بلحظة' },
-    { label: 'خصوصية على جهازك 100%', sub: 'بدون تسجيل أو رفع فيديوهات' },
-    { label: 'توجيه صوتي في < 20ms', sub: 'تنبيه فوري للأخطاء الحركية' },
-    { label: 'قياس المدى الحركي الكامل', sub: 'دقة عمق السكوات والضغط' },
-    { label: 'عد تلقائي للتكرارات', sub: 'حساب الإيقاع ومعدل الأداء' },
-    { label: 'معالجة عصبية محلية', sub: 'أداء فائق بدون استهلاك للإنترنت' },
-  ] : [
-    { label: '33 SKELETAL JOINTS', sub: 'Full Body Kinematics' },
-    { label: '60 FPS VISION ENGINE', sub: 'Real-Time Pose Analysis' },
-    { label: '100% ON-DEVICE PRIVACY', sub: 'Zero Video Uploads' },
-    { label: '< 20MS AUDIO CUES', sub: 'Instant Form Coaching' },
-    { label: 'FULL RANGE OF MOTION', sub: 'Depth & Joint Lockout' },
-    { label: 'AUTOMATIC REP CADENCE', sub: 'Tempo & Interval Tracking' },
-    { label: 'LOCAL NEURAL PROCESSING', sub: 'Ultra-low Latency' },
-  ];
-
   const handleGetStarted = () => {
     navigate('/login-screen?mode=register');
   };
@@ -270,85 +246,38 @@ const LandingPage = () => {
       dir={isAr ? 'rtl' : 'ltr'}
       className="min-h-screen bg-[#F7F8FA] dark:bg-[#08080A] text-[#08080A] dark:text-[#FFFFFF] font-sans relative overflow-x-hidden selection:bg-[#FAA802]/30 selection:text-white transition-colors duration-300"
       style={{
-        background: theme === 'dark' ? '#08080A' : undefined
+        background: theme === 'dark' 
+          ? `radial-gradient(ellipse at 50% 0%, rgba(250, 168, 2, 0.16) 0%, transparent 55rem),
+             radial-gradient(circle at 85% 45%, rgba(250, 168, 2, 0.08) 0%, transparent 40rem),
+             radial-gradient(circle at 15% 85%, rgba(192, 192, 192, 0.05) 0%, transparent 35rem),
+             radial-gradient(ellipse at top, #141416 0%, #08080A 40%, #050506 100%)`
+          : undefined
       }}
     >
       {/* ============================================================ */}
-      {/* Competitor-Grade Editorial Motion Styles                     */}
-      {/* ============================================================ */}
-      <style>{`
-        @keyframes heroBreath {
-          0%, 100% {
-            transform: scale(1) translate3d(0, 0, 0);
-          }
-          50% {
-            transform: scale(1.035) translate3d(0, -6px, 0);
-          }
-        }
-
-        @keyframes marqueeSlide {
-          0% { transform: translate3d(0, 0, 0); }
-          100% { transform: translate3d(-50%, 0, 0); }
-        }
-
-        @keyframes marqueeSlideRtl {
-          0% { transform: translate3d(0, 0, 0); }
-          100% { transform: translate3d(50%, 0, 0); }
-        }
-
-        @keyframes btnSheen {
-          0% { transform: translateX(-150%) skewX(-20deg); }
-          25%, 100% { transform: translateX(250%) skewX(-20deg); }
-        }
-
-        .animate-hero-breath {
-          animation: heroBreath 22s ease-in-out infinite;
-          will-change: transform;
-        }
-
-        .animate-marquee {
-          display: flex;
-          width: max-content;
-          animation: marqueeSlide 35s linear infinite;
-        }
-        .animate-marquee:hover {
-          animation-play-state: paused;
-        }
-
-        .animate-marquee-rtl {
-          display: flex;
-          width: max-content;
-          animation: marqueeSlideRtl 35s linear infinite;
-        }
-        .animate-marquee-rtl:hover {
-          animation-play-state: paused;
-        }
-
-        .btn-sheen-effect {
-          position: relative;
-          overflow: hidden;
-        }
-        .btn-sheen-effect::after {
-          content: '';
-          position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background: linear-gradient(
-            60deg,
-            transparent 35%,
-            rgba(255, 255, 255, 0.45) 50%,
-            transparent 65%
-          );
-          animation: btnSheen 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-          pointer-events: none;
-        }
-      `}</style>
-      {/* ============================================================ */}
-      {/* Subtle Fine Architectural Grid Texture                       */}
+      {/* Dashboard Ambient Horizon & Creative Biomechanical Aura     */}
       {/* ============================================================ */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        {/* Animated Atmospheric Trails (Matching Bento Dashboard) */}
+        <div className="trail trail-coral" style={{ width: 600, height: 600, top: '-10%', right: '8%', opacity: 0.16 }} />
+        <div className="trail trail-olive" style={{ width: 480, height: 480, top: '40%', left: '-5%', opacity: 0.10 }} />
+        <div className="trail trail-coral" style={{ width: 550, height: 550, top: '75%', right: '12%', opacity: 0.12 }} />
+
+        {/* Creative Biomechanical Motion Ring (Subtle, Slow-Spinning Telemetry - Expansive) */}
+        <div className="absolute top-[4%] left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] xl:w-[1250px] xl:h-[1250px] pointer-events-none opacity-20 dark:opacity-30">
+          <svg className="w-full h-full animate-[spin_200s_linear_infinite]" viewBox="0 0 850 850" fill="none">
+            <circle cx="425" cy="425" r="340" stroke="#FAA802" strokeWidth="1" strokeDasharray="6 14" opacity="0.4" />
+            <circle cx="425" cy="425" r="410" stroke="#C0C0C0" strokeWidth="0.75" strokeDasharray="3 18" opacity="0.25" />
+            <circle cx="425" cy="425" r="240" stroke="#FAA802" strokeWidth="1" strokeDasharray="8 20" opacity="0.3" />
+            {/* Precision Range-Of-Motion Calibration Markers */}
+            <line x1="425" y1="70" x2="425" y2="95" stroke="#FAA802" strokeWidth="1.5" opacity="0.6" />
+            <line x1="425" y1="755" x2="425" y2="780" stroke="#FAA802" strokeWidth="1.5" opacity="0.6" />
+            <line x1="70" y1="425" x2="95" y2="425" stroke="#FAA802" strokeWidth="1.5" opacity="0.6" />
+            <line x1="755" y1="425" x2="780" y2="425" stroke="#FAA802" strokeWidth="1.5" opacity="0.6" />
+          </svg>
+        </div>
+
+        {/* Fine Architectural Grid Texture */}
         <div 
           className="absolute inset-0 opacity-[0.02] dark:opacity-[0.035] pointer-events-none"
           style={{
@@ -562,157 +491,120 @@ const LandingPage = () => {
       {/* ============================================================ */}
       {/* Hero Section: Distributed, Creative, High-Impact             */}
       {/* ============================================================ */}
-      <section id="home" className="relative z-10 min-h-[640px] lg:min-h-[760px] xl:min-h-[820px] flex items-center overflow-hidden bg-[#08080A]">
-        {/* Full-Bleed Right-Aligned Cinematic Athlete Backdrop (Ken Burns breathing slow scale) */}
-        <div className={`absolute inset-y-0 ${isAr ? 'left-0' : 'right-0'} w-full lg:w-[68%] xl:w-[62%] pointer-events-none overflow-hidden z-0`}>
-          <div className={`w-full h-full ${isAr ? 'scale-x-[-1]' : ''}`}>
-            <img 
-              src="/assets/images/hero-athlete-elite.jpg" 
-              alt="ATOSfit Elite Athlete" 
-              className="w-full h-full object-cover object-right animate-hero-breath"
-              style={{
-                filter: 'contrast(1.04) brightness(1.0)',
-              }}
-            />
-          </div>
-          {/* Seamless Masterful Fade: dissolves left, top, and bottom into pure #08080A */}
-          <div 
-            className="absolute inset-0"
-            style={{
-              background: isAr
-                ? `linear-gradient(to left, #08080A 0%, rgba(8,8,10,0.98) 12%, rgba(8,8,10,0.6) 42%, transparent 75%),
-                   linear-gradient(to bottom, #08080A 0%, transparent 10%, transparent 80%, #08080A 100%),
-                   linear-gradient(to top, #08080A 0%, transparent 15%)`
-                : `linear-gradient(to right, #08080A 0%, rgba(8,8,10,0.98) 12%, rgba(8,8,10,0.6) 42%, transparent 75%),
-                   linear-gradient(to bottom, #08080A 0%, transparent 10%, transparent 80%, #08080A 100%),
-                   linear-gradient(to top, #08080A 0%, transparent 15%)`
-            }}
-          />
-        </div>
-
-        {/* Content Container (Positioned Over Seamless Dark Space) */}
-        <div className="w-full max-w-[1840px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-20 relative z-10 py-16 sm:py-20 lg:py-24">
-          <div className="max-w-xl xl:max-w-2xl space-y-6 sm:space-y-8">
-            
-            {/* Minimalist Editorial Eyebrow Tag with Live Status Pill */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 text-xs sm:text-sm font-bold tracking-[0.22em] text-[#FAA802] uppercase select-none">
-                <span className="text-base font-black leading-none">▸</span>
-                <span>{isAr ? "رؤية رياضية متقدمة للأداء البدني" : "TODAY'S MISSION"}</span>
-              </div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold tracking-wide">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+      <section id="home" className="relative z-10 pt-8 sm:pt-12 lg:pt-16 pb-12 sm:pb-20">
+        <div className="w-full max-w-[1840px] mx-auto px-6 sm:px-10 lg:px-12 xl:px-16 2xl:px-20">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-6 xl:gap-8 2xl:gap-12 items-center">
+            {/* Left Column: Vision, Headline, Actions (Spans 5 cols on desktop, spacious & expansive) */}
+            <div className={`lg:col-span-6 xl:col-span-5 2xl:col-span-5 space-y-6 sm:space-y-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+              
+              {/* Pulsing Athletic Pill Badge */}
+              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#FAA802]/10 dark:bg-[#FAA802]/15 border border-[#FAA802]/25 dark:border-[#FAA802]/30 backdrop-blur-md shadow-[0_0_20px_rgba(250, 168, 2,0.15)]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FAA802] animate-pulse shadow-[0_0_10px_#FAA802]"></span>
+                <span className="text-xs sm:text-sm font-bold text-[#B8860B] dark:text-[#FAA802] tracking-wider uppercase">
+                  {landingCopy.badge}
                 </span>
-                <span>{isAr ? "محرك الرؤية نشط 60FPS" : "60FPS CV ACTIVE"}</span>
               </div>
-            </div>
 
-            {/* Bold High-Impact Pure White Editorial Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-[68px] 2xl:text-[76px] font-black tracking-tight leading-[1.08] text-[#0F1015] dark:text-white">
-              <span className="block">
-                {landingCopy.form}
-              </span>
-              <span className="block text-[#0F1015] dark:text-white">
-                {landingCopy.results}
-              </span>
-            </h1>
+              {/* Bold Futuristic Typographic Headline with Athletic Accent */}
+              <h1 className="text-4xl sm:text-6xl xl:text-7xl 2xl:text-[76px] font-extrabold tracking-tight leading-[1.08]">
+                <span className="block text-[#0F1015] dark:text-white">
+                  {landingCopy.form}
+                </span>
+                <span className="block bg-gradient-to-r from-[#FAA802] via-[#FFAE00] to-[#E5E7EB] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(250, 168, 2,0.3)]">
+                  {landingCopy.results}
+                </span>
+              </h1>
 
-            {/* Refined Muted Editorial Subtitle */}
-            <p className="text-base sm:text-lg lg:text-xl text-[#525866] dark:text-[#9DA4B2] leading-relaxed max-w-xl font-normal">
-              {isAr 
-                ? 'رصد فوري لزوايا المفاصل واستقامة الجسم وعد تلقائي للتكرارات عبر كاميرا هاتفك، لتجربة تدريب نخبوية تجمع بين أقصى فائدة عضلية والوقاية التامة من الإصابات.'
-                : 'Good rhythm. Biomechanical form review, remaining mission to chase peak strength, posture calibration, and longevity.'}
-            </p>
+              {/* Rich Value Proposition Subtitle */}
+              <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-[#525866] dark:text-[#9DA4B2] leading-relaxed max-w-2xl xl:max-w-3xl">
+                <span className="text-[#0F1015] dark:text-white font-bold">ATOS fit</span> {landingCopy.intro}
+              </p>
 
-            {/* Authentic Pill Buttons (Exact Match to Tablet Reference Mockup with Interactive Light Sheen) */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              {hasSession ? (
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="btn-sheen-effect inline-flex items-center justify-center bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-bold px-8 py-3.5 rounded-full text-base transition-all shadow-[0_4px_20px_rgba(250,168,2,0.3)] hover:scale-105 active:scale-95"
-                >
-                  <span>{landingCopy.continueToDashboard}</span>
-                </button>
-              ) : (
-                <>
-                  <button
-                    onClick={handleGetStarted}
-                    className="btn-sheen-effect group inline-flex items-center justify-center gap-2 bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-bold px-9 py-3.5 rounded-full text-base transition-all shadow-[0_4px_25px_rgba(250,168,2,0.35)] hover:shadow-[0_8px_32px_rgba(250,168,2,0.5)] hover:scale-105 active:scale-95"
+              {/* Athletic Training Disciplines Chips */}
+              <div className="flex flex-wrap items-center gap-2.5 pt-1 pb-1">
+                {landingCopy.categories.map((cat, i) => (
+                  <span 
+                    key={i} 
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] text-xs sm:text-sm font-semibold text-[#525866] dark:text-[#A0A5B5] hover:border-[#FAA802]/40 transition-colors"
                   >
-                    <span>{landingCopy.start}</span>
+                    <Icon name={cat.iconName} size={15} className="text-[#FAA802]" />
+                    <span>{cat.label}</span>
+                  </span>
+                ))}
+              </div>
+
+              {/* Action Buttons Cluster */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+                {hasSession ? (
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(250,168,2,0.45)] hover:shadow-[0_0_50px_rgba(250,168,2,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-[#FAA802]/40"
+                  >
+                    <Icon name="LayoutDashboard" size={20} />
+                    <span>{landingCopy.continueToDashboard}</span>
                     <Icon 
                       name="ArrowRight" 
-                      size={18} 
-                      className={`transition-transform duration-300 group-hover:translate-x-1.5 ${isAr ? 'rotate-180 group-hover:-translate-x-1.5' : ''}`} 
+                      size={20} 
+                      className={isAr ? 'rotate-180 group-hover:-translate-x-1 transition-transform' : 'group-hover:translate-x-1 transition-transform'} 
                     />
                   </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleGetStarted}
+                      className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(250,168,2,0.45)] hover:shadow-[0_0_50px_rgba(250,168,2,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-[#FAA802]/40"
+                    >
+                      <span>{landingCopy.start}</span>
+                      <Icon 
+                        name="ArrowRight" 
+                        size={20} 
+                        className={isAr ? 'rotate-180 group-hover:-translate-x-1 transition-transform' : 'group-hover:translate-x-1 transition-transform'} 
+                      />
+                    </button>
 
-                  <a
-                    href="#how-it-works"
-                    className="inline-flex items-center justify-center border border-black/20 dark:border-white/25 hover:border-[#FAA802] text-[#08080A] dark:text-white font-medium px-8 py-3.5 rounded-full text-base hover:bg-white/[0.05] transition-all"
-                  >
-                    <span>{isAr ? 'اكتشف المزيد' : 'Learn more'}</span>
-                  </a>
-                </>
-              )}
-            </div>
+                    <button
+                      onClick={handleLogin}
+                      className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-black/10 dark:border-white/10 hover:border-[#FAA802]/50 text-[#08080A] dark:text-[#FFFFFF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all"
+                    >
+                      <Icon name="LogIn" size={18} className="text-[#FAA802]" />
+                      <span>{landingCopy.signIn}</span>
+                    </button>
+                  </>
+                )}
 
-            {/* Live Trust & Telemetry Strip with Status Accents */}
-            <div className="grid grid-cols-3 gap-6 pt-6 border-t border-black/[0.06] dark:border-white/[0.08] max-w-xl">
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
+                <a
+                  href="#how-it-works"
+                  className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-transparent hover:border-black/10 dark:border-white/10 text-[#636779] dark:text-[#A8A8A8] hover:text-[#08080A] dark:hover:text-[#FFFFFF] transition-all"
+                >
+                  <Icon name="Compass" size={18} className="text-[#FAA802]" />
+                  <span>{landingCopy.howItWorks}</span>
+                </a>
+              </div>
+
+              {/* Live Trust & Telemetry Strip */}
+              <div className="grid grid-cols-3 gap-6 pt-6 border-t border-black/[0.06] dark:border-white/[0.08] max-w-2xl xl:max-w-3xl">
+                <div className="flex flex-col">
                   <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">99.4%</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.7)]" />
+                  <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.accuracyStat}</span>
                 </div>
-                <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.accuracyStat}</span>
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
+                <div className="flex flex-col">
                   <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">&lt; 20ms</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FAA802] shadow-[0_0_6px_rgba(250,168,2,0.7)]" />
+                  <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.latencyStat}</span>
                 </div>
-                <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.latencyStat}</span>
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
+                <div className="flex flex-col">
                   <span className="text-xl sm:text-2xl xl:text-3xl font-black text-[#0F1015] dark:text-white" dir="ltr">100%</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.7)]" />
+                  <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.privacyStat}</span>
                 </div>
-                <span className="text-xs sm:text-sm text-[#636779] dark:text-[#A8A8A8] font-medium">{landingCopy.privacyStat}</span>
               </div>
             </div>
 
+            {/* Right Column: Interactive Phone Mockup with Distributed Floating Widgets */}
+            <div className="lg:col-span-6 xl:col-span-7 2xl:col-span-7 relative w-full flex items-center justify-center min-h-[580px] xl:min-h-[660px]">
+              <InteractiveImage />
+            </div>
           </div>
         </div>
       </section>
-
-      {/* ============================================================ */}
-      {/* Infinite Athletic Telemetry Marquee Ribbon (Competitor Tech) */}
-      {/* ============================================================ */}
-      <div className="relative z-20 border-y border-black/[0.08] dark:border-white/[0.08] bg-[#0A0B0E] py-4 overflow-hidden select-none">
-        {/* Soft edge gradient masks for seamless flow */}
-        <div className="absolute inset-y-0 left-0 w-20 sm:w-32 bg-gradient-to-r from-[#08080A] to-transparent z-10 pointer-events-none" />
-        <div className="absolute inset-y-0 right-0 w-20 sm:w-32 bg-gradient-to-l from-[#08080A] to-transparent z-10 pointer-events-none" />
-
-        <div className={isAr ? "animate-marquee-rtl" : "animate-marquee"}>
-          {marqueeItems.concat(marqueeItems).map((item, idx) => (
-            <div key={idx} className="flex items-center gap-4 px-6 sm:px-8 whitespace-nowrap">
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FAA802] shadow-[0_0_6px_#FAA802]" />
-                <span className="text-xs sm:text-sm font-black tracking-wider uppercase text-white/95">
-                  {item.label}
-                </span>
-              </div>
-              <span className="text-xs text-[#8A8F98] font-medium">
-                {item.sub}
-              </span>
-              <span className="text-white/15 select-none px-2 font-mono">/</span>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* ============================================================ */}
       {/* How It Works: 3 Simple Athletic Steps                       */}
@@ -737,18 +629,18 @@ const LandingPage = () => {
             {landingCopy.steps.map((step, idx) => (
               <div 
                 key={idx}
-                className="relative rounded-[28px] p-8 bg-white dark:bg-[#141416]/85 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/50 hover:shadow-[0_16px_40px_rgba(250,168,2,0.14)] hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between group cursor-default"
+                className="relative rounded-[28px] p-8 bg-white dark:bg-[#141416]/85 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/40 hover:shadow-[0_0_35px_rgba(250, 168, 2,0.15)] transition-all duration-300 flex flex-col justify-between group"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <div className="w-14 h-14 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 flex items-center justify-center text-[#FAA802] group-hover:scale-110 group-hover:bg-[#FAA802]/25 transition-all duration-300">
+                  <div className="w-14 h-14 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 flex items-center justify-center text-[#FAA802] group-hover:scale-110 transition-transform">
                     <Icon name={step.icon} size={26} />
                   </div>
-                  <span className="text-3xl font-black text-black/15 dark:text-white/10 group-hover:text-[#FAA802]/40 transition-colors" dir="ltr">
+                  <span className="text-3xl font-black text-black/15 dark:text-white/10 group-hover:text-[#FAA802]/30 transition-colors" dir="ltr">
                     {step.num}
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white mb-3 group-hover:text-[#FAA802] transition-colors">
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white mb-3">
                     {step.title}
                   </h3>
                   <p className="text-sm text-[#525866] dark:text-[#A8A8A8] leading-relaxed">
@@ -783,7 +675,7 @@ const LandingPage = () => {
             {landingCopy.exercises.map((ex, idx) => (
               <div 
                 key={idx}
-                className="p-5 rounded-2xl bg-white dark:bg-[#141416]/85 border border-black/[0.08] dark:border-white/[0.08] hover:border-[#FAA802]/50 hover:shadow-[0_12px_30px_rgba(250,168,2,0.14)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group cursor-default"
+                className="p-5 rounded-2xl bg-white dark:bg-[#141416]/85 border border-black/[0.08] dark:border-white/[0.08] hover:border-[#FAA802]/50 hover:shadow-[0_0_25px_rgba(250, 168, 2,0.15)] hover:scale-[1.02] transition-all flex flex-col justify-between group"
               >
                 <div>
                   <span className="text-[11px] font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-wider block mb-1">
@@ -827,16 +719,16 @@ const LandingPage = () => {
             {privacyCards.map((card, idx) => (
               <div 
                 key={idx}
-                className="rounded-[28px] p-8 bg-white dark:bg-[#141416]/80 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/50 hover:shadow-[0_20px_50px_rgba(250,168,2,0.16)] hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between group cursor-default"
+                className="rounded-[28px] p-8 bg-white dark:bg-[#141416]/80 border border-black/10 dark:border-white/10 shadow-lg hover:border-[#FAA802]/50 hover:shadow-[0_0_45px_rgba(250, 168, 2,0.16)] transition-all duration-300 flex flex-col justify-between group"
               >
                 <div>
-                  <div className="w-14 h-14 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 flex items-center justify-center text-[#FAA802] mb-6 shadow-[0_0_20px_rgba(250,168,2,0.2)] group-hover:scale-110 group-hover:bg-[#FAA802]/25 transition-all duration-300">
+                  <div className="w-14 h-14 rounded-2xl bg-[#FAA802]/15 border border-[#FAA802]/30 flex items-center justify-center text-[#FAA802] mb-6 shadow-[0_0_20px_rgba(250, 168, 2,0.2)] group-hover:scale-110 transition-transform">
                     <Icon name={card.icon} size={28} />
                   </div>
                   <span className="text-[11px] font-bold text-[#B8860B] dark:text-[#FAA802] uppercase tracking-wider block mb-2">
                     {card.tag}
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white mb-3 group-hover:text-[#FAA802] transition-colors">
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#0F1015] dark:text-white mb-3">
                     {card.title}
                   </h3>
                   <p className="text-sm text-[#525866] dark:text-[#A8A8A8] leading-relaxed mb-6">
