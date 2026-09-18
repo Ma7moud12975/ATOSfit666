@@ -4,6 +4,7 @@ import Icon from '../../components/AppIcon';
 import { useAuth } from '../../contexts/AuthContext';
 import { hasValidSession } from '../../utils/nativeAuth';
 import InteractiveImage from '../../components/InteractiveImage';
+import HeroAthleteVisual from '../../components/HeroAthleteVisual';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { applyTheme, getSavedTheme } from '../../utils/theme';
 import '../../styles/bento-dashboard.css';
@@ -33,7 +34,10 @@ const LandingPage = () => {
 
     const landingCopy = isAr ? {
     home: 'الرئيسية',
-    howItWorksNav: 'كيف يعمل',
+    programNav: 'البرامج التدريبية',
+    nutritionNav: 'التغذية والوجبات',
+    communityNav: 'المجتمع الرياضي',
+    howItWorksNav: 'طريقة العمل',
     exercisesNav: 'التمارين',
     pricing: 'الأسعار',
     privacy: 'الخصوصية',
@@ -106,6 +110,9 @@ const LandingPage = () => {
     copyright: '© 2026 ATOS fit. جميع الحقوق محفوظة.',
   } : {
     home: 'Home',
+    programNav: 'Program',
+    nutritionNav: 'Nutrition',
+    communityNav: 'Community',
     howItWorksNav: 'How It Works',
     exercisesNav: 'Exercises',
     pricing: 'Pricing',
@@ -301,14 +308,13 @@ const LandingPage = () => {
             </div>
           </div>
 
-          {/* Desktop Navigation Links */}
+          {/* Desktop Navigation Links (Aligned with Elite Reference Mockup) */}
           <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
-            <a href="#home" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.home}</a>
-            <a href="#how-it-works" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.howItWorksNav}</a>
-            <a href="#exercises" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.exercisesNav}</a>
-            <a href="#privacy" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.privacy}</a>
-            <button onClick={() => navigate('/pricing')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.pricing}</button>
+            <a href="#exercises" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.programNav}</a>
+            <button onClick={() => navigate('/ai-assistant-food-scanner')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.nutritionNav}</button>
+            <button onClick={() => navigate('/community')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.communityNav}</button>
             <button onClick={() => navigate('/about')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.about}</button>
+            <button onClick={() => navigate('/pricing')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.pricing}</button>
           </div>
 
           {/* Desktop Actions */}
@@ -497,26 +503,24 @@ const LandingPage = () => {
             {/* Left Column: Vision, Headline, Actions (Spans 5 cols on desktop, spacious & expansive) */}
             <div className={`lg:col-span-6 xl:col-span-5 2xl:col-span-5 space-y-6 sm:space-y-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
               
-              {/* Pulsing Athletic Pill Badge */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#FAA802]/10 dark:bg-[#FAA802]/15 border border-[#FAA802]/25 dark:border-[#FAA802]/30 backdrop-blur-md shadow-[0_0_20px_rgba(250, 168, 2,0.15)]">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#FAA802] animate-pulse shadow-[0_0_10px_#FAA802]"></span>
-                <span className="text-xs sm:text-sm font-bold text-[#B8860B] dark:text-[#FAA802] tracking-wider uppercase">
-                  {landingCopy.badge}
-                </span>
+              {/* Reference Style Eyebrow Tag */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAA802]/10 border border-[#FAA802]/25 text-xs font-bold text-[#FAA802] tracking-wider uppercase shadow-[0_0_15px_rgba(250,168,2,0.15)]">
+                <span className="text-[#FAA802] font-black">▸</span>
+                <span>{isAr ? "رؤية حاسوبية وتحليل بيوميكانيكي" : "TODAY'S MISSION"}</span>
               </div>
 
               {/* Bold Futuristic Typographic Headline with Athletic Accent */}
-              <h1 className="text-4xl sm:text-6xl xl:text-7xl 2xl:text-[76px] font-extrabold tracking-tight leading-[1.08]">
+              <h1 className="text-4xl sm:text-6xl xl:text-7xl 2xl:text-[76px] font-black tracking-tight leading-[1.06]">
                 <span className="block text-[#0F1015] dark:text-white">
                   {landingCopy.form}
                 </span>
-                <span className="block bg-gradient-to-r from-[#FAA802] via-[#FFAE00] to-[#E5E7EB] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(250, 168, 2,0.3)]">
+                <span className="block bg-gradient-to-r from-[#FAA802] via-[#FFAE00] to-[#E5E7EB] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(250,168,2,0.3)]">
                   {landingCopy.results}
                 </span>
               </h1>
 
               {/* Rich Value Proposition Subtitle */}
-              <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-[#525866] dark:text-[#9DA4B2] leading-relaxed max-w-2xl xl:max-w-3xl">
+              <p className="text-base sm:text-lg lg:text-xl text-[#525866] dark:text-[#A0A5B5] leading-relaxed max-w-2xl xl:max-w-3xl font-normal">
                 <span className="text-[#0F1015] dark:text-white font-bold">ATOS fit</span> {landingCopy.intro}
               </p>
 
@@ -533,52 +537,43 @@ const LandingPage = () => {
                 ))}
               </div>
 
-              {/* Action Buttons Cluster */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+              {/* Action Buttons Cluster - Refined to match Elite Reference Mockup */}
+              <div className="flex flex-wrap items-center gap-4 pt-2">
                 {hasSession ? (
                   <button
                     onClick={() => navigate('/dashboard')}
-                    className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(250,168,2,0.45)] hover:shadow-[0_0_50px_rgba(250,168,2,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-[#FAA802]/40"
+                    className="inline-flex items-center justify-center gap-2.5 bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-extrabold px-8 py-3.5 rounded-full text-base sm:text-lg transition-all duration-300 shadow-[0_4px_25px_rgba(250,168,2,0.35)] hover:shadow-[0_4px_35px_rgba(250,168,2,0.55)] hover:scale-105 active:scale-95"
                   >
-                    <Icon name="LayoutDashboard" size={20} />
+                    <Icon name="LayoutDashboard" size={19} />
                     <span>{landingCopy.continueToDashboard}</span>
                     <Icon 
                       name="ArrowRight" 
-                      size={20} 
-                      className={isAr ? 'rotate-180 group-hover:-translate-x-1 transition-transform' : 'group-hover:translate-x-1 transition-transform'} 
+                      size={18} 
+                      className={isAr ? 'rotate-180' : ''} 
                     />
                   </button>
                 ) : (
                   <>
                     <button
                       onClick={handleGetStarted}
-                      className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#FAA802] via-[#FB9202] to-[#E6B800] hover:from-[#E6B800] hover:to-[#FAA802] text-[#08080A] font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-[0_0_35px_rgba(250,168,2,0.45)] hover:shadow-[0_0_50px_rgba(250,168,2,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-[#FAA802]/40"
+                      className="inline-flex items-center justify-center gap-2.5 bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-extrabold px-8 py-3.5 rounded-full text-base sm:text-lg transition-all duration-300 shadow-[0_4px_25px_rgba(250,168,2,0.35)] hover:shadow-[0_4px_35px_rgba(250,168,2,0.55)] hover:scale-105 active:scale-95"
                     >
                       <span>{landingCopy.start}</span>
                       <Icon 
                         name="ArrowRight" 
-                        size={20} 
-                        className={isAr ? 'rotate-180 group-hover:-translate-x-1 transition-transform' : 'group-hover:translate-x-1 transition-transform'} 
+                        size={18} 
+                        className={isAr ? 'rotate-180' : ''} 
                       />
                     </button>
 
-                    <button
-                      onClick={handleLogin}
-                      className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-black/10 dark:border-white/10 hover:border-[#FAA802]/50 text-[#08080A] dark:text-[#FFFFFF] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all"
+                    <a
+                      href="#how-it-works"
+                      className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-base font-semibold border border-black/15 dark:border-white/20 hover:border-[#FAA802] text-[#08080A] dark:text-white hover:bg-white/[0.05] transition-all backdrop-blur-sm"
                     >
-                      <Icon name="LogIn" size={18} className="text-[#FAA802]" />
-                      <span>{landingCopy.signIn}</span>
-                    </button>
+                      <span>{isAr ? 'اكتشف المزيد' : 'Learn more'}</span>
+                    </a>
                   </>
                 )}
-
-                <a
-                  href="#how-it-works"
-                  className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold border border-transparent hover:border-black/10 dark:border-white/10 text-[#636779] dark:text-[#A8A8A8] hover:text-[#08080A] dark:hover:text-[#FFFFFF] transition-all"
-                >
-                  <Icon name="Compass" size={18} className="text-[#FAA802]" />
-                  <span>{landingCopy.howItWorks}</span>
-                </a>
               </div>
 
               {/* Live Trust & Telemetry Strip */}
@@ -598,9 +593,9 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* Right Column: Interactive Phone Mockup with Distributed Floating Widgets */}
-            <div className="lg:col-span-6 xl:col-span-7 2xl:col-span-7 relative w-full flex items-center justify-center min-h-[580px] xl:min-h-[660px]">
-              <InteractiveImage />
+            {/* Right Column: High-Impact Athletic Biomechanical Hero Visual */}
+            <div className="lg:col-span-6 xl:col-span-7 2xl:col-span-7 relative w-full flex items-center justify-center min-h-[500px] xl:min-h-[580px]">
+              <HeroAthleteVisual onStartTrial={handleGetStarted} />
             </div>
           </div>
         </div>
