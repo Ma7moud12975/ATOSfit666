@@ -282,13 +282,14 @@ const LandingPage = () => {
             </div>
           </div>
 
-          {/* Desktop Navigation Links (Aligned with Elite Reference Mockup) */}
+          {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
-            <a href="#exercises" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.programNav}</a>
-            <button onClick={() => navigate('/ai-assistant-food-scanner')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.nutritionNav}</button>
-            <button onClick={() => navigate('/community')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.communityNav}</button>
-            <button onClick={() => navigate('/about')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.about}</button>
+            <a href="#home" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.home}</a>
+            <a href="#how-it-works" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.howItWorksNav}</a>
+            <a href="#exercises" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.exercisesNav}</a>
+            <a href="#privacy" className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.privacy}</a>
             <button onClick={() => navigate('/pricing')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.pricing}</button>
+            <button onClick={() => navigate('/about')} className="text-[#636779] dark:text-[#A8A8A8] hover:text-[#0F1015] dark:hover:text-white font-medium transition-colors text-sm">{landingCopy.about}</button>
           </div>
 
           {/* Desktop Actions */}
