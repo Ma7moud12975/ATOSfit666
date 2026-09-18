@@ -503,72 +503,50 @@ const LandingPage = () => {
             {/* Left Column: Vision, Headline, Actions (Spans 5 cols on desktop, spacious & expansive) */}
             <div className={`lg:col-span-6 xl:col-span-5 2xl:col-span-5 space-y-6 sm:space-y-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
               
-              {/* Reference Style Eyebrow Tag */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAA802]/10 border border-[#FAA802]/25 text-xs font-bold text-[#FAA802] tracking-wider uppercase shadow-[0_0_15px_rgba(250,168,2,0.15)]">
-                <span className="text-[#FAA802] font-black">▸</span>
-                <span>{isAr ? "رؤية حاسوبية وتحليل بيوميكانيكي" : "TODAY'S MISSION"}</span>
+              {/* Minimalist Editorial Eyebrow Tag */}
+              <div className="flex items-center gap-2 text-xs sm:text-sm font-bold tracking-[0.22em] text-[#FAA802] uppercase select-none">
+                <span className="text-base font-black leading-none">▸</span>
+                <span>{isAr ? "رؤية رياضية متقدمة للأداء البدني" : "TODAY'S MISSION"}</span>
               </div>
 
-              {/* Bold Futuristic Typographic Headline with Athletic Accent */}
-              <h1 className="text-4xl sm:text-6xl xl:text-7xl 2xl:text-[76px] font-black tracking-tight leading-[1.06]">
-                <span className="block text-[#0F1015] dark:text-white">
+              {/* Bold High-Impact Pure White Editorial Headline */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-[68px] 2xl:text-[76px] font-black tracking-tight leading-[1.08] text-[#0F1015] dark:text-white">
+                <span className="block">
                   {landingCopy.form}
                 </span>
-                <span className="block bg-gradient-to-r from-[#FAA802] via-[#FFAE00] to-[#E5E7EB] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(250,168,2,0.3)]">
+                <span className="block text-[#0F1015] dark:text-white">
                   {landingCopy.results}
                 </span>
               </h1>
 
-              {/* Rich Value Proposition Subtitle */}
-              <p className="text-base sm:text-lg lg:text-xl text-[#525866] dark:text-[#A0A5B5] leading-relaxed max-w-2xl xl:max-w-3xl font-normal">
-                <span className="text-[#0F1015] dark:text-white font-bold">ATOS fit</span> {landingCopy.intro}
+              {/* Refined Muted Editorial Subtitle */}
+              <p className="text-base sm:text-lg lg:text-xl text-[#525866] dark:text-[#9DA4B2] leading-relaxed max-w-xl font-normal">
+                {isAr 
+                  ? 'رصد فوري لزوايا المفاصل واستقامة الجسم وعد تلقائي للتكرارات عبر كاميرا هاتفك، لتجربة تدريب نخبوية تجمع بين أقصى فائدة عضلية والوقاية التامة من الإصابات.'
+                  : 'Good rhythm. Biomechanical form review, remaining mission to chase peak strength, posture calibration, and longevity.'}
               </p>
 
-              {/* Athletic Training Disciplines Chips */}
-              <div className="flex flex-wrap items-center gap-2.5 pt-1 pb-1">
-                {landingCopy.categories.map((cat, i) => (
-                  <span 
-                    key={i} 
-                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] text-xs sm:text-sm font-semibold text-[#525866] dark:text-[#A0A5B5] hover:border-[#FAA802]/40 transition-colors"
-                  >
-                    <Icon name={cat.iconName} size={15} className="text-[#FAA802]" />
-                    <span>{cat.label}</span>
-                  </span>
-                ))}
-              </div>
-
-              {/* Action Buttons Cluster - Refined to match Elite Reference Mockup */}
+              {/* Authentic Pill Buttons (Exact Match to Tablet Reference Mockup) */}
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 {hasSession ? (
                   <button
                     onClick={() => navigate('/dashboard')}
-                    className="inline-flex items-center justify-center gap-2.5 bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-extrabold px-8 py-3.5 rounded-full text-base sm:text-lg transition-all duration-300 shadow-[0_4px_25px_rgba(250,168,2,0.35)] hover:shadow-[0_4px_35px_rgba(250,168,2,0.55)] hover:scale-105 active:scale-95"
+                    className="inline-flex items-center justify-center bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-bold px-8 py-3.5 rounded-full text-base transition-all shadow-[0_4px_20px_rgba(250,168,2,0.3)] hover:scale-105 active:scale-95"
                   >
-                    <Icon name="LayoutDashboard" size={19} />
                     <span>{landingCopy.continueToDashboard}</span>
-                    <Icon 
-                      name="ArrowRight" 
-                      size={18} 
-                      className={isAr ? 'rotate-180' : ''} 
-                    />
                   </button>
                 ) : (
                   <>
                     <button
                       onClick={handleGetStarted}
-                      className="inline-flex items-center justify-center gap-2.5 bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-extrabold px-8 py-3.5 rounded-full text-base sm:text-lg transition-all duration-300 shadow-[0_4px_25px_rgba(250,168,2,0.35)] hover:shadow-[0_4px_35px_rgba(250,168,2,0.55)] hover:scale-105 active:scale-95"
+                      className="inline-flex items-center justify-center bg-[#FAA802] hover:bg-[#FFAE00] text-[#08080A] font-bold px-9 py-3.5 rounded-full text-base transition-all shadow-[0_4px_20px_rgba(250,168,2,0.3)] hover:scale-105 active:scale-95"
                     >
                       <span>{landingCopy.start}</span>
-                      <Icon 
-                        name="ArrowRight" 
-                        size={18} 
-                        className={isAr ? 'rotate-180' : ''} 
-                      />
                     </button>
 
                     <a
                       href="#how-it-works"
-                      className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-base font-semibold border border-black/15 dark:border-white/20 hover:border-[#FAA802] text-[#08080A] dark:text-white hover:bg-white/[0.05] transition-all backdrop-blur-sm"
+                      className="inline-flex items-center justify-center border border-black/20 dark:border-white/25 hover:border-[#FAA802] text-[#08080A] dark:text-white font-medium px-8 py-3.5 rounded-full text-base hover:bg-white/[0.05] transition-all"
                     >
                       <span>{isAr ? 'اكتشف المزيد' : 'Learn more'}</span>
                     </a>
